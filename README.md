@@ -1,6 +1,6 @@
 # 351-project
 
-# INFINITY
+
 ## Motivation
 
 
