@@ -17,11 +17,20 @@ CREATE TABLE UsersInfo(
 );
 
 CREATE TABLE UserReservation (
-   username  varchar,
+   username  varchar(),
    room_id  int ,
    Date of Reservation  timestamp,
    check_in  timestamp,
    check_out  timestamp,
    cancelled  timestamp 
+
+);
+
+CREATE TABLE RoomInfo (
+   room_id  int ,
+   Num_of_beds int,
+   floor int,
+   price_per_night  int ,
+   booked_until  timestamp 
 
 );
