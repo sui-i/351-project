@@ -54,3 +54,19 @@ The above table has the username as a unique identifier (no duplicate usernames 
 - Cancelled : date ( or NULL if not cancelled)
 
 
+## Users' Reservation History
+
+| Room id      | Number of beds| floor   | Price per night | Availab | Booked until
+| :---:        |    :----:   |          :---: |  :---:        |    :----:   | :----:   |        
+|       |        |   | | | |
+|       |        |   | | | |
+
+The above table has the Room id as a unique identifier (no duplicate room ids allowed). It will have the following domains which are of types:
+- Room id : int
+- Number of beds : int
+- Floor : int
+- Price per night  : double
+- Booked until : date ( or NULL if available)
+
+
+
