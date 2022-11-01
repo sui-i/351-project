@@ -1,7 +1,7 @@
 CREATE TABLE UsersCredentials (
-   username varchar() ,
-   password varchar() ,
-   email varchar() ,
+   username varchar(32) ,
+   password varchar(32) ,
+   email varchar(64) ,
    Date_of_creation timestamp ,
    Last_login timestamp,
    active boolean
