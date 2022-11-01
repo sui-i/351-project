@@ -6,9 +6,9 @@
 
 
 ## Team:
-- Ahmad El Hajj (----- Developer)
-- Hashem Khodor (------ Developer)
-- Mounif El Khatib ( ----- Developer)
+- Ahmad El Hajj (Backend Developer)
+- Hashem Khodor (Database Developer)
+- Mounif El Khatib ( Frontend Developer)
 
 
 ## Tools:
