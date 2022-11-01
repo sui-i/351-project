@@ -54,7 +54,7 @@ The above table has the username as a unique identifier (no duplicate usernames 
 - Cancelled : date ( or NULL if not cancelled)
 
 
-## Users' Reservation History
+## Rooms
 
 | Room id      | Number of beds| floor   | Price per night | Availab | Booked until
 | :---:        |    :----:   |          :---: |  :---:        |    :----:   | :----:   |        
