@@ -1,31 +1,53 @@
 package serverPackage;
-import java.util.LinkedList;
-import java.util.HashMap;
+
+import java.net.ServerSocket;
+import java.io.*;
+import java.net.Socket;
+
+
+
 public class S_Server {
 	private static void print(String s) {System.out.println("[SERVER]: " + s);}
-	HashMap<Integer,S_Client> activeClientTable;
-	//Will be used to track active sessions.
+	private ServerSocket serverSocket;
 	
-	LinkedList<LinkedList<Integer>> clientsTimeoutQueue; 
-	//Will be used to keep timeout clients inactive for N minutes
-	/*
-	 * Linked list of users who entered at Minute X.
-	 * if a client contacts the server for the first time, a new Client
-	 * object is created for him. and is placed in the bucket at the head of the
-	 * linked list. Every minute, the tail of the linked list becomes a new node.
-	 * and if the size of the linked list exceeds N, timeout everyone at head
-	 * and set the new head at head.next .
-	 * Every time a client updates himself, he is deleted from his old position
-	 * and placed in head again.
-	 */
+	S_Server(ServerSocket serverSocket) {
+		S_Server.print("Initiating...");
+		this.serverSocket = serverSocket;
+		S_Server.print("Initialized.");
+	}
 	
-	S_Server() {
+	public void startServer()
+	{
 		S_Server.print("Starting...");
-		clientsTimeoutQueue = new LinkedList<LinkedList<Integer>>();
-		activeClientTable = new HashMap<Integer,S_Client>();
+		try 
+		{
+			while (!serverSocket.isClosed())
+			{
+				Socket socket = serverSocket.accept();
+				S_Server.print("New client has connected.");
+				S_Client clientHandler = new S_Client(socket);
+
+				Thread thread = new Thread(clientHandler);
+				thread.start();
+			}
+		}
+		catch (IOException e)
+		{
+			
+		}
 		
-		
-		
+		S_Server.print("Started.");
+	}
+	
+	public void closeServerSocket()
+	{
+		try {
+			if (serverSocket!=null)
+				serverSocket.close();
+		}
+		catch (IOException e) {
+			e.printStackTrace();
+		}
 	}
 	
 	
