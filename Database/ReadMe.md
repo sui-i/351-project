@@ -69,4 +69,5 @@ The above table has the Room id as a unique identifier (no duplicate room ids al
 - Booked until : date ( or NULL if available)
 
 
-
+## Security : 
+We will use md5 hashing to store the passwords in the database.
