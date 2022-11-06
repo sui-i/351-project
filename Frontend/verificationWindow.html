@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bootstrap@4.3.1/dist/css/bootstrap.min.css"
+      integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T"
+      crossorigin="anonymous"
+    />
+    <link rel="stylesheet" href="verificationWindow_stylesheet.css" />
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Registration</title>
+  </head>
+
+  <body>
+    <div class="center">
+      <div class="verification">
+        <br />
+        <p>2-Step Authentication</p>
+        <form>
+          <p1>Enter the code that has been sent to [insert_mail] </p1>
+          <br /><br /><br />
+          <input
+            type="text"
+            name="pincode"
+            maxlength="6"
+            onkeypress="return /[0-9]/i.test(event.key)"
+          />
+        </form>
+        <br /><br />
+        <a href="youtube">
+          <p2>Didn't receive a code?</p2>
+        </a>
+        <br /><br /><br />
+        <div>
+          <a href="verificationWindow.html">
+            <button class="nextButton">Next</button>
+          </a>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>
