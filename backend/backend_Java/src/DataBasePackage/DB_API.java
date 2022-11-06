@@ -1,12 +1,65 @@
 package DataBasePackage;
 
 import java.util.HashMap;
-
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.SQLException;
+import java.sql.ResultSet;
+import java.sql.Statement;
+// Prerequiste: ADD .jar file to project libraries
 public class DB_API {
+	//Connection
+	private static Connection conn ;
+	static final String JDBC_DRIVER ="org.postgresql.Driver";
+    static final String DB_URL = "jdbc:postgresql://localhost/DatabaseName";
+
+    static final String USER = "postgres";
+    static final String PASS ="YourPassword";
 	private static HashMap<String,Integer> cache;
 	// For caching at max 10 userNames.
 
+	public DB_API(String DB_Name,String USER , String PASS) {
+		try{
+            Class.forName(JDBC_DRIVER);
+            System.out.println("Connecting to database ... ");
+            conn = DriverManager.getConnection(DB_URL, USER, PASS);
 
+
+            
+        }
+        catch(Exception e){
+            e.printStackTrace();
+        }
+		
+	}
+	public DB_API(String PASS) {
+		try{
+            Class.forName(JDBC_DRIVER);
+            System.out.println("Connecting to database ... ");
+            conn = DriverManager.getConnection(DB_URL, USER, PASS);
+
+
+            
+        }
+        catch(Exception e){
+            e.printStackTrace();
+        }
+		
+	}
+	public DB_API() {
+		try{
+            Class.forName(JDBC_DRIVER);
+            System.out.println("Connecting to database ... ");
+            conn = DriverManager.getConnection(DB_URL, USER, PASS);
+
+
+            
+        }
+        catch(Exception e){
+            e.printStackTrace();
+        }
+		
+	}
 	/**
 	 * Query : Select FirstName from {table} where username is {username} ;
 	 * @param username : username 
@@ -16,6 +69,7 @@ public class DB_API {
 	static public String getFirstName(String username) 
 	{
 		//returns FirstName From DataBase
+		
 	}
 
 	/**
