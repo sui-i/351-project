@@ -13,7 +13,7 @@ public class DB_PI {
     static final String DB_URL = "jdbc:postgresql://localhost/Hostellar";
 
     static final String USER = "postgres";
-    static final String PASS ="Password";
+    static final String PASS ="YourPassword";
     public static void main(String[] args) {
             Connection conn = null;
             Statement stmt = null;
@@ -50,8 +50,8 @@ public class DB_PI {
             	System.out.println(query);
             	stmt.execute(query );
             	*/
-                stmt.close();
-                conn.close();
+                //stmt.close();
+                //conn.close();
                 
 
 
@@ -62,6 +62,33 @@ public class DB_PI {
             }
             
             System.out.println("Yessir");
+            try {
+    			stmt= conn.createStatement();
+    			String username="hmk57";
+    			String query = String.format("Select username from userscredentials where username = '%s' ;",username);
+    	        ResultSet rs= stmt.executeQuery(query);
+    	        while(rs.next()) {
+    	        	//Extracting data
+            	String c_username = rs.getString("username");
+            	if(c_username.equals(username) ) {
+            		System.out.println( true);
+            	}
+            	else {
+            	
+            		System.out.println( false);
+            	}
+    	        }
+            	stmt.close();
+                conn.close();
+    	        
+                System.out.println("NotFoundSir");
+    		}
+    		
+            catch(Exception e) {
+            	System.out.println(e.getMessage());
+            	System.out.println( false);
+            }
+            
 
     }
     
