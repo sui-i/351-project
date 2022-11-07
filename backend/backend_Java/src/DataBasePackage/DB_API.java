@@ -1,5 +1,6 @@
 package DataBasePackage;
-
+import Security.md5;
+import clientPackage.C_InformationDB;
 import java.util.HashMap;
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -7,18 +8,33 @@ import java.sql.SQLException;
 import java.sql.ResultSet;
 import java.sql.Statement;
 // Prerequiste: ADD .jar file to project libraries
+
 public class DB_API {
+	
+	/*
+	 * TO-DO ConnectFunction (Which connections to database, either one connection or multiple connections depending on number of threads
+	 * Ask the professor tomorrow in the class
+	 */
 	//Connection
-	private static Connection conn ;
+	//private static Connection conn ;
+	private static Connection conn;
+	// Connection 2 for getting user's info
+	private static Connection conn1;
 	//private Statement stmt;
 	static final String JDBC_DRIVER ="org.postgresql.Driver";
     static final String DB_URL = "jdbc:postgresql://localhost/DatabaseName";
-
+    static final String DB_URL_Info = "jdbc:postgresql://localhost/UsersInfo";
+    
     static final String USER = "postgres";
     static final String PASS ="YourPassword";
 	private static HashMap<String,Integer> cache;
+	
+	// Debate whether cache them or no
+	private static HashMap<String,C_InformationDB> users;
+	
 	// For caching at max 10 userNames.
-
+	
+	/*
 	public DB_API(String DB_Name,String USER , String PASS) {
 		try{
             Class.forName(JDBC_DRIVER);
@@ -61,6 +77,96 @@ public class DB_API {
         }
 		
 	}
+	*/
+	/**
+	 * Instantiate the connection conn with the database;
+	 * @return  <ul> 
+	 * 				<li> True if connection is  successful</li>
+	 * 				<li> False if otherwise </li>
+	 * 			</ul>
+	 */
+	public boolean ConnectDB1() throws Exception{
+		try{
+            Class.forName(JDBC_DRIVER);
+            System.out.println("Connecting to database ... ");
+            conn = DriverManager.getConnection(DB_URL, USER, PASS);
+
+            return true;
+            
+        }
+        catch(Exception e){
+            e.printStackTrace();
+            return false;
+        }
+		
+	}
+	public static  boolean ConnectDB2() throws Exception{
+		try{
+            Class.forName(JDBC_DRIVER);
+            System.out.println("Connecting to database ... ");
+            conn1 = DriverManager.getConnection(DB_URL_Info , USER, PASS);
+
+            return true;
+            
+        }
+        catch(Exception e){
+            e.printStackTrace();
+            return false;
+        }
+		
+	}
+	
+	
+	
+	static public C_InformationDB getUserInfo(String username) {
+		
+		//Assumption
+		
+		if(! checkMembership(username)) {
+			
+			return null;
+		}
+		
+		try {
+			if(ConnectDB2()) {
+				String C_firstName = "",C_lastName= "",C_phoneNumber= "",C_birthDate="",C_Location="";
+				Statement stmt= conn1.createStatement();
+				String query = String.format("Select username,firstName,lastName,phoneNumber,birthDate,Location from userscredentials where username = '%s' ;",username);
+		        ResultSet rs= stmt.executeQuery(query);
+		       
+		        while(rs.next()) {
+		        	//Extracting data
+		        	String c_username = rs.getString("username");
+		        	
+		        	if(c_username.equals(username) ) {
+		        		C_firstName= rs.getString("firstName");
+		        		C_lastName = rs.getString("lastName");
+		        		C_phoneNumber = rs.getString("phoneNumber");
+		        		C_birthDate = rs.getString("birthDate");
+		        		C_Location = rs.getString("Location");
+		        	}
+	        	
+		        }
+		        
+		        stmt.close();
+		        return new C_InformationDB(username,C_firstName,C_lastName,C_phoneNumber,C_birthDate,C_Location);
+			}
+			else {
+				// TO-DO : return special instance of the C_InformationDB
+				
+				return null;
+			}
+		}
+		
+		catch (Exception e) {
+			// TO-DO : return special instance of the C_InformationDB
+			e.printStackTrace();
+			return null;
+		}
+		
+		
+	}
+	
 	/**
 	 * Query : Select FirstName from {table} where username is {username} ;
 	 * @param username : username 
@@ -68,8 +174,13 @@ public class DB_API {
 	 */
 	
 	static public String getFirstName(String username) 
+	
 	{
-		
+		if(users.containsKey(username)) {
+			return users.get(username).getfirstName();
+		}
+		// Throwing Exception
+		return "";
 		//returns FirstName From DataBase
 		
 	}
@@ -82,6 +193,11 @@ public class DB_API {
 	 */
 	static public String getLastName(String username)
 	{
+		if(users.containsKey(username)) {
+			return users.get(username).getlastName();
+		}
+		// Throwing Exception
+		return "";
 		//returns LastName From DataBase
 	}
 	/**
@@ -146,11 +262,11 @@ public class DB_API {
         	String c_username = rs.getString("username");
         	String c_password= rs.getString("password");
         	String c_email= rs.getString("email");
-        	
-        	if(c_username == username && c_password == password && c_email==email ) {
+        	String passwordHash= md5.getMd5(password);
+        	if(c_username.equals(username)&& c_password.equals(passwordHash) && c_email.equals(email) ) {
         		return 0;
         	}
-        	else if (c_username == username && c_password == password) {
+        	else if (c_username.equals(username)&& c_password.equals(passwordHash)) {
         		return 2;
         	}
         	else {
@@ -194,7 +310,9 @@ public class DB_API {
 				// Hash the password bro
             	String time= "NOW()";
             	String lastLogin = "NOW()";
+            	password= md5.getMd5(password);
             	String query = String.format("Insert INTO userscredentials (username,password,email,date_of_creation,last_login) VALUES('%s','%s','%s',%s,%s) ;",username,password,email,time,lastLogin);  
+            	
             	//System.out.println(query);
             	stmt.execute(query );
             	
