@@ -8,7 +8,7 @@
 ## Team:
 - Ahmad El Hajj (Backend Developer)
 - Hashem Khodor (Database Developer)
-- Mounif El Khatib ( Frontend Developer)
+- Mounif El Khatib (Frontend Developer)
 
 
 ## Tools:
