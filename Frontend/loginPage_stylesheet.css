@@ -20,6 +20,7 @@ body {
     background-color: rgb(47, 54, 60);
 }
 
+
 h1 {
     font-family: "orbitronregular";
     font-weight: normal;
@@ -127,21 +128,14 @@ input {
     height: 45px;
     font-size: 28px;
     font-family: Arial, Helvetica, sans-serif;
-    border-radius: 10px;
+    border-radius: 5px;
     border: none;
     outline: none !important;
     color: rgb(171, 179, 184);
     background-color: rgb(19, 125, 19);
     cursor: pointer;
     margin-top: 50px;
-}
-
-.loginButton:hover {
-    box-shadow: 0 8px 16px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
-}
-
-.loginButton:active {
-    transform: translateY(4px);
+    cursor: pointer;
 }
 
 .center {
