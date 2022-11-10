@@ -31,13 +31,46 @@ public class S_Client implements Runnable{
 		try {
 			this.socket = socket;
 			this.bufferedWriter = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
-			this.bufferedReader = new BufferedReader(new InputStreamReader (socket.getInputStream( )));
+			this.bufferedReader = new BufferedReader(new InputStreamReader (socket.getInputStream ()));
 			isLoggedIn = false;
 				
 		} catch (IOException e){
 			closeEverything(socket,bufferedReader,bufferedWriter);
 		}
 		
+	}
+	public void removeS_Client() {
+		isLoggedIn = false;
+		S_Client.print(String.format("A client has disconnected"));
+	}
+	public void closeEverything(Socket socket, BufferedReader bufferedReader, BufferedWriter bufferedWriter) {
+		removeS_Client();
+		try {
+			if (bufferedReader!=null)bufferedReader.close();
+			if (bufferedWriter!=null)bufferedWriter.close();
+			if (socket!=null)socket.close();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	public int Register(String username, String email, String password, String firstName, String lastName) {
+		//if username already exists return 1
+		//if email already exists return 2
+		//if password is too small return 3
+		//if database error return -1
+		
+		//sends a mail if any issue return 4
+		//set new user in database (with Verified email = false, verification id = random number) then.) and return 0
+		
+	}
+	
+	public int Login(String username, String password) {
+		//if username is not found return 1
+		//if username is found but password is wrong, return 2
+		//if email is not verified return 3
+		//if database error return -1
+		//else return 0, and set all the parameters according to the database.
 	}
 	
 	private static int validateRoomID(String roomID) 
@@ -75,6 +108,8 @@ public class S_Client implements Runnable{
 		
 		//if all is well, remove reserve the room and return 0
 	}
+	
+	
 	
 	@Override
 	public void run() {
