@@ -199,7 +199,7 @@ public class DB_API {
 		assert conn !=null : "No connection mate";
 		try {
 			Statement stmt= conn.createStatement();
-			String query = String.format("Select username,password,email from userscredentials where username = '%s' ;",username);
+			String query = String.format("Select username,password,email from %s where username = '%s' ;",TableNames.get("credentials"),username);
 	        ResultSet rs= stmt.executeQuery(query);
 	       
 	        	//Extracting data
