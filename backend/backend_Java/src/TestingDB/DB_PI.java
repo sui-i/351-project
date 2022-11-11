@@ -13,7 +13,7 @@ public class DB_PI {
     static final String DB_URL = "jdbc:postgresql://localhost/Hostellar";
 
     static final String USER = "postgres";
-    static final String PASS ="yourpassword";
+    static final String PASS ="Password";
     public static void main(String[] args) {
             Connection conn = null;
             Statement stmt = null;
@@ -100,7 +100,7 @@ public class DB_PI {
  * public static void main(String[] args) {
         final String url = "jdbc:postgresql://localhost:5432/Hostellar";
         final String user = "postgres";
-        final String password = "hungryshark2003";
+        final String password = ;
 
         Connection conn = null;
         try {
