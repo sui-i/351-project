@@ -114,3 +114,9 @@ p {
 .cellMargin {
     margin-top: 9%;
 }
+
+@media (-webkit-device-pixel-ratio: 1.25) {
+    * {
+        zoom: 0.8;
+    }
+}
