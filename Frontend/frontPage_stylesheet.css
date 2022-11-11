@@ -120,3 +120,9 @@ p {
         zoom: 0.955;
     }
 }
+
+@media (-webkit-device-pixel-ratio: 1.5) {
+    * {
+        zoom: 0.94;
+    }
+}
