@@ -11,6 +11,7 @@ public class C_InformationDB {
 	
 	public C_InformationDB(String username, String firstname, String lastname,String phonenumber, String birthdate, String location) 
 	{
+		// Shouldn't these be setters? ~Mounif
 		userName=username;
 		firstName= firstname;
 		lastName = lastname;
@@ -34,7 +35,7 @@ public class C_InformationDB {
 	public String getbirthDate() {
 		return birthDate;
 	}
-	public String getLocation()) {
+	public String getLocation() {
 		return Location;
 	}
 	
