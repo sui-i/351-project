@@ -22,7 +22,7 @@ body {
 
 p {
     font-family: "orbitronregular";
-    margin-left: 40px;
+
     font-size: 50px;
     margin-bottom: 20px;
     color: black;
@@ -30,11 +30,11 @@ p {
 
 form {
     /*display: table;*/
-    margin: 185px;
+
     margin-top: 20px;
     margin-bottom: 40px;
-    padding: 10px;
-    margin-left: 208.5px;
+
+
     color: black;
 }
 
@@ -55,7 +55,6 @@ input {
     outline: none;
     width: 300px;
     height: 29px;
-
     font-family: Arial, Helvetica, sans-serif;
 }
 
@@ -69,7 +68,7 @@ a {
 }
 
 .registrationWindow {
-    width: 980px;
+    width: 800px;
     height: 470px;
     border-radius: 10px;
     box-shadow: 0 8px 16px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
@@ -79,11 +78,10 @@ a {
 .nextButton {
     width: 100px;
     height: 40px;
-    color: rgb(171, 179, 184);
+    margin-top: 5%;
+    color: rgb(214, 214, 214);
     font-size: 25px;
-    margin-left: 550px;
-    margin-top: 20px;
-    background-color: rgb(19, 125, 19);
+    background-color: rgb(21, 141, 127);
     border-radius: 5px;
     border: none;
     outline: none !important;
@@ -95,4 +93,24 @@ a {
     justify-content: center;
     align-items: center;
     height: 100vh;
+}
+
+.center1 {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+/* This block of code corrects the page zoom and scaling for different screen sizes */
+
+@media only screen and (-webkit-device-pixel-ratio: 1.25) {
+    * {
+        zoom: 0.99;
+    }
+}
+
+@media only screen and (-webkit-device-pixel-ratio: 1.5) {
+    * {
+        zoom: 0.99;
+    }
 }

@@ -78,10 +78,10 @@ a:hover {
 .nextButton {
     width: 100px;
     height: 40px;
-    color: rgb(171, 179, 184);
+    color: rgb(214, 214, 214);
     font-size: 25px;
-    margin-left: 350px;
-    background-color: rgb(19, 125, 19);
+    margin-top: 2%;
+    background-color: rgb(21, 141, 127);
     border-radius: 5px;
     border: none;
     outline: none !important;
@@ -89,5 +89,5 @@ a:hover {
 }
 
 .nextButton:hover {
-    background-color: rgb(17, 112, 17);
+    opacity: 0.8;
 }
