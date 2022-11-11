@@ -9,22 +9,35 @@ import java.sql.ResultSet;
 import java.sql.Statement;
 // Prerequiste: ADD .jar file to project libraries
 
-public class DB_API {
+public class DB_APIOLD {
 	
-	private Connection conn;
-	boolean connectionInitiliazed=false;
-	/**
-	 * HashMap for the tableNames (static)
+	/*
+	 * TO-DO ConnectFunction (Which connections to database, either one connection or multiple connections depending on number of threads
+	 * Ask the professor tomorrow in the class
 	 */
-	public static HashMap<String,String> TableNames;
+	//Connection
+	//private static Connection conn ;
+	private static Connection conn;
+	// Connection 2 for getting user's info
+	private static Connection conn1;
+	//private Statement stmt;
+	static HashMap<String,String> TableNames;
 	static boolean created=false;
 	static final String JDBC_DRIVER ="org.postgresql.Driver";
+	static final String DB_URL_ = "jdbc:postgresql://localhost/";
     static final String DB_URL = "jdbc:postgresql://localhost/Hostellar";
+    static final String DB_URL_Info = "jdbc:postgresql://localhost/UsersInfo";
+    
     static final String USER = "postgres";
     static final String PASS ="YourPassword";
-    private static HashMap<String,C_InformationDB> users;
-    
-	public DB_API() {
+	private static HashMap<String,Integer> cache;
+	
+	// Debate whether cache them or no
+	private static HashMap<String,C_InformationDB> users;
+	
+	// For caching at max 10 userNames.
+	
+	public DB_APIOLD() {
 		if(!created) {
 			created = true;
 			TableNames = new HashMap<>();
@@ -34,35 +47,72 @@ public class DB_API {
 		}
 		
 	}
-	
-
-	
 	/**
-	 * Must be used for each thread
-	 * TO-DO: Thread locks
 	 * Instantiate the connection conn with the database;
 	 * @return  <ul> 
 	 * 				<li> True if connection is  successful</li>
 	 * 				<li> False if otherwise </li>
 	 * 			</ul>
 	 */
+	public boolean ConnectDB1() throws Exception{
+		try{
+            Class.forName(JDBC_DRIVER);
+            System.out.println("Connecting to database ... ");
+            conn = DriverManager.getConnection(DB_URL_, USER, PASS);
+
+            return true;
+            
+        }
+        catch(Exception e){
+            e.printStackTrace();
+            return false;
+        }
+		
+	}
+	public static  boolean ConnectDB2() throws Exception{
+		try{
+            Class.forName(JDBC_DRIVER);
+            System.out.println("Connecting to database ... ");
+            conn1 = DriverManager.getConnection(DB_URL_Info , USER, PASS);
+
+            return true;
+            
+        }
+        catch(Exception e){
+            e.printStackTrace();
+            return false;
+        }
+		
+	}
 	
-	public  boolean ConnectDB() {
+	
+	/**
+	 * Must be used for each thread
+	 * TO-DO: Thread locks
+	 * Creates a connection conn with the database ;
+	 * @return  <ul> 
+	 * 				<li> Connection if connection is  successful</li>
+	 * 				<li> Null if otherwise </li>
+	 * 			</ul>
+	 */
+	
+	public static Connection ConnectDB() {
 		try {
 			Class.forName(JDBC_DRIVER);
             System.out.println("Connecting to database ... ");
             
-            Connection conn = DriverManager.getConnection(DB_URL  , USER, PASS);
-            return true;
+            Connection conn = DriverManager.getConnection(DB_URL_ + TableNames.get(table_name)  , USER, PASS);
+
+            return conn;
 		}
 		catch(Exception e){
 			e.printStackTrace();
-			return false;
+			return null;
 		}
 	}
 	
 	
-	 public  C_InformationDB getUserInfo(String username) {
+	 public static C_InformationDB getUserInfo(String username) {
 		
 		//Assumption
 		
@@ -72,9 +122,9 @@ public class DB_API {
 		}
 		
 		try {
-			if(ConnectDB()) {
+			if(ConnectDB2()) {
 				String C_firstName = "",C_lastName= "",C_phoneNumber= "",C_birthDate="",C_Location="";
-				Statement stmt= conn.createStatement();
+				Statement stmt= conn1.createStatement();
 				String query = String.format("Select username,firstName,lastName,phoneNumber,birthDate,Location from userscredentials where username = '%s' ;",username);
 		        ResultSet rs= stmt.executeQuery(query);
 		       
@@ -117,7 +167,7 @@ public class DB_API {
 	 * @return  FirstName From DataBase
 	 */
 	
-	 public String getFirstName(String username) 
+	 public static String getFirstName(String username) 
 	
 	{
 		if(users.containsKey(username)) {
@@ -151,7 +201,7 @@ public class DB_API {
 	 * 				<li> False if no such username exist </li>
 	 * 			</ul>
 	 */
-	 public boolean checkMembership(String username)
+	 public  static boolean checkMembership(String username)
 	{
 		
 		assert conn !=null : "No connection mate";
@@ -193,7 +243,7 @@ public class DB_API {
 	 * 				<li> 2 if they are valid but email is not verified </li>
 	 * 			</ul>
 	 */
-	 public  int checkLoginCredentials(String username, String password,String email)
+	 public  static int checkLoginCredentials(String username, String password,String email)
 	{
 		
 		assert conn !=null : "No connection mate";
@@ -242,7 +292,7 @@ public class DB_API {
 	 * 				<li> 2 if some other error occurs </li>
 	 * 			</ul>
 	 */
-	 public  int RegisterUser(String username, String email, String password)
+	 public  static int RegisterUser(String username, String email, String password)
 	{
 		try {
 			if(checkMembership(username)==true) {
@@ -255,7 +305,7 @@ public class DB_API {
             	String time= "NOW()";
             	String lastLogin = "NOW()";
             	password= md5.getMd5(password);
-            	String query = String.format("Insert INTO %s (username,password,email,date_of_creation,last_login) VALUES('%s','%s','%s',%s,%s) ;",TableNames.get("credentials"),username,password,email,time,lastLogin);  
+            	String query = String.format("Insert INTO userscredentials (username,password,email,date_of_creation,last_login) VALUES('%s','%s','%s',%s,%s) ;",username,password,email,time,lastLogin);  
             	
             	//System.out.println(query);
             	stmt.execute(query );
