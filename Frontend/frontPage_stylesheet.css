@@ -48,7 +48,12 @@ a:hover {
 
 p {
     font-size: 20px;
-    color: aliceblue;
+    color: gray;
+}
+
+p1 {
+    font-size: 15px;
+    color: gray;
 }
 
 .topHandle {
@@ -113,6 +118,12 @@ p {
 
 .cellMargin {
     margin-top: 9%;
+}
+
+.center {
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 
 @media (-webkit-device-pixel-ratio: 1.25) {
