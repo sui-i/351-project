@@ -13,6 +13,7 @@
     <link rel="stylesheet" href="buttonRipple.css" />
     <link rel="stylesheet" href="registration_stylesheet.css" />
     <script src="buttonRipple.js"></script>
+    <script src="clientSide/inputs.js"></script>
     <title>Registration</title>
   </head>
 
@@ -25,23 +26,23 @@
           <form>
             <p1>
               <label>Username:</label>
-              <input type="text" required />
+              <input type="text" required id="regUser" />
             </p1>
             <p1>
               <label>Email:</label>
-              <input type="email" required />
+              <input type="email" id="regEmail" required />
             </p1>
             <p1>
               <label>Password:</label>
-              <input type="password" required />
+              <input type="password" required id="regPass" />
             </p1>
             <p1>
               <label>Re-enter password:&nbsp;</label>
-              <input type="password" required />
+              <input type="password" required id="regRePass" />
             </p1>
             <br />
             <div class="center1">
-              <button class="nextButton Button">Next</button>
+              <button class="nextButton Button" onclick="">Next</button>
             </div>
           </form>
         </div>
