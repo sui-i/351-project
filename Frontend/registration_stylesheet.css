@@ -10,7 +10,7 @@
 
 @font-face {
     font-family: 'comfortaaregular';
-    src: url("Items/orbitron-variablefont_wght-webfont.woff2") format('woff2'),
+    src: url("Items/comfortaa-variablefont_wght-webfont.woff2") format('woff2'),
         url("Items/comfortaa-variablefont_wght-webfont.woff") format('woff');
     font-weight: normal;
     font-style: normal;
@@ -81,7 +81,7 @@ a {
     margin-top: 5%;
     color: rgb(214, 214, 214);
     font-size: 25px;
-    background-color: rgb(21, 141, 127);
+    background-color: rgb(38, 133, 129);
     border-radius: 5px;
     border: none;
     outline: none !important;

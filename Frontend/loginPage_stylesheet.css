@@ -10,7 +10,7 @@
 
 @font-face {
     font-family: 'comfortaaregular';
-    src: url("Items/orbitron-variablefont_wght-webfont.woff2") format('woff2'),
+    src: url("Items/comfortaa-variablefont_wght-webfont.woff2") format('woff2'),
         url("Items/comfortaa-variablefont_wght-webfont.woff") format('woff');
     font-weight: normal;
     font-style: normal;
@@ -133,7 +133,7 @@ input {
     border: none;
     outline: none !important;
     color: rgb(171, 179, 184);
-    background-color: rgb(19, 125, 19);
+    background-color: rgb(38, 133, 129);
     cursor: pointer;
     margin-top: 50px;
     cursor: pointer;
