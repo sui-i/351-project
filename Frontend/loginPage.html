@@ -16,6 +16,8 @@
       href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200"
     />
     <script src="buttonRipple.js"></script>
+    <script src="clientSide/index.js"></script>
+
     <title>Login Page</title>
   </head>
 
@@ -34,14 +36,20 @@
         <form>
           <p4>
             <label>Username:&nbsp;</label>
-            <input type="text" />
+            <input type="text" id="username" />
           </p4>
           <p4>
             <label>Password:</label>
-            <input type="password" />
+            <input type="password" id="password" />
           </p4>
         </form>
-        <button class="loginButton Button">Sign in</button>
+        <button
+          class="loginButton Button"
+          onclick="getUsername(); getPassword()"
+          type="submit"
+        >
+          Sign in
+        </button>
         <a href="youtube.com"
           ><br /><br />
           <p2>Forgot password?</p2>
