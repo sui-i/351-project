@@ -32,5 +32,4 @@ CREATE TABLE RoomInfo (
    floor int,
    price_per_night  int ,
    booked_until  timestamp 
-
 );

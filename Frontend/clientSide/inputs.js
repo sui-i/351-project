@@ -39,3 +39,10 @@ function getReEnteredPassword() {
   //alert(regRePass);
   return regRePass;
 }
+
+// this function stores the verification code that the user inputs upon verification
+function getCode() {
+  var code = document.getElementById("code").value;
+  alert(code);
+  return code;
+}

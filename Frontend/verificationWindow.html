@@ -13,6 +13,7 @@
     <link rel="stylesheet" href="verificationWindow_stylesheet.css" />
     <link rel="stylesheet" href="buttonRipple.css" />
     <script src="buttonRipple.js"></script>
+    <script src="clientSide/inputs.js"></script>
     <title>Registration</title>
   </head>
 
@@ -30,6 +31,7 @@
             maxlength="6"
             required
             onkeypress="return /[0-9]/i.test(event.key)"
+            id="code"
           />
           <br /><br />
           <a href="youtube">
@@ -38,7 +40,9 @@
           <br /><br />
           <div>
             <a>
-              <button class="nextButton Button">Next</button>
+              <button class="nextButton Button" onclick="getCode()">
+                Next
+              </button>
             </a>
           </div>
         </form>
