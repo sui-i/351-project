@@ -9,9 +9,9 @@
 }
 
 @font-face {
-    font-family: 'comfortaaregular';
-    src: url("Items/comfortaa-variablefont_wght-webfont.woff2") format('woff2'),
-        url("Items/comfortaa-variablefont_wght-webfont.woff") format('woff');
+    font-family: "comfortaaregular";
+    src: url("Items/comfortaa-variablefont_wght-webfont.woff2") format("woff2"),
+        url("Items/comfortaa-variablefont_wght-webfont.woff") format("woff");
     font-weight: normal;
     font-style: normal;
 }
@@ -19,7 +19,6 @@
 body {
     background-color: rgb(47, 54, 60);
 }
-
 
 h1 {
     font-family: "orbitronregular";
@@ -79,31 +78,30 @@ img {
 }
 
 form {
-    display: table;
-    margin-left: auto;
-    margin-right: auto;
-}
-
-label {
-    font-family: "comfortaaregular";
-    font-size: 30px;
-    margin-right: 8px;
-    margin-bottom: 20px;
-    display: table-cell;
+    display: grid;
+    align-items: center;
+    justify-content: center;
 }
 
 input {
-    background-color: rgba(255, 255, 255, 0.197);
+    display: inline-grid;
+    background-color: rgb(112, 118, 122);
     font-family: Arial, Helvetica, sans-serif;
     border: none;
-    display: table-cell;
     border-radius: 5px;
     outline: none;
-    width: 300px;
-    height: 29px;
-    margin-right: 10px;
+    width: 350px;
+    height: 40px;
     font-size: 20px;
-    color: rgba(255, 255, 255, 0.585);
+    color: rgb(196, 198, 200);
+    justify-self: center;
+    margin-top: 3%;
+}
+
+::placeholder {
+    color: rgb(42, 42, 42);
+    font-family: 'comfortaaregular';
+
 }
 
 /*Profile icon*/
@@ -125,6 +123,7 @@ input {
 }
 
 .loginButton {
+    display: inline-grid;
     width: 350px;
     height: 45px;
     font-size: 28px;
@@ -135,10 +134,23 @@ input {
     color: rgb(171, 179, 184);
     background-color: rgb(38, 133, 129);
     cursor: pointer;
-    margin-top: 50px;
-    cursor: pointer;
+    margin-top: 7%;
+    align-self: center;
+    justify-self: center;
 }
 
 .center {
     margin-top: 2%;
+}
+
+@media (-webkit-device-pixel-ratio: 1.25) {
+    * {
+        zoom: 0.94;
+    }
+}
+
+@media (-webkit-device-pixel-ratio: 1.5) {
+    * {
+        zoom: 0.94;
+    }
 }

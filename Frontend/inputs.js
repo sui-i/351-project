@@ -1,17 +1,3 @@
-// this function stores the username that the user inputs upon login
-function getUsername() {
-  var username = document.getElementById("username").value;
-  //alert(username);
-  return username;
-}
-
-// this function stores the password that the user inputs upon login
-function getPassword() {
-  var password = document.getElementById("password").value;
-  //alert(password);
-  return password;
-}
-
 // this function stores the username that the user inputs upon registering
 function getRegistrationUsername() {
   var regUser = document.getElementById("regUser").value;
@@ -45,4 +31,28 @@ function getCode() {
   var code = document.getElementById("code").value;
   //alert(code);
   return code;
+}
+
+const getUsername = document.getElementById("username");
+const getPassword = document.getElementById("password");
+const getLogin = document.getElementById("getLoginInfo");
+
+const URL = "http://localhost:3000";
+
+getLogin.addEventListener("click", postInfo);
+async function postInfo(e) {
+  e.preventDefault();
+  // in case of no input, the function terminates itself
+  if (getUsername == "") {
+    return;
+  }
+  const response = await fetch(URL, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      parcel: getUsername.value,
+    }),
+  });
 }

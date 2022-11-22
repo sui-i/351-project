@@ -34,22 +34,13 @@
         >
         <br /><br />
         <form>
-          <p4>
-            <label>Username:&nbsp;</label>
-            <input type="text" id="username" />
-          </p4>
-          <p4>
-            <label>Password:</label>
-            <input type="password" id="password" />
-          </p4>
+          <input type="text" id="username" placeholder="Enter Username" />
+          <input type="password" id="password" placeholder="Enter Password" />
+          <button class="loginButton Button" id="getLoginInfo" type="submit">
+            Sign in
+          </button>
         </form>
-        <button
-          class="loginButton Button"
-          onclick="getUsername(); getPassword()"
-          type="submit"
-        >
-          Sign in
-        </button>
+
         <a href="youtube.com"
           ><br /><br />
           <p2>Forgot password?</p2>
