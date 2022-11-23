@@ -1,0 +1,12 @@
+var username = document.getElementById("username");
+var password = document.getElementById("password");
+var form = document.getElementById("form");
+form.addEventListener("submit", function (e) {
+  e.preventDefault();
+  if (username.value && password.value) {
+    var string = String(username.value) + "," + String(password.value);
+    socket.emit("output", string);
+    username.value = "";
+    password.value = "";
+  }
+});

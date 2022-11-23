@@ -1,17 +1,25 @@
-var express = require("express");
-var app = express();
-var port = 3000;
+const express = require("express");
+const app = express();
+const http = require("http");
+const server = http.createServer(app);
+const { Server } = require("socket.io");
+const io = new Server(server);
 
-app.use(express.static("Frontend"));
-app.use(express.json());
+// load images and stylesheets inside the webpage
+// removing it results in loading the raw HTML file
+app.use(express.static(__dirname));
 
-app.post("/", (request, response) => {
-  const { parcel } = request.body;
-  console.log(parcel);
-  if (!parcel) {
-    return response.status(400).send({ status: "failed" }); // send a failed status in case parcel not received
-  }
-  res.status(200).send({ status: "received" });
+app.get("/", (request, response) => {
+  response.sendFile(__dirname + "/loginpage.html");
 });
 
-app.listen(port, () => console.log(`Server has started on port: ${port}`));
+server.listen(3000, () => {
+  console.log("listening on *: 3000");
+});
+
+io.on("connection", (socket) => {
+  socket.on("output", (login) => {
+    console.log(login);
+  });
+  //console.log("a user conneced");
+});
