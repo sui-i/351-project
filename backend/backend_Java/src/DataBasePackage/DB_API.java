@@ -1,7 +1,10 @@
 package DataBasePackage;
 import Security.md5;
-import clientPackage.C_InformationDB;
+
 import java.util.HashMap;
+
+import RETIREDclientPackage.C_InformationDB;
+
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
