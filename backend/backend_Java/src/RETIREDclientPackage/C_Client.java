@@ -1,4 +1,4 @@
-package clientPackage;
+package RETIREDclientPackage;
 import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;

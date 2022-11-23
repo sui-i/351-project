@@ -1,7 +1,7 @@
 package requestsrepliescodes;
 
 public enum IdentificationCodes {
-	LoginSuccessul(110),
+	LoginSuccessful(110),
 	EmailNotVerified(111),
 	UsernameNotFound(112),
 	WrongPassword(113),
@@ -13,13 +13,13 @@ public enum IdentificationCodes {
 	
 	VerificationSuccessful(130),
 	WrongVerrificationCode(131),
-	UserAlreadyVerified(132);
+	UserAlreadyVerified(132),
+	
+	InternalError(500);
 
-	final int ERRID;
+	final int ID;
 
 	IdentificationCodes(int i) {
-		this.ERRID = i;
+		this.ID = i;
 	}
-	
-	
 }

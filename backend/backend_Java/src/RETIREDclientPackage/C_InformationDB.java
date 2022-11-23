@@ -1,4 +1,4 @@
-package clientPackage;
+package RETIREDclientPackage;
 
 public class C_InformationDB {
 	
