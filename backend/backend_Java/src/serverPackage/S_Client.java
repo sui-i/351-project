@@ -39,10 +39,12 @@ public class S_Client implements Runnable{
 		}
 		
 	}
+	
 	public void removeS_Client() {
 		isLoggedIn = false;
 		S_Client.print(String.format("A client has disconnected"));
 	}
+	
 	public void closeEverything(Socket socket, BufferedReader bufferedReader, BufferedWriter bufferedWriter) {
 		removeS_Client();
 		try {

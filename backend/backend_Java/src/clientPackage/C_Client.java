@@ -20,7 +20,6 @@ public class C_Client {
 				
 		} catch (IOException e){
 			closeEverything(socket,bufferedReader,bufferedWriter);
-			break;
 		}
 	}
 	
