@@ -5,7 +5,8 @@ form.addEventListener("submit", function (e) {
   e.preventDefault();
   if (username.value && password.value) {
     var string = String(username.value) + "," + String(password.value);
-    socket.emit("output", string);
+    var x = JSON.stringify(string);
+    socket.emit("output", x);
     username.value = "";
     password.value = "";
   }
