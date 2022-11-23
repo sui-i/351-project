@@ -112,9 +112,52 @@ public class S_Client implements Runnable{
 	}
 	
 	
+	/*
+	 * Requests come in 2 forms:
+	 * 1-Identification requests
+	 * 		a+login 						FORMAT: "Req110:username,password"
+	 * 		b+registration					FORMAT: "Req120:username,password,email"
+	 * 		c+verification					FORMAT: "Req130:username,"
+	 * 2-Reservation request:
+	 * 		a+reserve						FORMAT: "Req210:{ROOMID},YYYY.MM.DD.HH-YYYY.MM.DD.HH" (start date-finish date)
+	 * 		b+unreserve						FORMAT: "Req220:{ROOMID}"
+	 * 
+	 * 
+	 * Replies by the server are:
+	 * 0-Invalid request					FORMAT: "Rep000"
+	 * 1-a.login replies
+	 * 		+logged in successfully			FORMAT: "Rep110"
+	 * 		+Email not verified				FORMAT: "Rep111"
+	 * 		+Username not found				FORMAT: "Rep112"
+	 * 		+Wrong Password					FORMAT: "Rep113"
+	 * 
+	 * 1-b.registration replies
+	 * 		+Registered successfully		FORMAT: "Rep120"
+	 * 		+Email not Available			FORMAT: "Rep121"
+	 * 		+Email already exists			FORMAT: "Rep122"
+	 * 		+Username already exists		FORMAT: "Rep123"
+	 * 
+	 * 1-c. verification replies
+	 * 		+Verification successful 		FORMAT: "Rep130"
+	 * 		+Wrong verificationCode			FORMAT: "Rep131"
+	 * 		+User already verified			FORMAT: "Rep132"
+	 * */
+	public void handleRequest(String request)
+	{
+		
+	}
 	
 	@Override
 	public void run() {
+		String RequestToHandle;
+		String ResponseToSend;
+		
+		while (socket.isConnected()) {
+			try {
+				RequestToHandle = bufferedReader.readLine();
+			}
+			catch (IOException e){}
+		}
 		
 		
 	}

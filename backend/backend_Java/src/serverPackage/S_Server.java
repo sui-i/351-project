@@ -35,12 +35,11 @@ public class S_Server {
 		{
 			
 		}
-		
-		S_Server.print("Started.");
 	}
 	
 	public void closeServerSocket()
 	{
+		S_Server.print("Stopping...");
 		try {
 			if (serverSocket!=null)
 				serverSocket.close();
@@ -48,6 +47,7 @@ public class S_Server {
 		catch (IOException e) {
 			e.printStackTrace();
 		}
+		S_Server.print("Stopped.");
 	}
 	
 	
