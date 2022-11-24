@@ -62,12 +62,13 @@ The above table has the username as a unique identifier (no duplicate usernames 
 |       |        |   | | | |
 
 The above table has the Room id as a unique identifier (no duplicate room ids allowed). It will have the following domains which are of types:
-- Room id : int
-- Number of beds : int
-- Floor : int
-- Price per night  : double
-- Booked until : date ( or NULL if available)
+- room_id : int
+- Num_of_beds : int
+- floor : int
+- price_per_night  : double
+- booked_until : date ( or NULL if available)
 
 
 ## Security : 
 We will use md5 hashing to store the passwords in the database.
+
