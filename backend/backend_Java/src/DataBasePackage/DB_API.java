@@ -299,12 +299,17 @@ public class DB_API {
 	        	//Extracting data
         	Boolean availability = rs.getBoolean("Available");
 			String time = rs.getString("booked_until");
-        	if(!availability && disjointAndGreater(time,date) ){
+			TimeStamp usersDate= new TimeStamp(date);
+			TimeStamp booked_until = new TimeStamp(time);
+        	if(!availability && usersDate.compareTo(booked_until)<=0 ){
+        		// Can't book this shit
 				return 6;
 			}
 
 			else{
-
+				// Redesign the dataBase
+				
+				
 				return 0;
 
 			}
@@ -315,10 +320,6 @@ public class DB_API {
         	return -1;
         }
 }
-//Comparing two timestamps
-public boolean disjointAndGreater(String date, String reservedTime){
-	
-	return true;
-}
+
 
 }
