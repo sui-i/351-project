@@ -1,9 +1,7 @@
 package serverPackage;
-import java.time.Clock;
-import java.util.HashMap;
-import java.util.LinkedList;
 
-import DataBasePackage.DB_API;
+import requestsrepliescodes.IdentificationCodes;
+import requestsrepliescodes.ReservationCodes;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -56,7 +54,17 @@ public class S_Client implements Runnable{
 		}
 	}
 	
-	public int Register(String username, String email, String password, String firstName, String lastName) {
+
+	/**INCOMPLETE.
+	 * Registering the user uses the database interface to add a new user, and calls on the Email
+	 * server to send a verification code.
+	 * register does NOT login the user.
+	 * 
+	 * self explanatory parameters
+	 * 
+	 * @return ID: appropritate enum identification code
+	 * */
+	public IdentificationCodes Register(String username, String password, String email, String firstName, String lastName) {
 		//if username already exists return 1
 		//if email already exists return 2
 		//if password is too small return 3
@@ -66,9 +74,20 @@ public class S_Client implements Runnable{
 		//set new user in database (with Verified email = false, verification id = random number) then.) and return 0
 		
 	}
+	/**INCOMPLETE.
+	 * Login method is called to login a client, or provide feedback on why a login failed.
+	 * if a login is successful, the isLoggedin Boolean is flagged.
+	 * 
+	 * self explanatory parameters
+	 * 
+	 * @return ID: appropriate enum identification code
+	 * */
+	public IdentificationCodes Login(String username, String password) {
+		
+		return IdentificationCodes.LoginSuccessful;
+	}
 	
 	public int Login(String username, String password) {
-
 		//if username is not found return 1
 		//if username is found but password is wrong, return 2
 		//if email is not verified return 3
@@ -114,9 +133,59 @@ public class S_Client implements Runnable{
 	}
 	
 	
+	/**INCOMPLETE.
+	 * Handeling requests.
+	 * 
+	 * Requests come in 2 forms:
+	 * 1-Identification requests
+	 * 		a+login 						FORMAT: "Req110:username,password"
+	 * 		b+registration					FORMAT: "Req120:username,password,email"
+	 * 		c+verification					FORMAT: "Req130:username,verificationcode"
+	 * 		d+logout						FORMAT: "Req140"
+	 * 2-Reservation request:
+	 * 		a+reserve						FORMAT: "Req210:{ROOMID},YYYY.MM.DD.HH-YYYY.MM.DD.HH" (start date-finish date)
+	 * 		b+unreserve						FORMAT: "Req220:{ROOMID}"
+	 * 
+	 * 
+	 * Replies by the server are:
+	 * 0-Invalid request					FORMAT: "Rep000"
+	 * 1-a. login replies
+	 * 		+logged in successfully			FORMAT: "Rep110"
+	 * 		+Email not verified				FORMAT: "Rep111"
+	 * 		+Username not found				FORMAT: "Rep112"
+	 * 		+Wrong Password					FORMAT: "Rep113"
+	 * 
+	 * 1-b. registration replies
+	 * 		+Registered successfully		FORMAT: "Rep120"
+	 * 		+Email not Available			FORMAT: "Rep121"
+	 * 		+Email already exists			FORMAT: "Rep122"
+	 * 		+Username already exists		FORMAT: "Rep123"
+	 * 
+	 * 1-c. verification replies
+	 * 		+Verification successful 		FORMAT: "Rep130"
+	 * 		+Wrong verificationCode			FORMAT: "Rep131"
+	 * 		+User already verified			FORMAT: "Rep132"
+	 * 
+	 * 1-d. logout
+	 * 		+logout successful				FORMAT: "Rep140"
+	 * */
+	public String handleRequest(String request)
+	{
+		
+		return "Rep000";
+	}
 	
 	@Override
 	public void run() {
+		String RequestToHandle;
+		String ResponseToSend;
+		
+		while (socket.isConnected()) {
+			try {
+				RequestToHandle = bufferedReader.readLine();
+			}
+			catch (IOException e){}
+		}
 		
 		
 	}

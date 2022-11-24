@@ -1,13 +1,14 @@
-package serverPackage;
+package TESTING;
 
 import java.io.IOException;
 import java.net.ServerSocket;
-public class S_Main {
+
+public class TestMain {
 
 	public static void main(String[] args) throws IOException {
 		ServerSocket serverSocket = new ServerSocket(35135);
-		S_Server server = new S_Server(serverSocket);
-		server.startServer();
+		TestServer server = new TestServer(serverSocket);
+		server.startServer();	
 	}
 
 }
