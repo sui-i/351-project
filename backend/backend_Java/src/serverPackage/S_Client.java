@@ -87,12 +87,12 @@ public class S_Client implements Runnable{
 		return IdentificationCodes.LoginSuccessful;
 	}
 	
-	/**
-	 * Logs the client out by reseting all parameters,
-	 * */
-	public void Logout() {
-		isLoggedIn=false;
-		clientUsername = clientEmail = clientPassword = firstName = lastName = null;
+	public int Login(String username, String password) {
+		//if username is not found return 1
+		//if username is found but password is wrong, return 2
+		//if email is not verified return 3
+		//if database error return -1
+		//else return 0, and set all the parameters according to the database.
 	}
 	
 	private static int validateRoomID(String roomID) 
@@ -113,6 +113,7 @@ public class S_Client implements Runnable{
 		{
 			return roomErrorCode;
 		}
+		
 		//if room reserved is already reserved at hour, return 6
 		
 		//if all is well, reserve the room and return 0
