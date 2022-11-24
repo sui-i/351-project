@@ -68,6 +68,7 @@ public class S_Client implements Runnable{
 	}
 	
 	public int Login(String username, String password) {
+
 		//if username is not found return 1
 		//if username is found but password is wrong, return 2
 		//if email is not verified return 3
@@ -93,6 +94,7 @@ public class S_Client implements Runnable{
 		{
 			return roomErrorCode;
 		}
+		
 		//if room reserved is already reserved at hour, return 6
 		
 		//if all is well, reserve the room and return 0
