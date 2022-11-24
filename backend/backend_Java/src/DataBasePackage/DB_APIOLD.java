@@ -1,10 +1,8 @@
 package DataBasePackage;
 import Security.md5;
+import cmdClientPackage.C_InformationDB;
 
 import java.util.HashMap;
-
-import RETIREDclientPackage.C_InformationDB;
-
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
@@ -103,9 +101,13 @@ public class DB_APIOLD {
 		try {
 			Class.forName(JDBC_DRIVER);
             System.out.println("Connecting to database ... ");
-            
-            Connection conn = DriverManager.getConnection(DB_URL_ + TableNames.get(table_name)  , USER, PASS);
 
+            /**
+             * line disconnected by Ahmad
+             * 
+             * Connection conn = DriverManager.getConnection(DB_URL_ + TableNames.get(table_name)  , USER, PASS);
+             */
+            
             return conn;
 		}
 		catch(Exception e){

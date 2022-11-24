@@ -1,4 +1,4 @@
-package RETIREDclientPackage;
+package cmdClientPackage;
 import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -33,9 +33,19 @@ public class C_Client {
 		}
 	}
 	
-	public void Login(String username, String password)
+	
+	public void AttemptLogin(String username, String password)
 	{
 		
 	}
 
+	public void AttemptRegister(String username, String password, String email, String firstName, String lastName)
+	{
+		
+	}
+	
+	public void AttemptVerifyEmail(String username, String VerificationCode)
+	{
+		
+	}
 }
