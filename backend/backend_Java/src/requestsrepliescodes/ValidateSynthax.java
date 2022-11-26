@@ -3,7 +3,7 @@ package requestsrepliescodes;
 /**
  * set of functions that checks for validity of identitification credentials.
  * */
-public class ValidateIdentitySynthax {
+public class ValidateSynthax {
 	public static boolean checkUsername(String username) {
 		return !username.contains(" ") && !username.contains(",");
 	}
@@ -18,4 +18,9 @@ public class ValidateIdentitySynthax {
 		//uses Regular expressions to validate the email.
 		return name.matches("^[a-zA-Z+ ]+");
 	}
+	public static boolean checkTime(String time) {
+		return time.matches("^[0-9]{4}-[0-9]{2}-[0-9]{2} [0-9]{2}:[0-9]{2}:[0-9]{2}$");
+	}
+	
+	
 }

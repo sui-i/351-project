@@ -4,7 +4,8 @@ public enum ReservationCodes {
 	IndentityError(115),
 	RoomStatusChangedSuccessfully(210),
 	RoomAlreadyReserved(211),
-	RoomReservationDateExceeded(212),
+	RoomReservationtimeInvalid(212),
+	RoomRechedulingFailed(241),
 
 	RoomFoundSuccessfully(220),
 	RoomIDInvalid(221),
@@ -14,7 +15,7 @@ public enum ReservationCodes {
 	PlanetNotFound(223),
 	SolarSystemNotFound(222),
 	
-	InvalidDate(231),
+	InvalidDateFormat(231),
 	
 	InternalError(500);
 	
