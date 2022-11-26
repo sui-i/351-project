@@ -18,8 +18,19 @@ server.listen(3000, () => {
 });
 
 io.on("connection", (socket) => {
-  socket.on("output", (login) => {
-    console.log(login);
+  socket.on("output", (user, pass) => {
+    //console.log(login);
+    const obj = {
+      username: user,
+      password: pass,
+    };
+
+    var objString = JSON.stringify(obj);
+    var fs = require("fs");
+    fs.writeFile("storeInputs.json", objString, function (err, result) {
+      if (err) console.log("error", err);
+    });
+    console.log(JSON.stringify(obj, null, 2));
   });
   //console.log("a user conneced");
 });
