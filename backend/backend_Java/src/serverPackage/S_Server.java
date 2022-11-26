@@ -24,7 +24,7 @@ public class S_Server {
 			while (!serverSocket.isClosed())
 			{
 				Socket socket = serverSocket.accept();
-				S_Server.print("New client has connected.");
+				S_Server.print("New client connected.");
 				S_Client clientHandler = new S_Client(socket);
 
 				Thread thread = new Thread(clientHandler);
@@ -33,7 +33,7 @@ public class S_Server {
 		}
 		catch (IOException e)
 		{
-			
+			closeServerSocket();
 		}
 	}
 	

@@ -1,10 +1,12 @@
 package requestsrepliescodes;
 
 public enum ReservationCodes {
-	RoomReservedSuccessfully(210),
+	IndentityError(115),
+	RoomStatusChangedSuccessfully(210),
 	RoomAlreadyReserved(211),
 	RoomReservationDateExceeded(212),
 
+	RoomFoundSuccessfully(220),
 	RoomIDInvalid(221),
 	RoomNotFound(226),
 	RoomNotReserved(225),
@@ -16,7 +18,7 @@ public enum ReservationCodes {
 	
 	InternalError(500);
 	
-	final int ID;
+	public final int ID;
 
 	ReservationCodes(int i) {
 		this.ID = i;

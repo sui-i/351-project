@@ -1,4 +1,4 @@
-package RETIREDclientPackage;
+package cmdClientPackage;
 
 public class C_InformationDB {
 	

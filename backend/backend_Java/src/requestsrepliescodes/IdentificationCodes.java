@@ -15,9 +15,11 @@ public enum IdentificationCodes {
 	WrongVerrificationCode(131),
 	UserAlreadyVerified(132),
 	
+	LogoutSuccessful(140),
+	
 	InternalError(500);
 
-	final int ID;
+	public final int ID;
 
 	IdentificationCodes(int i) {
 		this.ID = i;
