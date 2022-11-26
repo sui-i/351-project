@@ -1,5 +1,5 @@
 package serverPackage;
-
+import DataBasePackage.TimeStamp;
 import requestsrepliescodes.IdentificationCodes;
 import requestsrepliescodes.ReservationCodes;
 
@@ -151,7 +151,7 @@ public class ReservationHandler {
 	 * @param time
 	 * @return appropriate ReservationCode
 	 */
-	private ReservationCodes Reserve(String roomID, int start, int end)
+	private ReservationCodes Reserve(String roomID, String startTime, String finishTime)
 	{
 		if (!isLoggedIn)
 			return ReservationCodes.IndentityError;
@@ -172,7 +172,7 @@ public class ReservationHandler {
 	 * @param time
 	 * @return appropriate ReservationCode
 	 */
-	private ReservationCodes unReserve(String roomID, int start, int end)
+	private ReservationCodes unReserve(String roomID, String startTime, String finishTime)
 	{
 		if (!isLoggedIn)
 			return ReservationCodes.IndentityError;
@@ -194,8 +194,8 @@ public class ReservationHandler {
 	 * 		c+verification					FORMAT: "Req130:username,verificationcode"
 	 * 		d+logout						FORMAT: "Req140"
 	 * 2-Reservation request:
-	 * 		a+reserve						FORMAT: "Req210:{ROOMID},YYYY.MM.DD.HH-YYYY.MM.DD.HH" (start date-finish date)
-	 * 		b+unreserve						FORMAT: "Req220:{ROOMID},YYYY.MM.DD.HH-YYYY.MM.DD.HH"
+	 * 		a+reserve						FORMAT: "Req210:{ROOMID},YYYY-MM-DD HH:MM:SS^YYYY-MM-DD HH:MM:SS" (start date-finish date)
+	 * 		b+unreserve						FORMAT: "Req220:{ROOMID},YYYY-MM-DD HH:MM:SS^YYYY-MM-DD HH:MM:SS"
 	 * 
 	 * 
 	 * Replies by the server are:
@@ -282,13 +282,14 @@ public class ReservationHandler {
 			return def;
 		
 		//TODO: HANDLE TIMES
-		String[] timeRange = Param[1].split("-");
+		String[] timeRange = Param[1].split("^");
 		String RoomID = Param[0];
 		
+		
 		if ("210".equals(RCode)) //Reserve
-			return "Rep"+Reserve(RoomID,0,0).ID;
+			return "Rep"+Reserve(RoomID,timeRange[0],timeRange[1]).ID;
 		if ("220".equals(RCode)) //Unreserve
-			return "Rep"+unReserve(RoomID,0,0).ID;
+			return "Rep"+unReserve(RoomID,timeRange[0],timeRange[1]).ID;
 		return def;
 	}
 }

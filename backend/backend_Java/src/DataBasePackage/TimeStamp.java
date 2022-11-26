@@ -28,6 +28,10 @@ public class TimeStamp implements Comparable<TimeStamp>{
         return seconds;
     }
 
+    /**
+     * 
+     * @param dateTime: String in the form "YYYY-MM-DD HH:MM:SS.MS"
+     */
     public TimeStamp(String dateTime){
         //Here we are assuming the dataBase type of the booked_until is timestamp YYYY-MM-DD HH:MM:SS.MS
         // TO-DO: Handle exceptions when dateTime isn't legit
@@ -47,6 +51,10 @@ public class TimeStamp implements Comparable<TimeStamp>{
 
 
 
+    }
+    @Override
+    public String toString() {
+    	return String.format("%s-%s-%s %s:%s:%s", getYear(),getMonth(),getDay(),getHours(),getMinutes(),getSeconds());
     }
 
     private TimeStamp (Builder builder){
