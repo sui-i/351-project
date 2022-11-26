@@ -11,6 +11,7 @@
     Check Reservation :
         SELECT * FROM room_reservation_history where NOT ((booked_in <= EndB)  and  (booked_out >= StartB)) ; 
     
+    SELECT count(*) from table where blahblahblah;
     
 
     
