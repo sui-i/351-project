@@ -7,6 +7,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Scanner;
 
+import requestsrepliescodes.ValidateIdentitySynthax;
 public class C_Main {
 	private static void pressAnyKeyToContinue() {
 		System.out.println("Press any key to continue.");
@@ -80,25 +81,6 @@ public class C_Main {
 		return cmdIn.nextLine().charAt(0);
 	}
 	
-	/*
-	 * set of functions that checks for validity of Indentity.
-	 * 
-	 * */
-	public static boolean checkUsername(String username) {
-		return !username.contains(" ") && !username.contains(",");
-	}
-	public static boolean checkPassword(String password) {
-		return password.length()>7 && !password.contains(",");
-	}
-	public static boolean checkEmail(String email) {
-		//uses Regular expressions to validate the email.
-		return email.matches("^[a-zA-Z0-9+_.-]+@[a-zA-Z0-9.-]+$");
-	}
-	public static boolean checkName(String name) {
-		//uses Regular expressions to validate the email.
-		return name.matches("^[a-zA-Z+ ]+");
-	}
-	
 	
 	/*
 	 * Set of functions that define the CMD interface.
@@ -108,13 +90,13 @@ public class C_Main {
 		//take username and password and check their validity
 		System.out.println("Login:\nPlease enter your username: ");
 		String username = cmdIn.nextLine();
-		if (!checkUsername(username)) {
+		if (!ValidateIdentitySynthax.checkUsername(username)) {
 			System.out.println("Username must not contain spaces or commas");
 			return;
 		}
 		System.out.println("Please enter your password: ");
 		String password = cmdIn.nextLine();
-		if (!checkPassword(password)) {
+		if (!ValidateIdentitySynthax.checkPassword(password)) {
 			System.out.println("Password must be at least 8 characters long and not contain commas");
 			return;
 		}
@@ -126,13 +108,13 @@ public class C_Main {
 	public void RegisterCMDInterface() {
 		System.out.println("Register:\nPlease enter your username: ");
 		String username = cmdIn.nextLine();
-		if (!checkUsername(username)) {
+		if (!ValidateIdentitySynthax.checkUsername(username)) {
 			System.out.println("Username must not contain spaces or commas");
 			return;
 		}
 		System.out.println("Please enter your password: ");
 		String password = cmdIn.nextLine();
-		if (!checkPassword(password)) {
+		if (!ValidateIdentitySynthax.checkPassword(password)) {
 			System.out.println("Password must be at least 8 characters long and not contain commas");
 			return;
 		}
@@ -144,21 +126,21 @@ public class C_Main {
 		
 		System.out.println("Please enter your email: ");
 		String email = cmdIn.nextLine();
-		if (!checkEmail(email)) {
+		if (!ValidateIdentitySynthax.checkEmail(email)) {
 			System.out.println("Email must follow emails' format.");
 			return;
 		}
 		
 		System.out.println("Please enter your first name: ");
 		String firstName = cmdIn.nextLine();
-		if (!checkName(firstName)) {
+		if (!ValidateIdentitySynthax.checkName(firstName)) {
 			System.out.println("first name must only contain uppercase and lowerCase characters and spaces.");
 			return;
 		}
 		
 		System.out.println("Please enter your last name: ");
 		String lastName = cmdIn.nextLine();
-		if (!checkName(lastName)) {
+		if (!ValidateIdentitySynthax.checkName(lastName)) {
 			System.out.println("last name must only contain uppercase and lowerCase characters and spaces.");
 			return;
 		}
@@ -169,7 +151,7 @@ public class C_Main {
 	public void VerifyEmailCMDInterface() {
 		System.out.println("Email verification:\nPlease enter your username: ");
 		String username = cmdIn.nextLine();
-		if (!checkUsername(username)) {
+		if (!ValidateIdentitySynthax.checkUsername(username)) {
 			System.out.println("Username must not contain spaces or commas");
 			return;
 		}
@@ -182,6 +164,8 @@ public class C_Main {
 	public void ReserveCMDInterface() {
 		
 	}
-	public void UnreserveCMDInterface() {}
+	public void UnreserveCMDInterface() {
+		
+	}
 
 }
