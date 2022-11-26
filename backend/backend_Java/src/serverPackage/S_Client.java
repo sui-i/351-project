@@ -1,21 +1,16 @@
 package serverPackage;
 
-import serverPackage.ReservationHandler;
-
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
-import java.io.FileReader;
 
 import java.net.Socket;
-import java.nio.file.Files;
-import java.nio.file.Path;
 
 public class S_Client implements Runnable{
 	private static void print(String s) {System.out.println("[SERVER]: " + s);}
-	private static final Path RootPath = Path.of("C:\\Users\\Pcito\\Desktop\\Univ\\Fall 2022 2023\\ece 351\\351-project");
+	//private static final Path RootPath = Path.of("C:\\Users\\Pcito\\Desktop\\Univ\\Fall 2022 2023\\ece 351\\351-project");
 	
 	private Socket socket;
 	private BufferedReader bufferedReader;
@@ -44,8 +39,9 @@ public class S_Client implements Runnable{
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+		S_Client.print("A client has disconnected.");
 	}
-		
+	
 	@Override
 	public void run() {
 		String RequestToHandle;

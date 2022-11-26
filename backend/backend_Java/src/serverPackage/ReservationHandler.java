@@ -5,7 +5,7 @@ import requestsrepliescodes.ReservationCodes;
 
 import java.util.HashMap;
 import java.util.Random;
-
+import java.util.Arrays;
 import java.util.Date;
 public class ReservationHandler {
 	private static HashMap<Long,ReservationHandler> Clients = new HashMap<>();
@@ -118,7 +118,7 @@ public class ReservationHandler {
 	    if (strNum == null)
 	        return false;
 	    try
-	        {double d = Integer.parseInt(strNum);}
+	        {Integer.parseInt(strNum);}
 	    catch (NumberFormatException nfe)
 	        {return false;}
 	    return true;
@@ -224,11 +224,14 @@ public class ReservationHandler {
 	{
 		lastSeen = date.getTime();
 		String def = "Rep000";
+		if (request==null)
+			return def;
 		
 		//HANDLE IDENTIFICATIONS:
-		if (request.length()<6 || request.subSequence(0, 2)!="Req")
+		if (request.length()<6 || !request.subSequence(0, 3).equals("Req"))
 			return def;
-		if (request.subSequence(3, 5)=="110") //login
+		String RCode = (String) request.subSequence(3, 6);
+		if ("110".equals(RCode)) //login
 		{
 			if (request.length()<8)
 				return def;
@@ -240,8 +243,9 @@ public class ReservationHandler {
 				return def;
 			return "Rep"+Login(Cred[0],Cred[1]).ID;	
 		}
-		if (request.subSequence(3, 5)=="120") //register
+		if ("120".equals(RCode)) //register
 		{
+			System.out.println("Got here");
 			if (request.length()<8)
 				return def;
 			String[] parser = request.split(":");
@@ -252,7 +256,7 @@ public class ReservationHandler {
 				return def;
 			return "Rep"+Register(Cred[0],Cred[1],Cred[2],Cred[3],Cred[4]).ID;	
 		}
-		if (request.subSequence(3, 5)=="130") //verify email
+		if ("130".equals(RCode)) //verify email
 		{
 			if (request.length()<8)
 				return def;
@@ -264,7 +268,7 @@ public class ReservationHandler {
 				return def;
 			return "Rep"+VerifyEmail(Cred[0],Cred[1]).ID;	
 		}
-		if (request.subSequence(3, 5)=="140") //logout
+		if (request.subSequence(3, 6)=="140") //logout
 		{
 			return "Rep"+Logout().ID;
 		}
@@ -281,9 +285,9 @@ public class ReservationHandler {
 		String[] timeRange = Param[1].split("-");
 		String RoomID = Param[0];
 		
-		if (request.subSequence(3, 5)=="210") //Reserve
+		if ("210".equals(RCode)) //Reserve
 			return "Rep"+Reserve(RoomID,0,0).ID;
-		if (request.subSequence(3, 5)=="220") //Unreserve
+		if ("220".equals(RCode)) //Unreserve
 			return "Rep"+unReserve(RoomID,0,0).ID;
 		return def;
 	}

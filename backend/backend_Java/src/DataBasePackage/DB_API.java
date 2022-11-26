@@ -244,35 +244,80 @@ public class DB_API {
 	 * 			</ul>
 	 */
 	 public  int RegisterUser(String username, String email, String password)
-	{
-		try {
-			if(checkMembership(username)==true) {
-				return 1;
+		{
+			try {
+				if(checkMembership(username)==true) {
+					return 1;
+				}
+				else {
+					Statement stmt = conn.createStatement();
+					//TO_DO:
+					// Hash the password bro
+					String time= "NOW()";
+					String lastLogin = "NOW()";
+					password= md5.getMd5(password);
+					String query = String.format("Insert INTO %s (username,password,email,date_of_creation,last_login) VALUES('%s','%s','%s',%s,%s) ;",TableNames.get("credentials"),username,password,email,time,lastLogin);  
+					
+					//System.out.println(query);
+					stmt.execute(query );
+					
+					return 0;
+					
+				}
 			}
-			else {
-				Statement stmt = conn.createStatement();
-				//TO_DO:
-				// Hash the password bro
-            	String time= "NOW()";
-            	String lastLogin = "NOW()";
-            	password= md5.getMd5(password);
-            	String query = String.format("Insert INTO %s (username,password,email,date_of_creation,last_login) VALUES('%s','%s','%s',%s,%s) ;",TableNames.get("credentials"),username,password,email,time,lastLogin);  
-            	
-            	//System.out.println(query);
-            	stmt.execute(query );
-            	
-            	return 0;
-				
+			catch (Exception e) {
+				System.out.println(e.getMessage());
+				return 2;
 			}
+			
+			//adds a new user
+			//returns 0 if user was successfully added
+			//returns 1 if user already exists
+			//returns 2 if some other error occurs
 		}
-		catch (Exception e) {
-			System.out.println(e.getMessage());
-			return 2;
+	
+	/**
+	 * Query : "Select booked_until,Available from %s where RoomId = '%s' ;
+	 * @param ID : ID of the room 
+	 * @return  <ul> 
+	 * 				<li> 0 if user was successfully added</li>
+	 * 				<li> 1 if user already exists </li>
+	 * 				<li> 2 if some other error occurs </li>
+	 * 			</ul>
+	 */
+
+	//TO-DO: Finish it 
+	public  int Reserve(String username,int RoomID,String date) {
+		assert conn !=null : "No connection mate";
+		try {
+			Statement stmt= conn.createStatement();
+			String query = String.format("Select booked_until,Available from %s where RoomId = '%s' ;",TableNames.get("Rooms"),RoomID);
+	        ResultSet rs= stmt.executeQuery(query);
+	       
+	        	//Extracting data
+        	Boolean availability = rs.getBoolean("Available");
+			String time = rs.getString("booked_until");
+			TimeStamp usersDate= new TimeStamp(date);
+			TimeStamp booked_until = new TimeStamp(time);
+        	if(!availability && usersDate.compareTo(booked_until)<=0 ){
+        		// Can't book this shit
+				return 6;
+			}
+
+			else{
+				// Redesign the dataBase
+				
+				
+				return 0;
+
+			}
 		}
 		
-		//adds a new user
-		//returns 0 if user was successfully added
-		//returns 1 if user already exists
-		//returns 2 if some other error occurs
-	}
+        catch(Exception e) {
+        	System.out.println(e.getStackTrace());
+        	return -1;
+        }
+}
+
+
 }
