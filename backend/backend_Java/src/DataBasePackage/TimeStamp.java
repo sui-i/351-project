@@ -52,11 +52,10 @@ public class TimeStamp implements Comparable<TimeStamp>{
 
 
     }
-<<<<<<< HEAD
     @Override
     public String toString() {
     	return String.format("%s-%s-%s %s:%s:%s", getYear(),getMonth(),getDay(),getHours(),getMinutes(),getSeconds());
-=======
+    }
 
     private TimeStamp (Builder builder){
         this.year=builder.year;this.month=builder.month;this.day=builder.day; 
@@ -105,7 +104,6 @@ public class TimeStamp implements Comparable<TimeStamp>{
         public TimeStamp build(){
             return new TimeStamp(this);
         }    
->>>>>>> ebe8996e596342107a0abba5e446096ef5f44179
     }
 
 
