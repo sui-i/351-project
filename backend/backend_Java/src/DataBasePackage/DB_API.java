@@ -96,25 +96,20 @@ public class DB_API {
 		try {
 			if(ConnectDB()) {
 				String C_firstName = "",C_lastName= "",C_phoneNumber= "",C_birthDate="",C_Location="";
-				Statement stmt= conn.createStatement();
 				String query = String.format("Select username,firstName,lastName,phoneNumber,birthDate,Location from %s where username = '%s' ;",TableNames.get("Info"),username);
-		        ResultSet rs= stmt.executeQuery(query);
-		       
-		        while(rs.next()) {
-		        	//Extracting data
-		        	String c_username = rs.getString("username");
-		        	
-		        	if(c_username.equals(username) ) {
-		        		C_firstName= rs.getString("first_name");
-		        		C_lastName = rs.getString("last_name");
-		        		C_phoneNumber = rs.getString("phone_number");
-		        		C_birthDate = rs.getString("birthdate");
-		        		C_Location = rs.getString("location");
-		        	}
-	        	
-		        }
-		        
-		        stmt.close();
+				ArrayList<HashMap<String,String>> results= extractQuery(query, new String[] {"username","first_name","last_name","phone_number","birthdate","location"});
+				
+				if(results.size()==1){
+					C_firstName=results.get(0).get("first_name");
+					C_lastName=results.get(0).get("last_name");
+					C_phoneNumber=results.get(0).get("phone_number");
+					C_birthDate=results.get(0).get("birthdate");
+					C_Location=results.get(0).get("location");
+				}
+				else{
+					return null;
+				}
+
 		        return new C_InformationDB(username,C_firstName,C_lastName,C_phoneNumber,C_birthDate,C_Location);
 			}
 			else {
@@ -331,17 +326,17 @@ public class DB_API {
 
 			String query=String.format("Select booked_until,Available from %s where RoomId = '%s' order by booked_until desc ;",TableNames.get("Rooms"),RoomID);
 			ArrayList<HashMap<String,String>> results= extractQuery(query, new String [] {"Available","booked_until"})
-			
+			boolean availability;
 			if(results.size()==1){
 
-				boolean availability = Boolean.parseBoolean(results.get(0).get("Available"));
+				availability = Boolean.parseBoolean(results.get(0).get("Available"));
 				String time= results.get(0).get("booked_until");
 			}
 			else{
 				return 2;
 			}
 			TimeStamp usersDate= new TimeStamp(BookIn);
-			TimeStamp booked_until = new TimeStamp(time);
+			TimeStamp booked_until = new TimeStamp(BookOut);
 
         	if(!availability && usersDate.compareTo(booked_until)<=0 ){
         		// Can't book this shit
@@ -402,8 +397,8 @@ public class DB_API {
 					else return 2;
 				}
 			
-			java.sql.Timestamp Book_In = new TimeStamp(BookIn);
-			java.sql.Timestamp Book_Out = new TimeStamp(BookOut);
+			TimeStamp Book_In = new TimeStamp(BookIn);
+			TimeStamp Book_Out = new TimeStamp(BookOut);
 			//Note here we are inserting two seperate records in room_reservation_history and users_reservation_history
 			query = String.format("INSERT INTO room_reservation_history (reservation_id,room_id,booked_in,booked_until) values (%s,%s,'%s','%s') ; ",newId,RoomID,Book_In.toString(),Book_Out.toString());
 			if(! insertQuery(query)) return 2;
