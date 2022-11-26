@@ -9,7 +9,7 @@ We have a total of 5 tables :
 
 ## users_credentials 
 
-| username      | email | password   | date_of_creation | last_login | is_active
+| username      | email | password   | date_of_creation | last_login | userType
 | :---:        |    :----:   |          :---: |  :---:        |    :----:   |          :---: |
 |       |        |   | | | |
 |       |        |   | | | |
@@ -20,7 +20,7 @@ The above table has the username as a unique identifier (no duplicate usernames 
 - password : varchar
 - date_of_creation : timestamp
 - last_login : timestamp
-- is_active : boolean 
+- is_active : int  
 
 
 ## users_info

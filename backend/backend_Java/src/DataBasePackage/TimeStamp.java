@@ -52,9 +52,60 @@ public class TimeStamp implements Comparable<TimeStamp>{
 
 
     }
+<<<<<<< HEAD
     @Override
     public String toString() {
     	return String.format("%s-%s-%s %s:%s:%s", getYear(),getMonth(),getDay(),getHours(),getMinutes(),getSeconds());
+=======
+
+    private TimeStamp (Builder builder){
+        this.year=builder.year;this.month=builder.month;this.day=builder.day; 
+        this.hours=builder.hours;this.minutes=builder.minutes;this.seconds=builder.seconds;
+    }
+
+
+    
+    public TimeStamp add(TimeStamp other){
+        //return new TimeStamp()
+    }
+
+
+    public static class Builder{
+        private int year;
+        private int month;
+        private int day;
+        //Optional Shit
+        private int hours;
+        
+        private int minutes;
+        private double seconds;
+            
+            
+        public Builder(int year, int month,int day){
+            if(year<=0 || month <=0 || day<=0 || month>12 || day>31) {}
+            //Handle 31 and shit
+
+            this.year=year;
+            this.month=month;
+            this.day=day;
+        }
+        public Builder Hour(int hour){
+            this.hours = hour % 24;
+            return this;
+        }
+        public Builder Minute(int minute){
+            this.minutes = minute%60;
+            return this;
+        }
+        public Builder Second(int second){
+            this.seconds = second%60;
+            return this;
+        }
+        
+        public TimeStamp build(){
+            return new TimeStamp(this);
+        }    
+>>>>>>> ebe8996e596342107a0abba5e446096ef5f44179
     }
 
 
