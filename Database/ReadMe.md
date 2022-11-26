@@ -4,70 +4,83 @@ We have a total of 5 tables :
 - Users' Personal Information
 - Users' Reservation History
 - Room details
+- RoomsReservationHistory
 - Settings 
 
-## Users' Credentials 
+## users_credentials 
 
-| Username      | Email | Password   | Date of Creation | Last login | Active User
+| username      | email | password   | date_of_creation | last_login | is_active
 | :---:        |    :----:   |          :---: |  :---:        |    :----:   |          :---: |
 |       |        |   | | | |
 |       |        |   | | | |
 
 The above table has the username as a unique identifier (no duplicate usernames allowed). It will have the following domains which are of types:
 - username : varchar
-- Email : varchar
-- Password : varchar
-- Date of Creation : timestamp
-- Last Login : timestamp
-- Active User : boolean 
+- email : varchar
+- password : varchar
+- date_of_creation : timestamp
+- last_login : timestamp
+- is_active : boolean 
 
 
-## Users' Information 
+## users_info
 
-| Username      | FirstName | LastName   | Phone Number | Birthdate | Location
+| username      | first_name | last_name   | phone_number | birthdate | location
 | :---:        |    :----:   |          :---: |  :---:        |    :----:   |          :---: |
 |       |        |   | | | |
 |       |        |   | | | |
 
 The above table has the username as a unique identifier (no duplicate usernames allowed). It will have the following domains which are of types:
 - username : varchar
-- FirstName : varchar
-- LastName : varchar
-- Phone Number : int
-- Birthdate : date
-- Location : varchar
+- first_name : varchar
+- last_name : varchar
+- phone_number : int
+- birthdate : date
+- location : varchar
 
 
-## Users' Reservation History
+## users_reservation_history
 
-| Username      | Room id | Date of Reservation   | Check in | Check out | Cancelled
+| username      | room_id | reservation_date   | check_in | check_out | cancelled
 | :---:        |    :----:   |          :---: |  :---:        |    :----:   |          :---: |
 |       |        |   | | | |
 |       |        |   | | | |
 
 The above table has the username as a unique identifier (no duplicate usernames allowed). It will have the following domains which are of types:
 - username : varchar
-- Room id : int
-- Date of Reservation : date
-- Check in : date
-- Check out  : date
-- Cancelled : date ( or NULL if not cancelled)
+- room_id : int
+- reservation_date : date
+- check_in : date
+- check_out : date
+- cancelled : date ( or NULL if not cancelled)
 
 
-## Rooms
+## room_info
 
-| Room id      | Number of beds| floor   | Price per night | Availab | Booked until
+| room_id     | num_of_beds| floor   | price_per_night | available | booked_until
 | :---:        |    :----:   |          :---: |  :---:        |    :----:   | :----:   |        
 |       |        |   | | | |
 |       |        |   | | | |
 
 The above table has the Room id as a unique identifier (no duplicate room ids allowed). It will have the following domains which are of types:
 - room_id : int
-- Num_of_beds : int
+- num_of_beds : int
 - floor : int
 - price_per_night  : double
 - booked_until : date ( or NULL if available)
 
+## room_reservation_history
+
+| reservation_id     | room_id| booked_in | booked_until |
+| :---:        |    :----:   |          :---: |  :---:        |        
+|       |        |   | |
+|       |        |   | | 
+
+The above table has the Room id as a unique identifier (no duplicate room ids allowed). It will have the following domains which are of types:
+- reservation_id : int
+- room_id : int
+- booked_in : timestamp
+- booked_until : date ( or NULL if available)
 
 ## Security : 
 We will use md5 hashing to store the passwords in the database.

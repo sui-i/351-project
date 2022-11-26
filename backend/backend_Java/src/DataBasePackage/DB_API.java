@@ -33,7 +33,7 @@ public class DB_API {
 			TableNames = new HashMap<>();
 			TableNames.put("Credentials","UsersCredentials");TableNames.put("Info","UsersInfo");
 			TableNames.put("Reservation","UsersReservation");
-			TableNames.put("Rooms","RoomsInfo");
+			TableNames.put("Rooms","RoomsInfo");TableNames.put("RoomsHistory","RoomsReservationHistory");
 		}
 		
 	}
@@ -279,7 +279,7 @@ public class DB_API {
 		}
 	
 	/**
-	 * Query : "Select booked_until,Available from %s where RoomId = '%s' ;
+	 * Query : "Select booked_until,Available from %s where RoomId = '%s' order by booked_until desc ;
 	 * @param ID : ID of the room 
 	 * @return  <ul> 
 	 * 				<li> 0 if user was successfully added</li>
@@ -293,7 +293,7 @@ public class DB_API {
 		assert conn !=null : "No connection mate";
 		try {
 			Statement stmt= conn.createStatement();
-			String query = String.format("Select booked_until,Available from %s where RoomId = '%s' ;",TableNames.get("Rooms"),RoomID);
+			String query = String.format("Select booked_until,Available from %s where RoomId = '%s' order by booked_until desc ;",TableNames.get("Rooms"),RoomID);
 	        ResultSet rs= stmt.executeQuery(query);
 	       
 	        	//Extracting data
@@ -307,6 +307,11 @@ public class DB_API {
 			}
 
 			else{
+				//"Insert INTO %s () VALUES ()"
+				//tables.get(RoomsHistory)
+				query = String.format("Select booked_until,Available from %s where RoomId = '%s' order by booked_until desc ;",TableNames.get("Rooms"),RoomID);
+				
+				
 				// Redesign the dataBase
 				
 				
