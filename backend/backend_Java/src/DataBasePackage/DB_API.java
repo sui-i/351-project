@@ -1,6 +1,7 @@
 package DataBasePackage;
 import Security.md5;
 
+import roomsPackage.R_InformationDB;
 import java.util.HashMap;
 
 import RETIREDclientPackage.C_InformationDB;
@@ -18,6 +19,12 @@ public class DB_API {
 	boolean connectionInitiliazed=false;
 	/**
 	 * HashMap for the tableNames (static)
+	 * Key (String) | Value (tableName)
+	 * Credentials  | users_credentials
+	 * Info		    | users_info
+	 * Reservation  | users_reservation_history
+	 * Rooms  	    | room_info
+	 * RoomsHistory | room_reservation_history
 	 */
 	public static HashMap<String,String> TableNames;
 	static boolean created=false;
@@ -31,9 +38,9 @@ public class DB_API {
 		if(!created) {
 			created = true;
 			TableNames = new HashMap<>();
-			TableNames.put("Credentials","UsersCredentials");TableNames.put("Info","UsersInfo");
-			TableNames.put("Reservation","UsersReservation");
-			TableNames.put("Rooms","RoomsInfo");TableNames.put("RoomsHistory","RoomsReservationHistory");
+			TableNames.put("Credentials","users_credentials");TableNames.put("Info","users_info");
+			TableNames.put("Reservation","users_reservation_history");
+			TableNames.put("Rooms","room_info");TableNames.put("RoomsHistory","room_reservation_history");
 		}
 		
 	}
@@ -55,7 +62,7 @@ public class DB_API {
 			Class.forName(JDBC_DRIVER);
             System.out.println("Connecting to database ... ");
             
-            Connection conn = DriverManager.getConnection(DB_URL  , USER, PASS);
+            conn = DriverManager.getConnection(DB_URL  , USER, PASS);
             return true;
 		}
 		catch(Exception e){
@@ -63,14 +70,32 @@ public class DB_API {
 			return false;
 		}
 	}
-	
-	
+
+	/**
+	 * HashMap for the tableNames (static)
+	 * Key (String) | Value (tableName)
+	 * --------------------------------
+	 * Credentials  | users_credentials
+	 * Info		    | users_info
+	 * Reservation  | users_reservation_history
+	 * Rooms  	    | room_info
+	 * RoomsHistory | room_reservation_history
+	 */
+	/**
+	 * Extracts the information of the user from the database;
+	 * Table Used: users_info
+	 * Query Used: Select username,firstName,lastName,phoneNumber,birthDate,Location from users_info where username = ....;
+	 * @return  <ul> 
+	 * 				<li> {@code C_InformationDB} instance if user is Found</li>
+	 * 				<li> Null if otherwise </li>
+	 * 			</ul>
+	 */
 	 public  C_InformationDB getUserInfo(String username) {
 		
 		//Assumption
 		
-		if(! checkMembership(username)) {
-			
+		if(! checkMembershipUserName(username)) {
+			//UserNameNotFoundException
 			return null;
 		}
 		
@@ -78,7 +103,7 @@ public class DB_API {
 			if(ConnectDB()) {
 				String C_firstName = "",C_lastName= "",C_phoneNumber= "",C_birthDate="",C_Location="";
 				Statement stmt= conn.createStatement();
-				String query = String.format("Select username,firstName,lastName,phoneNumber,birthDate,Location from userscredentials where username = '%s' ;",username);
+				String query = String.format("Select username,firstName,lastName,phoneNumber,birthDate,Location from %s where username = '%s' ;",TableNames.get("Info"),username);
 		        ResultSet rs= stmt.executeQuery(query);
 		       
 		        while(rs.next()) {
@@ -86,11 +111,11 @@ public class DB_API {
 		        	String c_username = rs.getString("username");
 		        	
 		        	if(c_username.equals(username) ) {
-		        		C_firstName= rs.getString("firstName");
-		        		C_lastName = rs.getString("lastName");
-		        		C_phoneNumber = rs.getString("phoneNumber");
-		        		C_birthDate = rs.getString("birthDate");
-		        		C_Location = rs.getString("Location");
+		        		C_firstName= rs.getString("first_name");
+		        		C_lastName = rs.getString("last_name");
+		        		C_phoneNumber = rs.getString("phone_number");
+		        		C_birthDate = rs.getString("birthdate");
+		        		C_Location = rs.getString("location");
 		        	}
 	        	
 		        }
@@ -131,6 +156,16 @@ public class DB_API {
 		//returns FirstName From DataBase
 		
 	}
+	/**
+	 * HashMap for the tableNames (static)
+	 * Key (String) | Value (tableName)
+	 * --------------------------------
+	 * Credentials  | users_credentials
+	 * Info		    | users_info
+	 * Reservation  | users_reservation_history
+	 * Rooms  	    | room_info
+	 * RoomsHistory | room_reservation_history
+	 */
 
 	/**
 	 * Suggestion : merging the two getLastName and getFirstName into one (only one query is needed)
@@ -148,14 +183,31 @@ public class DB_API {
 		//returns LastName From DataBase
 	}
 	/**
+	 * HashMap for the tableNames (static)
+	 * Key (String) | Value (tableName)
+	 * --------------------------------
+	 * Credentials  | users_credentials
+	 * Info		    | users_info
+	 * Reservation  | users_reservation_history
+	 * Rooms  	    | room_info
+	 * RoomsHistory | room_reservation_history
+	 */
+	/**
+	 * Checks if username exists in the database;
+	 * Table Used: users_credentials
+	 * <br>
+	 * Query Used: <br>
+	 * 		Select username from userscredentials where username = {@code username} ;
 	 * @param username : 
 	 * @return  <ul> 
 	 * 				<li> True if username exists</li>
 	 * 				<li> False if no such username exist </li>
 	 * 			</ul>
+	 * 
+	 * 
 	 */
-	 public boolean checkMembership(String username)
-	{
+	 public boolean checkMembershipUserName(String username)
+		{
 		
 		assert conn !=null : "No connection mate";
 		try {
@@ -185,9 +237,24 @@ public class DB_API {
         }
 		//return true;
 		//returns if username has an account
-	}
+		}
+	
 	/**
-	 * Query : Select username, password from  {table} where username is username;
+	 * HashMap for the tableNames (static)
+	 * Key (String) | Value (tableName)
+	 * --------------------------------
+	 * Credentials  | users_credentials
+	 * Info		    | users_info
+	 * Reservation  | users_reservation_history
+	 * Rooms  	    | room_info
+	 * RoomsHistory | room_reservation_history
+	 */
+	/**
+	 * Checks if the credentials of the username are valid in the database;
+	 * Table Used: users_credentials
+	 * <br>
+	 * Query Used: <br>
+	 * &nbsp &nbsp		SELECT username,password,email from {@code users_credentials} where username = {@code username};
 	 * @param username : username 
 	 * @param  password : password
 	 * @return  <ul> 
@@ -234,6 +301,16 @@ public class DB_API {
 		//returns 2 if they are valid but email is not verified
 		//returns -1 if they was an error
 	}
+
+	/**
+	 * HashMap for the tableNames (static)
+	 * Key (String) | Value (tableName)
+	 * Credentials  | users_credentials
+	 * Info		    | users_info
+	 * Reservation  | users_reservation_history
+	 * Rooms  	    | room_info
+	 * RoomsHistory | room_reservation_history
+	 */
 	/**
 	 * Query : Insert INTO userscredentials (username,password,email,date_of_creation,last_login) VALUES () ;
 	 * @param username : username 
@@ -248,7 +325,7 @@ public class DB_API {
 	 public  int RegisterUser(String username, String email, String password)
 		{
 			try {
-				if(checkMembership(username)==true) {
+				if(checkMembershipUserName(username)==true) {
 					return 1;
 				}
 				else {
@@ -277,7 +354,72 @@ public class DB_API {
 			//returns 1 if user already exists
 			//returns 2 if some other error occurs
 		}
-	
+	/**
+	 * HashMap for the tableNames (static)
+	 * Key (String) | Value (tableName)
+	 * Credentials  | users_credentials
+	 * Info		    | users_info
+	 * Reservation  | users_reservation_history
+	 * Rooms  	    | room_info
+	 * RoomsHistory | room_reservation_history
+	 */
+	/**
+	 * Query : "Select booked_until,Available from %s where RoomId = '%s' order by booked_until desc ;
+	 * @param ID : ID of the room 
+	 * @return  <ul> 
+	 * 				<li> 0 if user was successfully added</li>
+	 * 				<li> 1 if user already exists </li>
+	 * 				<li> 2 if some other error occurs </li>
+	 * 			</ul>
+	 */
+
+	//TO-DO: Finish it 
+	public  int checkRoomAvailability(int RoomID,String BookIn,String BookOut) {
+		assert conn !=null : "No connection mate";
+		try {
+			Statement stmt= conn.createStatement();
+			String query = String.format("Select booked_until,Available from %s where RoomId = '%s' order by booked_until desc ;",TableNames.get("Rooms"),RoomID);
+	        ResultSet rs= stmt.executeQuery(query);
+	       
+	        	//Extracting data
+        	Boolean availability = rs.getBoolean("Available");
+			String time = rs.getString("booked_until");
+			TimeStamp usersDate= new TimeStamp(date);
+			TimeStamp booked_until = new TimeStamp(time);
+        	if(!availability && usersDate.compareTo(booked_until)<=0 ){
+        		// Can't book this shit
+				return 6;
+			}
+
+			else{
+				//"Insert INTO %s () VALUES ()"
+				//tables.get(RoomsHistory)
+				query = String.format("Select booked_until,Available from %s where RoomId = '%s' order by booked_until desc ;",TableNames.get("Rooms"),RoomID);
+				
+				
+				// Redesign the dataBase
+				
+				
+				return 0;
+
+			}
+		}
+		
+        catch(Exception e) {
+        	System.out.println(e.getStackTrace());
+        	return -1;
+        }
+}
+
+	/**
+	 * HashMap for the tableNames (static)
+	 * Key (String) | Value (tableName)
+	 * Credentials  | users_credentials
+	 * Info		    | users_info
+	 * Reservation  | users_reservation_history
+	 * Rooms  	    | room_info
+	 * RoomsHistory | room_reservation_history
+	 */
 	/**
 	 * Query : "Select booked_until,Available from %s where RoomId = '%s' order by booked_until desc ;
 	 * @param ID : ID of the room 
@@ -325,6 +467,69 @@ public class DB_API {
         	return -1;
         }
 }
+	/**
+	 * HashMap for the tableNames (static)
+	 * Key (String) | Value (tableName)
+	 * Credentials  | users_credentials
+	 * Info		    | users_info
+	 * Reservation  | users_reservation_history
+	 * Rooms  	    | room_info
+	 * RoomsHistory | room_reservation_history
+	 */
+	/**
+	 * Table:  room_info
+	 * Query : "Select * from {@code room_info} where RoomId = {@code ID} ;
+	 * @param ID : ID of the room 
+	 * @return  <ul> 
+	 * 				<li> 0 if the room is validated</li>
+	 * 				<li> 1 if user already exists </li>
+	 * 				<li> 2 if some other error occurs </li>
+	 * 				<li> 3 if some other error occurs </li>
+	 * 				<li> 4 if some other error occurs </li>	
+	 * 				<li> 5 if some other error occurs </li>
+	 * 			</ul>
+	 * 
+	 * 
+	 */
+	public int ValidateRoom(int ID)
+	{
+
+	assert conn !=null : "No connection mate";
+	try {
+		Statement stmt= conn.createStatement();
+		String query = String.format("Select * from %s where room_id = '%s' ;",TableNames.get("Rooms"),ID);
+		ResultSet rs= stmt.executeQuery(query);
+		//Check if ID is valid
+		if(rs.getFetchSize()==0){
+			//No such ID exists
+			return -1;
+
+		}
+		while(rs.next()) {
+			int numberOfBeds= rs.getInt("num_of_beds");
+			int floor = rs.getInt("floor");
+			double PricePerNight = rs.getDouble("price_per_night");
+			String bookedUntil = rs.getString("booked_until");
+			R_InformationDB roomInformation = new R_InformationDB.Builder(ID, bookedUntil).NumOfBeds(numberOfBeds).PricePerNight(PricePerNight).Floor(floor).build();
+		}
+		stmt.close();
+		return 0;
+		
+		
+	
+	}
+
+	catch(Exception e) {
+		System.out.println(e.getMessage());
+		return -1;
+	}
+	//checks if the roomID is within format returns 1
+	//checks if the solar system is a valid returns 2
+	//checks if the Planet is valid returns 3
+	//checks if the Hotel is valid returns 4
+	//checks if the room is within range of rooms 5
+	//if all is well return 0
+	}
 
 
 }
