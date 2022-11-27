@@ -1,14 +1,13 @@
 package DataBasePackage;
-import Security.md5;
-import cmdClientPackage.C_InformationDB;
-
-import java.util.HashMap;
 import java.sql.Connection;
 import java.sql.DriverManager;
-import java.sql.SQLException;
 import java.sql.ResultSet;
 import java.sql.Statement;
 // Prerequiste: ADD .jar file to project libraries
+import java.util.HashMap;
+
+import Security.md5;
+import cmdClientPackage.C_InformationDB;
 
 public class DB_APIOLD {
 	

@@ -65,7 +65,8 @@ public class TimeStamp implements Comparable<TimeStamp>{
 
     
     public TimeStamp add(TimeStamp other){
-        //return new TimeStamp()
+    	//TODO:
+        return other;
     }
 
 

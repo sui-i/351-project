@@ -1,13 +1,10 @@
 package serverPackage;
-import DataBasePackage.TimeStamp;
-import requestsrepliescodes.IdentificationCodes;
-import requestsrepliescodes.ReservationCodes;
-import requestsrepliescodes.ValidateSynthax;
-
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Random;
-import java.util.Arrays;
-import java.util.Date;
+
+import requestsrepliescodes.IdentificationCodes;
+import requestsrepliescodes.ReservationCodes;
 public class ReservationHandler {
 	private static HashMap<Long,ReservationHandler> Clients = new HashMap<>();
 	private static Random rand = new Random();
@@ -126,7 +123,7 @@ public class ReservationHandler {
 	{
 		if (!isLoggedIn)
 			return ReservationCodes.IndentityError;
-		ReservationCodes roomCode = ValidateSynthax.validateRoomID(roomID);
+		ReservationCodes roomCode = validateRoomID(roomID);
 		if (roomCode!=ReservationCodes.RoomFoundSuccessfully)
 			return roomCode;
 		
@@ -143,7 +140,7 @@ public class ReservationHandler {
 	 * @param time
 	 * @return appropriate ReservationCode
 	 */
-	public ReservationCodes unReserve(String roomID, String startTime, String finishTime)
+	public ReservationCodes unReserve(String roomID, String startTime)
 	{
 		if (!isLoggedIn)
 			return ReservationCodes.IndentityError;
@@ -235,8 +232,8 @@ public class ReservationHandler {
 	 * 1-d. logout
 	 * 		+logout successful				FORMAT: "Rep140"
 	 * 
-	 * 2-a. reserve							FORMAT: "Req210"
-	 *  /b. Unreserve						FORMAT: "Req220"
+	 * 2-a. reserve							
+	 *  /b. Unreserve						
 	 * 		+Identity error					FORMAT: "Rep115"
 	 * 		 (user not logged 
 	 * 		  or insufficient permissions)
@@ -246,7 +243,7 @@ public class ReservationHandler {
 	 * 		+Invalid date format			FORMAT: "Rep231"
 	 * 		+Room rescheduling failed		FORMAT: "Rep241"
 	 * */
-	public String handleRequest(String request)
+	public String handleRequest(String request) throws Exception
 	{
 		lastSeen = date.getTime();
 		String def = "Rep000";
@@ -295,13 +292,13 @@ public class ReservationHandler {
 				return def;
 			return "Rep"+VerifyEmail(Cred[0],Cred[1]).ID;	
 		}
-		if (request.subSequence(3, 6)=="140") //logout
+		if ("140".equals(RCode)) //logout
 		{
 			return "Rep"+Logout().ID;
 		}
 		
 		//HANDLE RESERVATIONS:
-		String[] parser = request.split(":");
+		String[] parser = request.split(":",2);
 		if (parser.length!=2)
 			return def;
 		String[] Param = parser[1].split(",");
@@ -309,14 +306,13 @@ public class ReservationHandler {
 			return def;
 		
 		//TODO: HANDLE TIMES
-		String[] timeRange = Param[1].split("^");
+		String[] timeRange = Param[1].split("\\^");
 		String RoomID = Param[0];
-
 		
 		if ("210".equals(RCode) && timeRange.length==2) //Reserve
 			return "Rep"+Reserve(RoomID,timeRange[0],timeRange[1]).ID;
 		if ("220".equals(RCode)&& timeRange.length==1) //Unreserve
-			return "Rep"+unReserve(RoomID,timeRange[0],timeRange[1]).ID;
+			return "Rep"+unReserve(RoomID,timeRange[0]).ID;
 		if ("240".equals(RCode) && timeRange.length==3) //Reschedule
 			return "Rep"+Reschedule(RoomID,timeRange[0],timeRange[1],timeRange[2]).ID;
 		

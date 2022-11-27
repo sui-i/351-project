@@ -1,13 +1,11 @@
 package cmdClientPackage;
 
 import java.io.IOException;
-
 import java.net.Socket;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Scanner;
 
-import requestsrepliescodes.ReservationCodes;
 import requestsrepliescodes.ValidateSynthax;
 public class C_Main {
 	private static void pressAnyKeyToContinue() {
@@ -215,7 +213,7 @@ public class C_Main {
 		String finishTime = cmdIn.nextLine();
 		if (!ValidateSynthax.checkTime(finishTime)) 
 		{
-			System.out.println("The format does not seem right.");
+			System.out.println("The format is not right.");
 			return;
 		}
 		
@@ -252,14 +250,14 @@ public class C_Main {
 		String newStartTime = cmdIn.nextLine();
 		if (!ValidateSynthax.checkTime(newStartTime)) 
 		{
-			System.out.println("The format does not seem right.");
+			System.out.println("The format is not right.");
 			return;
 		}
 		System.out.println("New finish time (same format): ");
 		String newFinishTime = cmdIn.nextLine();
 		if (!ValidateSynthax.checkTime(newFinishTime)) 
 		{
-			System.out.println("The format does not seem right.");
+			System.out.println("The format is not right.");
 			return;
 		}
 		

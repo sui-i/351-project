@@ -5,7 +5,6 @@ import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
-
 import java.net.Socket;
 
 public class S_Client implements Runnable{
@@ -50,7 +49,11 @@ public class S_Client implements Runnable{
 		while (socket.isConnected()) {
 			try {
 				RequestToHandle = bufferedReader.readLine();
-				ResponseToSend = reservationHandler.handleRequest(RequestToHandle);
+				try {
+					ResponseToSend = reservationHandler.handleRequest(RequestToHandle);
+				} catch (Exception e) {
+					ResponseToSend = "Rep500";
+				}
 				if (ResponseToSend!=null) bufferedWriter.write(ResponseToSend);
 				bufferedWriter.newLine();
 				bufferedWriter.flush();	
