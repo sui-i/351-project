@@ -7,6 +7,8 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Scanner;
 
+import requestsrepliescodes.ReservationCodes;
+import requestsrepliescodes.ValidateSynthax;
 public class C_Main {
 	private static void pressAnyKeyToContinue() {
 		System.out.println("Press any key to continue.");
@@ -25,7 +27,7 @@ public class C_Main {
 		try {
 			socket = new Socket("localhost",351);
 		} catch (IOException e) {
-			System.err.println("App could not connect to the server...");
+			System.err.println("App could not connect to the main server...");
 			pressAnyKeyToContinue();
 			return;
 		}
@@ -41,7 +43,7 @@ public class C_Main {
 	
 	public void startApp() {
 		System.out.println("Welcome to Hosteler commandLine reservation applet.");
-		List<Character> options = Arrays.asList(new Character[] {'L','R','V','B','U','Q'});
+		List<Character> options = Arrays.asList(new Character[] {'L','R','V','B','U','S','Q'});
 		char option = 'X';
 		boolean running = true;
 		while (running) {
@@ -65,6 +67,14 @@ public class C_Main {
 				RegisterCMDInterface();
 			if (option=='V')
 				VerifyEmailCMDInterface();
+			if (option=='B')
+				ReserveCMDInterface();
+			if (option=='U')
+				UnreserveCMDInterface();
+			if (option=='S')
+				RescheduleCMDInterface();
+			else
+				System.out.println("[Error] Invalid option selected.");
 			option = 'X';
 		}
 	}
@@ -76,27 +86,9 @@ public class C_Main {
 		System.out.println("    -V  Verify email adress");
 		System.out.println("    -B  Reserve a room");
 		System.out.println("    -U  Unreserve a room");
+		System.out.println("    -S  Reschedule a room");
 		System.out.println("    -Q  Quit the app");
 		return cmdIn.nextLine().charAt(0);
-	}
-	
-	/*
-	 * set of functions that checks for validity of Indentity.
-	 * 
-	 * */
-	public static boolean checkUsername(String username) {
-		return !username.contains(" ") && !username.contains(",");
-	}
-	public static boolean checkPassword(String password) {
-		return password.length()>7 && !password.contains(",");
-	}
-	public static boolean checkEmail(String email) {
-		//uses Regular expressions to validate the email.
-		return email.matches("^[a-zA-Z0-9+_.-]+@[a-zA-Z0-9.-]+$");
-	}
-	public static boolean checkName(String name) {
-		//uses Regular expressions to validate the email.
-		return name.matches("^[a-zA-Z+ ]+");
 	}
 	
 	
@@ -108,13 +100,13 @@ public class C_Main {
 		//take username and password and check their validity
 		System.out.println("Login:\nPlease enter your username: ");
 		String username = cmdIn.nextLine();
-		if (!checkUsername(username)) {
+		if (!ValidateSynthax.checkUsername(username)) {
 			System.out.println("Username must not contain spaces or commas");
 			return;
 		}
 		System.out.println("Please enter your password: ");
 		String password = cmdIn.nextLine();
-		if (!checkPassword(password)) {
+		if (!ValidateSynthax.checkPassword(password)) {
 			System.out.println("Password must be at least 8 characters long and not contain commas");
 			return;
 		}
@@ -126,13 +118,13 @@ public class C_Main {
 	public void RegisterCMDInterface() {
 		System.out.println("Register:\nPlease enter your username: ");
 		String username = cmdIn.nextLine();
-		if (!checkUsername(username)) {
+		if (!ValidateSynthax.checkUsername(username)) {
 			System.out.println("Username must not contain spaces or commas");
 			return;
 		}
 		System.out.println("Please enter your password: ");
 		String password = cmdIn.nextLine();
-		if (!checkPassword(password)) {
+		if (!ValidateSynthax.checkPassword(password)) {
 			System.out.println("Password must be at least 8 characters long and not contain commas");
 			return;
 		}
@@ -144,21 +136,21 @@ public class C_Main {
 		
 		System.out.println("Please enter your email: ");
 		String email = cmdIn.nextLine();
-		if (!checkEmail(email)) {
+		if (!ValidateSynthax.checkEmail(email)) {
 			System.out.println("Email must follow emails' format.");
 			return;
 		}
 		
 		System.out.println("Please enter your first name: ");
 		String firstName = cmdIn.nextLine();
-		if (!checkName(firstName)) {
+		if (!ValidateSynthax.checkName(firstName)) {
 			System.out.println("first name must only contain uppercase and lowerCase characters and spaces.");
 			return;
 		}
 		
 		System.out.println("Please enter your last name: ");
 		String lastName = cmdIn.nextLine();
-		if (!checkName(lastName)) {
+		if (!ValidateSynthax.checkName(lastName)) {
 			System.out.println("last name must only contain uppercase and lowerCase characters and spaces.");
 			return;
 		}
@@ -169,7 +161,7 @@ public class C_Main {
 	public void VerifyEmailCMDInterface() {
 		System.out.println("Email verification:\nPlease enter your username: ");
 		String username = cmdIn.nextLine();
-		if (!checkUsername(username)) {
+		if (!ValidateSynthax.checkUsername(username)) {
 			System.out.println("Username must not contain spaces or commas");
 			return;
 		}
@@ -179,9 +171,100 @@ public class C_Main {
 		System.out.println(web.AttemptVerifyEmail(username, verificationCode));
 	}
 	
+	/* //May not be needed
+	 * public static String CMDInterfaceValidateRoom(String roomID){
+			ReservationCodes RC = ValidateSynthax.validateRoomID(roomID);
+			switch (RC)
+			{
+			case RoomIDInvalid:
+				return ("Room ID format is invalid.");
+			case SolarSystemNotFound:
+				return ("The Solar System you are searching in is unavailable.");
+			case PlanetNotFound:
+				return ("The Planet you are searching in is unavailable.");
+			case HotelNotFound:
+				return ("The Hotel branch you are searching in is unavailable.");
+			case RoomNotFound:
+				return ("The Room you are searching for is unavailable.");
+			default:
+				return "";
+			}
+		}
+	 */
+	
+	
 	public void ReserveCMDInterface() {
+		System.out.println("Reserve a room:\nPlease enter the room ID: ");
+		String roomID = cmdIn.nextLine();
+		/* //May not be needed 
+		 * 
+		 * String roomIDERRORString = CMDInterfaceValidateRoom(roomID);
+		 * if (!roomIDERRORString.equals("")) {
+		 * 	 System.out.println(roomIDERRORString);
+		 * 	 return;
+		 * }
+		 */
+		System.out.println("Please enter the start time you wish to reserve: (Use this format: YYYY-MM-DD HH:MM:SS) ");
+		String startTime = cmdIn.nextLine();
+		if (!ValidateSynthax.checkTime(startTime)) 
+		{
+			System.out.println("The format is not right.");
+			return;
+		}	
+		System.out.println("Finish time (same format): ");
+		String finishTime = cmdIn.nextLine();
+		if (!ValidateSynthax.checkTime(finishTime)) 
+		{
+			System.out.println("The format does not seem right.");
+			return;
+		}
 		
+		System.out.println(web.AttemptReserve(roomID, startTime, finishTime));
+	
 	}
-	public void UnreserveCMDInterface() {}
+	public void UnreserveCMDInterface() {
+		System.out.println("Unreserve a room:\nPlease enter the room ID: ");
+		String roomID = cmdIn.nextLine();
+
+		System.out.println("Please enter the start time of the reservation: (Use this format: YYYY-MM-DD HH:MM:SS) ");
+		String startTime = cmdIn.nextLine();
+		if (!ValidateSynthax.checkTime(startTime)) 
+		{
+			System.out.println("The format is not right.");
+			return;
+		}	
+		
+		System.out.println(web.AttemptUnReserve(roomID, startTime));
+	
+	}
+	public void RescheduleCMDInterface() {
+		System.out.println("Reschedule a room:\nPlease enter the room ID: ");
+		String roomID = cmdIn.nextLine();
+
+		System.out.println("Please enter the start time of the old reservation: (Use this format: YYYY-MM-DD HH:MM:SS) ");
+		String oldStartTime = cmdIn.nextLine();
+		if (!ValidateSynthax.checkTime(oldStartTime)) 
+		{
+			System.out.println("The format is not right.");
+			return;
+		}
+		System.out.println("New start time (same format): ");
+		String newStartTime = cmdIn.nextLine();
+		if (!ValidateSynthax.checkTime(newStartTime)) 
+		{
+			System.out.println("The format does not seem right.");
+			return;
+		}
+		System.out.println("New finish time (same format): ");
+		String newFinishTime = cmdIn.nextLine();
+		if (!ValidateSynthax.checkTime(newFinishTime)) 
+		{
+			System.out.println("The format does not seem right.");
+			return;
+		}
+		
+		System.out.println(web.AttemptReschedule(roomID, oldStartTime, newStartTime, newFinishTime));
+	
+	}
 
 }

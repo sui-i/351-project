@@ -3,13 +3,29 @@ import Security.md5;
 import cmdClientPackage.C_InformationDB;
 
 import roomsPackage.R_InformationDB;
+
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.sql.ResultSet;
 import java.sql.Statement;
-// Prerequiste: ADD .jar file to project libraries
+
+
+/**
+ * Prerequistes: 
+ * <ol>
+ * 		<li> Java 8 + running on your machine </li>
+ * 		<li> Postgresql server installed and running on your machine (this project uses Postgres 15)</li>
+ * 		<li> ADD {@code postgresql-42.5.1.jar} file to project libraries (class path) found in {@code backend/JarFile/postgresql-42.5.1.jar} </li>
+ * 		<li> Update {@code 'YourDataBase'} in {@code DB_URL} to your DataBase name  </li>
+ * 		<li> Run the {@code CreateTables.sql} file found in {@code /DataBase/CreateTables.sql}</li>
+ * 		<li> Enjoy our application :) </li>
+ * </ol>
+ */
+
+
 
 public class DB_API {
 	
@@ -18,18 +34,19 @@ public class DB_API {
 	/**
 	 * HashMap for the tableNames (static)
 	 * Key (String) | Value (tableName)
+	 * --------------------------------
 	 * Credentials  | users_credentials
 	 * Info		    | users_info
 	 * Reservation  | users_reservation_history
 	 * Rooms  	    | room_info
 	 * RoomsHistory | room_reservation_history
 	 */
-	public static HashMap<String,String> TableNames;
-	static boolean created=false;
-	static final String JDBC_DRIVER ="org.postgresql.Driver";
-    static final String DB_URL = "jdbc:postgresql://localhost/Hostellar";
-    static final String USER = "postgres";
-    static final String PASS ="YourPassword";
+	private static HashMap<String,String> TableNames;
+	private static boolean created=false;
+	private static final String JDBC_DRIVER ="org.postgresql.Driver";
+    private static final String DB_URL = "jdbc:postgresql://localhost/'YourDataBase'";
+    private static final String USER = "postgres";
+    private static final String PASS ="YourPassword";
     private static HashMap<String,C_InformationDB> users;
     
 	public DB_API() {
@@ -69,16 +86,7 @@ public class DB_API {
 		}
 	}
 
-	/**
-	 * HashMap for the tableNames (static)
-	 * Key (String) | Value (tableName)
-	 * --------------------------------
-	 * Credentials  | users_credentials
-	 * Info		    | users_info
-	 * Reservation  | users_reservation_history
-	 * Rooms  	    | room_info
-	 * RoomsHistory | room_reservation_history
-	 */
+	
 	/**
 	 * Extracts the information of the user from the database;
 	 * Table Used: users_info
@@ -100,25 +108,20 @@ public class DB_API {
 		try {
 			if(ConnectDB()) {
 				String C_firstName = "",C_lastName= "",C_phoneNumber= "",C_birthDate="",C_Location="";
-				Statement stmt= conn.createStatement();
 				String query = String.format("Select username,firstName,lastName,phoneNumber,birthDate,Location from %s where username = '%s' ;",TableNames.get("Info"),username);
-		        ResultSet rs= stmt.executeQuery(query);
-		       
-		        while(rs.next()) {
-		        	//Extracting data
-		        	String c_username = rs.getString("username");
-		        	
-		        	if(c_username.equals(username) ) {
-		        		C_firstName= rs.getString("first_name");
-		        		C_lastName = rs.getString("last_name");
-		        		C_phoneNumber = rs.getString("phone_number");
-		        		C_birthDate = rs.getString("birthdate");
-		        		C_Location = rs.getString("location");
-		        	}
-	        	
-		        }
-		        
-		        stmt.close();
+				ArrayList<HashMap<String,String>> results= extractQuery(query, new String[] {"username","first_name","last_name","phone_number","birthdate","location"});
+				
+				if(results.size()==1){
+					C_firstName=results.get(0).get("first_name");
+					C_lastName=results.get(0).get("last_name");
+					C_phoneNumber=results.get(0).get("phone_number");
+					C_birthDate=results.get(0).get("birthdate");
+					C_Location=results.get(0).get("location");
+				}
+				else{
+					return null;
+				}
+
 		        return new C_InformationDB(username,C_firstName,C_lastName,C_phoneNumber,C_birthDate,C_Location);
 			}
 			else {
@@ -149,21 +152,14 @@ public class DB_API {
 		if(users.containsKey(username)) {
 			return users.get(username).getfirstName();
 		}
-		// Throwing Exception
-		return "";
+
+		users.put(username,getUserInfo(username));
+		
+		return users.get(username).getfirstName();
 		//returns FirstName From DataBase
 		
 	}
-	/**
-	 * HashMap for the tableNames (static)
-	 * Key (String) | Value (tableName)
-	 * --------------------------------
-	 * Credentials  | users_credentials
-	 * Info		    | users_info
-	 * Reservation  | users_reservation_history
-	 * Rooms  	    | room_info
-	 * RoomsHistory | room_reservation_history
-	 */
+
 
 	/**
 	 * Suggestion : merging the two getLastName and getFirstName into one (only one query is needed)
@@ -171,25 +167,18 @@ public class DB_API {
 	 * @param username : username 
 	 * @return  LatName From DataBase
 	 */
-	 public static String getLastName(String username)
+	 public String getLastName(String username)
 	{
 		if(users.containsKey(username)) {
 			return users.get(username).getlastName();
 		}
 		// Throwing Exception
-		return "";
+		users.put(username,getUserInfo(username));
+		
+		return users.get(username).getfirstName();
 		//returns LastName From DataBase
 	}
-	/**
-	 * HashMap for the tableNames (static)
-	 * Key (String) | Value (tableName)
-	 * --------------------------------
-	 * Credentials  | users_credentials
-	 * Info		    | users_info
-	 * Reservation  | users_reservation_history
-	 * Rooms  	    | room_info
-	 * RoomsHistory | room_reservation_history
-	 */
+	
 	/**
 	 * Checks if username exists in the database;
 	 * Table Used: users_credentials
@@ -209,24 +198,12 @@ public class DB_API {
 		
 		assert conn !=null : "No connection mate";
 		try {
-			Statement stmt= conn.createStatement();
 			String query = String.format("Select username from userscredentials where username = '%s' ;",username);
-	        ResultSet rs= stmt.executeQuery(query);
-	       
-	        while(rs.next()) {
-	        	//Extracting data
-	        	String c_username = rs.getString("username");
-	        	
-	        	if(c_username.equals(username) ) {
-	        		return true;
-	        	}
-        	
-	        }
-	        stmt.close();
-	        return false;
-	        
-	        
-	       
+			ArrayList<HashMap<String,String>> results= extractQuery(query, new String [] {"username"});
+
+			if(results.size()==0 || results.size()>1) return false;
+			else
+				return true;
 		}
 		
         catch(Exception e) {
@@ -237,16 +214,7 @@ public class DB_API {
 		//returns if username has an account
 		}
 	
-	/**
-	 * HashMap for the tableNames (static)
-	 * Key (String) | Value (tableName)
-	 * --------------------------------
-	 * Credentials  | users_credentials
-	 * Info		    | users_info
-	 * Reservation  | users_reservation_history
-	 * Rooms  	    | room_info
-	 * RoomsHistory | room_reservation_history
-	 */
+	
 	/**
 	 * Checks if the credentials of the username are valid in the database;
 	 * Table Used: users_credentials
@@ -256,6 +224,7 @@ public class DB_API {
 	 * @param username : username 
 	 * @param  password : password
 	 * @return  <ul> 
+	 * 				<li> -1 if there was an error </li>
 	 * 				<li> 0 if username and password are valid, and email is verified.</li>
 	 * 				<li> 1 if they are invalid </li>
 	 * 				<li> 2 if they are valid but email is not verified </li>
@@ -266,14 +235,17 @@ public class DB_API {
 		
 		assert conn !=null : "No connection mate";
 		try {
-			Statement stmt= conn.createStatement();
 			String query = String.format("Select username,password,email from %s where username = '%s' ;",TableNames.get("credentials"),username);
-	        ResultSet rs= stmt.executeQuery(query);
-	       
-	        	//Extracting data
-        	String c_username = rs.getString("username");
-        	String c_password= rs.getString("password");
-        	String c_email= rs.getString("email");
+			ArrayList<HashMap<String,String>> results= extractQuery(query,new String [] {"username","password","email"});
+			if(results.size()==0 || results.size()>1 ){
+				//Report replicated usernames
+				return 1;
+			}
+
+			else{
+			String c_username = results.get(0).get("username");
+        	String c_password=results.get(0).get("password");
+        	String c_email= results.get(0).get("email");
         	String passwordHash= md5.getMd5(password);
         	if(c_username.equals(username)&& c_password.equals(passwordHash) && c_email.equals(email) ) {
         		return 0;
@@ -285,8 +257,9 @@ public class DB_API {
         	
         		return 1;
         	}
-	        
-	       
+			}
+
+        	
 		}
 		
         catch(Exception e) {
@@ -294,22 +267,12 @@ public class DB_API {
         	return -1;
         }
         
-		//returns 0 if username and password are valid, and email is verified.
-		//returns 1 if they are invalid
-		//returns 2 if they are valid but email is not verified
-		//returns -1 if they was an error
+		
 	}
 
+	
 	/**
-	 * HashMap for the tableNames (static)
-	 * Key (String) | Value (tableName)
-	 * Credentials  | users_credentials
-	 * Info		    | users_info
-	 * Reservation  | users_reservation_history
-	 * Rooms  	    | room_info
-	 * RoomsHistory | room_reservation_history
-	 */
-	/**
+	 * TO-DO: IMPLEMENT ADMIN, VERIFIED USER, and NON VERIFIED USER
 	 * Query : Insert INTO userscredentials (username,password,email,date_of_creation,last_login) VALUES () ;
 	 * @param username : username 
 	 * @param  password : password
@@ -333,7 +296,7 @@ public class DB_API {
 					String time= "NOW()";
 					String lastLogin = "NOW()";
 					password= md5.getMd5(password);
-					String query = String.format("Insert INTO %s (username,password,email,date_of_creation,last_login) VALUES('%s','%s','%s',%s,%s) ;",TableNames.get("credentials"),username,password,email,time,lastLogin);  
+					String query = String.format("Insert INTO %s (username,password,email,date_of_creation,last_login,userType) VALUES('%s','%s','%s',%s,%s,1) ;",TableNames.get("credentials"),username,password,email,time,lastLogin);  
 					
 					//System.out.println(query);
 					stmt.execute(query );
@@ -352,128 +315,166 @@ public class DB_API {
 			//returns 1 if user already exists
 			//returns 2 if some other error occurs
 		}
-	/**
-	 * HashMap for the tableNames (static)
-	 * Key (String) | Value (tableName)
-	 * Credentials  | users_credentials
-	 * Info		    | users_info
-	 * Reservation  | users_reservation_history
-	 * Rooms  	    | room_info
-	 * RoomsHistory | room_reservation_history
-	 */
-	/**
-	 * Query : "Select booked_until,Available from %s where RoomId = '%s' order by booked_until desc ;
-	 * @param ID : ID of the room 
+
+	
+		/**
+	 * TO-DO: IMPLEMENT ADMIN, VERIFIED USER, and NON VERIFIED USER
+	 * Query : Insert INTO userscredentials (username,password,email,date_of_creation,last_login) VALUES () ;
+	 * @param username : username 
+	 * @param  password : password
+	 * @param email : email
 	 * @return  <ul> 
 	 * 				<li> 0 if user was successfully added</li>
 	 * 				<li> 1 if user already exists </li>
 	 * 				<li> 2 if some other error occurs </li>
 	 * 			</ul>
 	 */
+	public  int RegisterAdmin(String username, String email, String password)
+	{
+		try {
+			if(checkMembershipUserName(username)==true) {
+				return 1;
+			}
+			else {
+				Statement stmt = conn.createStatement();
+				//TO_DO:
+				// Hash the password bro
+				String time= "NOW()";
+				String lastLogin = "NOW()";
+				password= md5.getMd5(password);
+				String query = String.format("Insert INTO %s (username,password,email,date_of_creation,last_login,0) VALUES('%s','%s','%s',%s,%s,1) ;",TableNames.get("credentials"),username,password,email,time,lastLogin);  
+				
+				//System.out.println(query);
+				stmt.execute(query );
+				
+				return 0;
+				
+			}
+		}
+		catch (Exception e) {
+			System.out.println(e.getMessage());
+			return 2;
+		}
+		
+		//adds a new user
+		//returns 0 if user was successfully added
+		//returns 1 if user already exists
+		//returns 2 if some other error occurs
+	}
+	/**
+	 * HashMap for the tableNames (static)
+	 * Key (String) | Value (tableName)
+	 * --------------------------------
+	 * Credentials  | users_credentials
+	 * Info		    | users_info
+	 * Reservation  | users_reservation_history
+	 * Rooms  	    | room_info
+	 * RoomsHistory | room_reservation_history
+	 */
 
-	//TO-DO: Finish it 
+	
+	/**
+	 * NOT FINISHED : HANDLING BOOLEAN SHIT
+	 * Query : "Select booked_until,Available from %s where RoomId = '%s' order by booked_until desc ;
+	 * @param ID : ID of the room 
+	 * @return  <ul> 
+	 * 				<li> 0 if available</li>
+	 * 				<li> 1 if the times aren't available </li>
+	 * 				<li> 2 if some other error occurs </li>
+	 * 			</ul>
+	 */
+
 	public  int checkRoomAvailability(int RoomID,String BookIn,String BookOut) {
 		assert conn !=null : "No connection mate";
 		try {
-			Statement stmt= conn.createStatement();
-			String query = String.format("Select booked_until,Available from %s where RoomId = '%s' order by booked_until desc ;",TableNames.get("Rooms"),RoomID);
-	        ResultSet rs= stmt.executeQuery(query);
-	       
-	        	//Extracting data
-        	Boolean availability = rs.getBoolean("Available");
-			String time = rs.getString("booked_until");
-			TimeStamp usersDate= new TimeStamp(date);
-			TimeStamp booked_until = new TimeStamp(time);
-        	if(!availability && usersDate.compareTo(booked_until)<=0 ){
-        		// Can't book this shit
-				return 6;
+
+			String query="";
+			ArrayList<HashMap<String,String>> results= new ArrayList<>();
+			
+			TimeStamp usersDate= new TimeStamp(BookIn);
+			TimeStamp booked_until = new TimeStamp(BookOut);
+
+        	if(usersDate.compareTo(booked_until)<=0 ){
+        		//Note Valid Date Bro
+				return 1;
 			}
 
 			else{
-				//"Insert INTO %s () VALUES ()"
-				//tables.get(RoomsHistory)
-				query = String.format("Select booked_until,Available from %s where RoomId = '%s' order by booked_until desc ;",TableNames.get("Rooms"),RoomID);
-				
-				
-				// Redesign the dataBase
-				
-				
-				return 0;
-
+				query = String.format("SELECT count(*) FROM room_reservation_history where NOT((booked_in <= '%s')  and  (booked_out >= '%s')) AND cancelled = false ; ",booked_until.toString(),usersDate.toString());
+				results = extractQuery(query, new String [] {"count"});
+				if(results.size()==1){
+					if(results.get(0).get("count")!=null){
+						if(Integer.parseInt(results.get(0).get("count"))==0)return 0;
+						else return 1;	
+					}
+					else return 2;
+					
+				}
+				return 2;
 			}
 		}
 		
         catch(Exception e) {
         	System.out.println(e.getStackTrace());
-        	return -1;
+        	return 2;
         }
 }
 
 	/**
-	 * HashMap for the tableNames (static)
-	 * Key (String) | Value (tableName)
-	 * Credentials  | users_credentials
-	 * Info		    | users_info
-	 * Reservation  | users_reservation_history
-	 * Rooms  	    | room_info
-	 * RoomsHistory | room_reservation_history
-	 */
-	/**
 	 * Query : "Select booked_until,Available from %s where RoomId = '%s' order by booked_until desc ;
 	 * @param ID : ID of the room 
 	 * @return  <ul> 
-	 * 				<li> 0 if user was successfully added</li>
-	 * 				<li> 1 if user already exists </li>
+	 * 				<li> 0 if reservation was successfully</li>
+	 * 				<li> 1 if overlap observed </li>
 	 * 				<li> 2 if some other error occurs </li>
 	 * 			</ul>
 	 */
 
 	//TO-DO: Finish it 
-	public  int Reserve(String username,int RoomID,String date) {
+	public  int Reserve(String username,int RoomID,String BookIn,String BookOut) {
 		assert conn !=null : "No connection mate";
 		try {
-			Statement stmt= conn.createStatement();
-			String query = String.format("Select booked_until,Available from %s where RoomId = '%s' order by booked_until desc ;",TableNames.get("Rooms"),RoomID);
-	        ResultSet rs= stmt.executeQuery(query);
-	       
-	        	//Extracting data
-        	Boolean availability = rs.getBoolean("Available");
-			String time = rs.getString("booked_until");
-			TimeStamp usersDate= new TimeStamp(date);
-			TimeStamp booked_until = new TimeStamp(time);
-        	if(!availability && usersDate.compareTo(booked_until)<=0 ){
-        		// Can't book this shit
-				return 6;
+			int available= checkRoomAvailability(RoomID,BookIn,BookOut);
+			if(available==0){
+				String query=String.format("Select reservation_id from room_reservation_history  ORDER BY reservation_id desc limit 1; ");
+
+				ArrayList<HashMap<String,String>> results= extractQuery(query, new String [] {"reservation_id"});
+				int newId;
+				if(results.size()==0){
+					newId=1;
+
+				}
+				else{
+					if(results.get(0).get("reservation_id")!=null){
+						newId= Integer.parseInt(results.get(0).get("reservation_id"));
+					}
+					//TO_DO handle exception
+					else return 2;
+				}
+			
+			TimeStamp Book_In = new TimeStamp(BookIn);
+			TimeStamp Book_Out = new TimeStamp(BookOut);
+			//Note here we are inserting two seperate records in room_reservation_history and users_reservation_history
+			query = String.format("INSERT INTO room_reservation_history (reservation_id,room_id,booked_in,booked_until,cancelled) values (%s,%s,'%s','%s',false) ; ",newId,RoomID,Book_In.toString(),Book_Out.toString());
+			if(! insertQuery(query)) return 2;
+			
+			query = String.format("INSERT INTO users_reservation_history (username,room_id,reservation_id,reservation_date,check_in,check_out,cancelled) values ('%s',%s,%s,NOW(),%s,'%s',null) ; ",username,RoomID,newId,Book_In.toString(),Book_Out.toString());
+
+			if(! insertQuery(query)) return 2;
+			return 0;
+
+
 			}
 
-			else{
-				//"Insert INTO %s () VALUES ()"
-				//tables.get(RoomsHistory)
-				query = String.format("Select booked_until,Available from %s where RoomId = '%s' order by booked_until desc ;",TableNames.get("Rooms"),RoomID);
-				
-				
-				// Redesign the dataBase
-				
-				
-				return 0;
-
-			}
+			else return 1;
+			
 		}
 		
         catch(Exception e) {
         	System.out.println(e.getStackTrace());
-        	return -1;
+        	return 2;
         }
 }
-	/**
-	 * HashMap for the tableNames (static)
-	 * Key (String) | Value (tableName)
-	 * Credentials  | users_credentials
-	 * Info		    | users_info
-	 * Reservation  | users_reservation_history
-	 * Rooms  	    | room_info
-	 * RoomsHistory | room_reservation_history
-	 */
 	/**
 	 * Table:  room_info
 	 * Query : "Select * from {@code room_info} where RoomId = {@code ID} ;
@@ -489,28 +490,36 @@ public class DB_API {
 	 * 
 	 * 
 	 */
-	public int ValidateRoom(int ID)
+	public int ValidateRoom(int RoomID)
 	{
 
 	assert conn !=null : "No connection mate";
 	try {
-		Statement stmt= conn.createStatement();
-		String query = String.format("Select * from %s where room_id = '%s' ;",TableNames.get("Rooms"),ID);
-		ResultSet rs= stmt.executeQuery(query);
-		//Check if ID is valid
-		if(rs.getFetchSize()==0){
+
+		String query = String.format("Select * from %s where room_id = '%s' ;",TableNames.get("Rooms"),RoomID);
+		String [] fields=  new String [] {"num_of_beds","floor","price_per_night","booked_until","solar_system","planet","hotel","room_type"};
+		ArrayList<HashMap<String,String>> results= extractQuery(query, fields);
+
+		
+		if(results.size()==0){
 			//No such ID exists
 			return -1;
+		}
 
+		for(int i=0; i<results.size();i++){
+			for(String field : fields){
+				if(results.get(i).get(field)==null){
+					return -2;
+				}
+			}
+
+			R_InformationDB roomInformation = new R_InformationDB.Builder(RoomID, results.get(i).get("booked_until" )).Planet(results.get(i).get("planet" )).Hotel(
+				results.get(i).get("hotel" )).SolarSystem(results.get(i).get("solar_system" )).NumOfBeds(Integer.parseInt(results.get(i).get("num_of_beds" ))).PricePerNight(
+				Double.parseDouble(results.get(i).get("price_per_night" ))).Floor(Integer.parseInt(results.get(i).get("floor" ))).build();
+			
+			
 		}
-		while(rs.next()) {
-			int numberOfBeds= rs.getInt("num_of_beds");
-			int floor = rs.getInt("floor");
-			double PricePerNight = rs.getDouble("price_per_night");
-			String bookedUntil = rs.getString("booked_until");
-			R_InformationDB roomInformation = new R_InformationDB.Builder(ID, bookedUntil).NumOfBeds(numberOfBeds).PricePerNight(PricePerNight).Floor(floor).build();
-		}
-		stmt.close();
+		
 		return 0;
 		
 		
@@ -527,6 +536,138 @@ public class DB_API {
 	//checks if the Hotel is valid returns 4
 	//checks if the room is within range of rooms 5
 	//if all is well return 0
+	}
+	
+	
+	/**
+	 * TO-DO: Update on previous queries
+	 * Executes an update query that sets cancelled field in the table to the date of cancellation
+	 *  <br>
+	 * The value of invalid columns will be null <br>
+	 * // Question: Exception Handling
+	 * @param username : String 
+	 * @param RoomID : Int
+	 * @return <ul>
+	 * 				<li> 0 if cancellation was successful </li>
+	 * 				<li> 1 if not</li>
+	 * 				<li> 2 if some error occured </li>
+	 * 		   </ul>
+	 */
+	public int CancelReservation(String username, int RoomID,String ReservationDate) {
+		assert conn != null : "No Connection mate";
+		if(checkMembershipUserName(username)){
+			try{
+				String reservation_id="";
+				String query = String.format("SELECT * from users_reservation_history where username= '%s' AND room_id= %s AND reservation_date=%s ; ", username, RoomID,ReservationDate);
+				ArrayList<HashMap<String,String>> results= extractQuery(query, new String [] {"reservation_id"});
+				if(results.size()==1){
+					reservation_id= results.get(0).get("reservation_id");
+					if(reservation_id==null) return 2;
+				}
+				else{
+					return 1;
+				}
+				String query1=String.format("UPDATE users_reservation_history SET cancelled=NOW() WHERE reservation_id=%s;", reservation_id);
+				String query2=String.format("UPDATE room_reservation_history SET cancelled=true WHERE reservation_id=%s;", reservation_id);
+				if(! insertQuery(query1)) return 2;
+				if(! insertQuery(query2)) return 2;
+				return 0;
+			}
+
+			catch(Exception e){
+				e.printStackTrace();
+				return 2;
+			}
+			
+		}
+		else{
+			return 1;
+		}
+	
+	}
+
+	/**
+	 * Executes a get query and extracts the information from it into ArrayList of {@code Hashmap<String,String>}
+	 *  <br>
+	 * The value of invalid columns will be null <br>
+	 * // Question: Exception Handling
+	 * @param query : String (Must be SQL query)
+	 * @param keys : String [] Column names of the table.
+	 * @return <ul>
+	 * 				<li> </li>
+	 * 				<li> </li>
+	 * 		   </ul>
+	 */
+	public ArrayList<HashMap<String,String>> extractQuery(String query, String [] keys ){
+		assert conn!=null : "No connection mate";
+		try{
+			Statement stmt= conn.createStatement();
+			ResultSet rs= stmt.executeQuery(query);
+			ArrayList<HashMap<String,String>> results= new ArrayList<>();
+			while(rs.next()){
+				HashMap<String,String> result= new HashMap<>();
+				for(String key : keys){
+					try{
+						result.put(key,rs.getString(key));
+					}
+					catch(Exception e){
+						result.put(key,null);
+					}		
+				}
+				results.add(result);
+			
+
+			}
+			stmt.close();
+			return results;
+		}
+		catch(Exception e){
+			e.printStackTrace();
+			return new ArrayList<>();
+		}
+		
+	}
+
+	/**
+	 * Executes an insert query and extract the information from it
+	 * // Question: Exception Handling
+	 * @param query
+	 * @param keys
+	 * @return
+	 */
+	public boolean insertQuery(String query){
+		assert conn!=null : "No connection mate";
+		try{
+			Statement stmt= conn.createStatement();
+			stmt.executeQuery(query);
+			stmt.close();
+			return true;
+		}
+		catch(Exception e){
+			e.printStackTrace();
+			return false;
+		}
+	}
+
+
+	/**
+	 * TO-DO: Scrape the info of the rooms also
+	 * Returns reservation history of the user ;
+	 * @param username
+	 * @return 
+	 */
+	public ArrayList<HashMap<String,String>> getReservationHistoryUser(String username){
+		if(!checkMembershipUserName(username)) return null;
+		String query1 = String.format("Select * from user_reservation_history where username='%s';", username);
+		//String query2 = String.format("Select * from user_reservation_history where username='%s';", username);
+		String [] fields1=  new String [] {"room_id","reservation_date","check_in","check_out","cancelled"};
+		//String [] fields2=  new String [] {"num_of_beds","floor","price_per_night","booked_until","solar_system","planet","hotel","room_type"};
+		ArrayList<HashMap<String,String>> results= extractQuery(query1,fields1);
+		
+		
+
+		return results;
+
 	}
 
 

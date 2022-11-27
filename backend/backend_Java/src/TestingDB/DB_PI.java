@@ -5,17 +5,17 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.sql.ResultSet;
 import java.sql.Statement;
-
+import java.util.*;
 
 public class DB_PI {
 	// TO-DO add connections
     static final String JDBC_DRIVER ="org.postgresql.Driver";
     static final String DB_URL = "jdbc:postgresql://localhost/Hostellar";
-
+    private static Connection conn;
     static final String USER = "postgres";
-    static final String PASS ="Password";
+    static final String PASS ="password";
     public static void main(String[] args) {
-            Connection conn = null;
+            
             Statement stmt = null;
             try{
                 Class.forName(JDBC_DRIVER);
@@ -26,7 +26,9 @@ public class DB_PI {
                 System.out.println("Connected");
                 //Creating statement 
                 stmt= conn.createStatement();
-                ResultSet rs= stmt.executeQuery("Select * from userscredentials ; " );
+                
+                ResultSet rs= stmt.executeQuery("Select * from userscredentials  ; " );
+                //rs.next();
                 while(rs.next()) {
                 	//Extracting data
                 	String username = rs.getString("username");
@@ -34,6 +36,8 @@ public class DB_PI {
                 	String email = rs.getString("email");
                 	String time= rs.getString("date_of_creation");
                 	String lastLogin = rs.getString("last_login");
+                	
+                	
                 	
                 	System.out.println(username+" | "+password+" | "+ email +" | "+time+" | "+lastLogin );
                 }
@@ -63,6 +67,7 @@ public class DB_PI {
             
             System.out.println("Yessir");
             try {
+            	System.out.println(extractQuery(String.format("Select username from userscredentials  ;"),new String[] {"username","password","email","date_of_creation","last_login"}));
     			stmt= conn.createStatement();
     			String username="hmk57";
     			String query = String.format("Select username from userscredentials where username = '%s' ;",username);
@@ -91,6 +96,37 @@ public class DB_PI {
             
 
     }
+    
+    public static ArrayList<HashMap<String,String>>  extractQuery(String query, String [] keys ){
+		assert conn!=null : "No connection mate";
+		try{
+			Statement stmt= conn.createStatement();
+			ResultSet rs= stmt.executeQuery(query);
+			ArrayList<HashMap<String,String>> results= new ArrayList<>();
+			while(rs.next()){
+				HashMap<String,String> result= new HashMap<>();
+				for(String key : keys){
+					try{
+						result.put(key,rs.getString(key));
+					}
+					catch(Exception e){
+						result.put(key,null);
+					}
+					
+				}
+				results.add(result);
+			
+
+			}
+			stmt.close();
+			return results;
+		}
+		catch(Exception e){
+			e.printStackTrace();
+			return new ArrayList<>();
+		}
+		
+	}
     
     
 }

@@ -1,7 +1,8 @@
 package serverPackage;
-
+import DataBasePackage.TimeStamp;
 import requestsrepliescodes.IdentificationCodes;
 import requestsrepliescodes.ReservationCodes;
+import requestsrepliescodes.ValidateSynthax;
 
 import java.util.HashMap;
 import java.util.Random;
@@ -80,7 +81,7 @@ public class ReservationHandler {
 	}
 	
 	/**
-	 * Used to Verify email adderesses.
+	 * Used to Verify email addresses.
 	 * returns either wrong or successful.
 	 * */
 	public static IdentificationCodes VerifyEmail(String username, String VerificationCode) {
@@ -113,36 +114,6 @@ public class ReservationHandler {
 	}
 	
 	
-	
-	public static boolean isNumeric(String strNum) {
-	    if (strNum == null)
-	        return false;
-	    try
-	        {Integer.parseInt(strNum);}
-	    catch (NumberFormatException nfe)
-	        {return false;}
-	    return true;
-	}
-	
-	/**
-	 * checks if the roomID is within format 		
-	 * checks if the solar system is a valid 		
-	 * checks if the Planet is valid 				
-	 * checks if the Hotel is valid 					
-	 * checks if the room is within range of rooms 	
-		
-	 * @param roomID
-	 * @return appropriate ReservationCode
-	 */
-	private static ReservationCodes validateRoomID(String roomID) 
-	{
-		if (roomID.length()!=16 || !isNumeric((String) roomID.subSequence(12, 15)))
-			return ReservationCodes.RoomIDInvalid;
-		
-		
-		return ReservationCodes.RoomFoundSuccessfully;
-	}
-	
 	/**
 	 * Reserve first checks if the room is available by calling validateRoomID, 
 	 * then tries to reserve the room. If it fails, it returns the appropriate error
@@ -151,11 +122,11 @@ public class ReservationHandler {
 	 * @param time
 	 * @return appropriate ReservationCode
 	 */
-	private ReservationCodes Reserve(String roomID, int start, int end)
+	public ReservationCodes Reserve(String roomID, String startTime, String finishTime)
 	{
 		if (!isLoggedIn)
 			return ReservationCodes.IndentityError;
-		ReservationCodes roomCode = ReservationHandler.validateRoomID(roomID);
+		ReservationCodes roomCode = ValidateSynthax.validateRoomID(roomID);
 		if (roomCode!=ReservationCodes.RoomFoundSuccessfully)
 			return roomCode;
 		
@@ -172,15 +143,57 @@ public class ReservationHandler {
 	 * @param time
 	 * @return appropriate ReservationCode
 	 */
-	private ReservationCodes unReserve(String roomID, int start, int end)
+	public ReservationCodes unReserve(String roomID, String startTime, String finishTime)
 	{
 		if (!isLoggedIn)
 			return ReservationCodes.IndentityError;
-		ReservationCodes roomCode = ReservationHandler.validateRoomID(roomID);
+		ReservationCodes roomCode = validateRoomID(roomID);
 		if (roomCode!=ReservationCodes.RoomFoundSuccessfully)
 			return roomCode;
 
 		return ReservationCodes.RoomStatusChangedSuccessfully;
+	}
+	
+	/**
+	 * Rescheduling is about unreserving a room at its old time, then scheduling it at the new time.
+	 * 
+	 * Careful consideration:
+	 * 	if the unreserve operation was successful and the reserve unsuccessful we must reserver again at the initial time.
+	 * 		=>This function adds a huge threadlock to the database.
+	 * @param roomID
+	 * @param time
+	 * @return appropriate ReservationCode
+	 */
+	public ReservationCodes Reschedule(String roomID, String oldStartTime, String newStartTime, String newFinishTime)
+	{
+		
+		if (!isLoggedIn)
+			return ReservationCodes.IndentityError;
+		ReservationCodes roomCode = validateRoomID(roomID);
+		if (roomCode!=ReservationCodes.RoomFoundSuccessfully)
+			return roomCode;
+		
+		//TODO: As stated in documentation above.
+		
+		return ReservationCodes.RoomStatusChangedSuccessfully;
+	}
+	
+	/**
+	 * Checks if room is available given a time interval
+	 * 
+	 * @param roomID
+	 * @param time
+	 * @return appropriate ReservationCode
+	 */
+	public boolean CheckIfRoomIsAvailable(String roomID, String startTime, String finishTime)
+	{
+		ReservationCodes roomCode = validateRoomID(roomID);
+		if (roomCode!=ReservationCodes.RoomFoundSuccessfully)
+			return false;
+		
+		//TODO: check if its free within time range.
+		
+		return true;
 	}
 	
 	
@@ -194,17 +207,19 @@ public class ReservationHandler {
 	 * 		c+verification					FORMAT: "Req130:username,verificationcode"
 	 * 		d+logout						FORMAT: "Req140"
 	 * 2-Reservation request:
-	 * 		a+reserve						FORMAT: "Req210:{ROOMID},YYYY.MM.DD.HH-YYYY.MM.DD.HH" (start date-finish date)
-	 * 		b+unreserve						FORMAT: "Req220:{ROOMID},YYYY.MM.DD.HH-YYYY.MM.DD.HH"
-	 * 
+	 * 		a+reserve						FORMAT: "Req210:{ROOMID},YYYY-MM-DD HH:MM:SS^YYYY-MM-DD HH:MM:SS" 						(start date^finish date)
+	 * 		b+unreserve						FORMAT: "Req220:{ROOMID},YYYY-MM-DD HH:MM:SS"					  						(start date)
+	 * 		c+reschedule					FORMAT: "Req240:{ROOMID},YYYY-MM-DD HH:MM:SS^YYYY-MM-DD HH:MM:SS^YYYY-MM-DD HH:MM:SS"	(old start date^new start date^new finish date)
 	 * 
 	 * Replies by the server are:
-	 * 0-Invalid request					FORMAT: "Rep000"
+	 * 0-a. Invalid request					FORMAT: "Rep000"
+	 * 0-b.	Internal error					FORMAT: "Rep231"
 	 * 1-a. login replies
 	 * 		+logged in successfully			FORMAT: "Rep110"
 	 * 		+Email not verified				FORMAT: "Rep111"
 	 * 		+Username not found				FORMAT: "Rep112"
 	 * 		+Wrong Password					FORMAT: "Rep113"
+	 * 		+Identity error					FORMAT: "Rep115"
 	 * 
 	 * 1-b. registration replies
 	 * 		+Registered successfully		FORMAT: "Rep120"
@@ -219,6 +234,17 @@ public class ReservationHandler {
 	 * 
 	 * 1-d. logout
 	 * 		+logout successful				FORMAT: "Rep140"
+	 * 
+	 * 2-a. reserve							FORMAT: "Req210"
+	 *  /b. Unreserve						FORMAT: "Req220"
+	 * 		+Identity error					FORMAT: "Rep115"
+	 * 		 (user not logged 
+	 * 		  or insufficient permissions)
+	 * 		+Room status changed			FORMAT: "Rep210"
+	 * 		+Room already reserved			FORMAT: "Rep211"
+	 * 		+Room reservation time Invalid 	FORMAT: "Rep212"
+	 * 		+Invalid date format			FORMAT: "Rep231"
+	 * 		+Room rescheduling failed		FORMAT: "Rep241"
 	 * */
 	public String handleRequest(String request)
 	{
@@ -228,6 +254,7 @@ public class ReservationHandler {
 			return def;
 		
 		//HANDLE IDENTIFICATIONS:
+		//MAYBE TODO: check for identification synthax validity here.
 		if (request.length()<6 || !request.subSequence(0, 3).equals("Req"))
 			return def;
 		String RCode = (String) request.subSequence(3, 6);
@@ -282,13 +309,48 @@ public class ReservationHandler {
 			return def;
 		
 		//TODO: HANDLE TIMES
-		String[] timeRange = Param[1].split("-");
+		String[] timeRange = Param[1].split("^");
 		String RoomID = Param[0];
+
 		
-		if ("210".equals(RCode)) //Reserve
-			return "Rep"+Reserve(RoomID,0,0).ID;
-		if ("220".equals(RCode)) //Unreserve
-			return "Rep"+unReserve(RoomID,0,0).ID;
+		if ("210".equals(RCode) && timeRange.length==2) //Reserve
+			return "Rep"+Reserve(RoomID,timeRange[0],timeRange[1]).ID;
+		if ("220".equals(RCode)&& timeRange.length==1) //Unreserve
+			return "Rep"+unReserve(RoomID,timeRange[0],timeRange[1]).ID;
+		if ("240".equals(RCode) && timeRange.length==3) //Reschedule
+			return "Rep"+Reschedule(RoomID,timeRange[0],timeRange[1],timeRange[2]).ID;
+		
 		return def;
 	}
+	
+	public static boolean isNumeric(String strNum) {
+	    if (strNum == null)
+	        return false;
+	    try
+	        {Integer.parseInt(strNum);}
+	    catch (NumberFormatException nfe)
+	        {return false;}
+	    return true;
+	}
+
+	/**
+	 * checks if the roomID is within format 		
+	 * checks if the solar system is a valid 		
+	 * checks if the Planet is valid 				
+	 * checks if the Hotel is valid 					
+	 * checks if the room is within range of rooms 	
+		
+	 * @param roomID
+	 * @return appropriate ReservationCode
+	 */
+	public static ReservationCodes validateRoomID(String roomID) 
+	{
+		if (roomID.length()!=16 || !isNumeric((String) roomID.subSequence(12, 15)))
+			return ReservationCodes.RoomIDInvalid;
+		
+		//TODO:check with the database for everything.
+		
+		return ReservationCodes.RoomFoundSuccessfully;
+	}
+	
 }
