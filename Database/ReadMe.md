@@ -20,7 +20,7 @@ The above table has the username as a unique identifier (no duplicate usernames 
 - password : varchar
 - date_of_creation : timestamp
 - last_login : timestamp
-- is_active : int  
+- userType : int  
 
 
 ## users_info
@@ -57,8 +57,8 @@ The above table has the username as a unique identifier (no duplicate usernames 
 
 ## room_info
 
-| room_id     | num_of_beds| floor   | price_per_night | available | booked_until
-| :---:        |    :----:   |          :---: |  :---:        |    :----:   | :----:   |        
+| room_id     | solar_system| planet | hotel | num_of_beds| floor   | price_per_night | booked_until  
+| :---:        |    :----:   |      :----:   |  :----:   |      :---: |  :---:        |    :----:   |          :---: |       
 |       |        |   | | | |
 |       |        |   | | | |
 
@@ -68,11 +68,14 @@ The above table has the Room id as a unique identifier (no duplicate room ids al
 - floor : int
 - price_per_night  : double
 - booked_until : date ( or NULL if available)
+- solar_system : varchar
+- planet : varchar
+- hotel : varchar
 
 ## room_reservation_history
 
-| reservation_id     | room_id| booked_in | booked_until |
-| :---:        |    :----:   |          :---: |  :---:        |        
+| reservation_id     | room_id| booked_in | booked_until | cancelled
+| :---:        |    :----:  |          :---:  |          :---: |  :---:        |        
 |       |        |   | |
 |       |        |   | | 
 
@@ -81,6 +84,7 @@ The above table has the Room id as a unique identifier (no duplicate room ids al
 - room_id : int
 - booked_in : timestamp
 - booked_until : date ( or NULL if available)
+- cancelled : boolean
 
 ## Security : 
 We will use md5 hashing to store the passwords in the database.

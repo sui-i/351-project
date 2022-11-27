@@ -4,7 +4,7 @@ CREATE TABLE users_credentials (
    password  varchar(32),
    date_of_creation  timestamp,
    last_login  timestamp,
-   is_active  boolean 
+   userType  int 
 );
 
 CREATE TABLE users_info(
@@ -27,15 +27,19 @@ CREATE TABLE users_reservation_history (
 
 CREATE TABLE room_info (
    room_id    int,
+   solar_system  varchar(32),
+   planet  varchar(32),
+   hotel  varchar(32),
    num_of_beds    int,
    floor    int,
    price_per_night     double precision ,
-   booked_until     timestamp
+   booked_until     timestamp,
 );
 
 CREATE TABLE room_reservation_history (
    reservation_id    int,
    room_id    int,
    booked_in    timestamp,
-   booked_until     timestamp
+   booked_until     timestamp,
+   cancelled boolean 
 );

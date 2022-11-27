@@ -28,6 +28,8 @@ public class TimeStamp implements Comparable<TimeStamp>{
         return seconds;
     }
 
+    
+
     /**
      * 
      * @param dateTime: String in the form "YYYY-MM-DD HH:MM:SS.MS"
@@ -63,9 +65,42 @@ public class TimeStamp implements Comparable<TimeStamp>{
     }
 
 
-    
+    public TimeStamp addTime(TimeStamp other){
+        //Let's recap the one bit adders
+        double [] first = {seconds,minutes,hours};
+        double [] second = {other.getSeconds(),other.getMinutes(),other.getHours()};
+        double [] result = {0,0,0};
+        int [] remainder = {60,60,24};
+        double [] carry ={0,0,0,0}; 
+        for(int i=0;i<3;i++){
+            if (i!=0){
+                result[i] = (first[i] + second[i] +carry[i-1])%remainder[i];
+                carry[i]= (int)(first[i] + second[i] +carry[i-1])/remainder[i];
+            }
+            else{
+                result[i] = (first[i] + second[i] )%remainder[i];
+            }
+            
+
+            
+
+        }
+
+        
+        return new TimeStamp("");
+    }
+    public static void main(String[] args) {
+        TimeStamp x= new TimeStamp("2222-12-23 19:23:12.23124");
+        TimeStamp y= new TimeStamp("2222-12-23 0:45:12.23124");
+        x.addTime(y);
+    }
     public TimeStamp add(TimeStamp other){
-        //return new TimeStamp()
+        /*
+         * YYYY-MM-DD HH-MM-SS
+         * +
+         * YYYY-
+         */
+        return new TimeStamp("");
     }
 
 
