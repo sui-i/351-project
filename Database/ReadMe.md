@@ -57,8 +57,8 @@ The above table has the username as a unique identifier (no duplicate usernames 
 
 ## room_info
 
-| room_id     | solar_system| planet | hotel | num_of_beds| floor   | price_per_night | booked_until  
-| :---:        |    :----:   |      :----:   |  :----:   |      :---: |  :---:        |    :----:   |          :---: |       
+| room_id     | solar_system| planet | hotel |room_type| num_of_beds| floor   | price_per_night | booked_until  
+| :---:        |    :----:   |      :----:   |  :----:   |   :---: |   :---: |  :---:        |    :----:   |          :---: |       
 |       |        |   | | | |
 |       |        |   | | | |
 
@@ -69,6 +69,11 @@ The above table has the Room id as a unique identifier (no duplicate room ids al
 - price_per_night  : double
 - booked_until : date ( or NULL if available)
 - solar_system : varchar
+- room_type : bit(2)
+    - It b2b1 where
+    - b2= 0 if room is single
+    - b2= 1 if room is double
+    - b1= 0 if it is smoking or 1 if otherwise
 - planet : varchar
 - hotel : varchar
 

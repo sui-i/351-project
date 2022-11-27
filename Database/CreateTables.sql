@@ -30,10 +30,11 @@ CREATE TABLE room_info (
    solar_system  varchar(32),
    planet  varchar(32),
    hotel  varchar(32),
+   room_type bit(2),
    num_of_beds    int,
    floor    int,
    price_per_night     double precision ,
-   booked_until     timestamp,
+   booked_until     timestamp
 );
 
 CREATE TABLE room_reservation_history (

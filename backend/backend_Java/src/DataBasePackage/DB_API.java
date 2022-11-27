@@ -364,6 +364,7 @@ public class DB_API {
 	/**
 	 * HashMap for the tableNames (static)
 	 * Key (String) | Value (tableName)
+	 * --------------------------------
 	 * Credentials  | users_credentials
 	 * Info		    | users_info
 	 * Reservation  | users_reservation_history
@@ -496,7 +497,7 @@ public class DB_API {
 	try {
 
 		String query = String.format("Select * from %s where room_id = '%s' ;",TableNames.get("Rooms"),RoomID);
-		String [] fields=  new String [] {"num_of_beds","floor","price_per_night","booked_until","solar_system","planet","hotel"};
+		String [] fields=  new String [] {"num_of_beds","floor","price_per_night","booked_until","solar_system","planet","hotel","room_type"};
 		ArrayList<HashMap<String,String>> results= extractQuery(query, fields);
 
 		
@@ -646,6 +647,27 @@ public class DB_API {
 			e.printStackTrace();
 			return false;
 		}
+	}
+
+
+	/**
+	 * TO-DO: Scrape the info of the rooms also
+	 * Returns reservation history of the user ;
+	 * @param username
+	 * @return 
+	 */
+	public ArrayList<HashMap<String,String>> getReservationHistoryUser(String username){
+		if(!checkMembershipUserName(username)) return null;
+		String query1 = String.format("Select * from user_reservation_history where username='%s';", username);
+		//String query2 = String.format("Select * from user_reservation_history where username='%s';", username);
+		String [] fields1=  new String [] {"room_id","reservation_date","check_in","check_out","cancelled"};
+		//String [] fields2=  new String [] {"num_of_beds","floor","price_per_night","booked_until","solar_system","planet","hotel","room_type"};
+		ArrayList<HashMap<String,String>> results= extractQuery(query1,fields1);
+		
+		
+
+		return results;
+
 	}
 
 
