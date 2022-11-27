@@ -4,6 +4,15 @@ import java.io.InputStreamReader;
 
 import requestsrepliescodes.MailCodes;
 public class EmailPythonCaller {
+	/** Send Emails from HostelerHotel@gmail.com
+	 * Uses a python script to send an email to a recipient. It is used to send verification mails.
+	 * 
+	 * Limitations:
+	 * 		Can only be used to send strings as bodyMessage
+	 * 		if time left TODO: figure out support for html messageBody.
+	 * @param self explanatory
+	 * @return the appropriate MailCode
+	 */
 	public static MailCodes send(String messageSubject, String messageBody, String recipient) {
 		StringBuilder reply = new StringBuilder();
 		int returnCode = 1;
@@ -31,8 +40,8 @@ public class EmailPythonCaller {
 	}
 	
 	public static void main(String[] args) {
-		System.out.println(send("New subject",
-								"Your Verification Code is: 999999",
-								"nojive981@kuvasi.cm"));
+		System.out.println(send("Mounif 7aj tne2 ya khayye",
+								"Mounif enta ktir bt ne2 please wa2if tne2 7a nmout",
+								"mounifelkhatib@hotmail.com"));
 	}
 }
