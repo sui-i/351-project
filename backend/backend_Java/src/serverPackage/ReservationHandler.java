@@ -194,8 +194,7 @@ public class ReservationHandler {
 	}
 	
 	
-	/**
-	 * Handling requests.
+	/** Handling requests.
 	 * 
 	 * Requests come in 2 forms:
 	 * 1-Identification requests

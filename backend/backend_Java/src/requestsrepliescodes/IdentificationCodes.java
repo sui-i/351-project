@@ -7,7 +7,7 @@ public enum IdentificationCodes {
 	WrongPassword(113),
 	
 	RegistrationSuccessul(120),
-	EmailNotAvailable(121),
+	EmailSendingError(121),
 	EmailAlreadyExists(122),
 	UsernameAlreadyExists(123),
 	
@@ -20,7 +20,6 @@ public enum IdentificationCodes {
 	InternalError(500);
 
 	public final int ID;
-
 	IdentificationCodes(int i) {
 		this.ID = i;
 	}
