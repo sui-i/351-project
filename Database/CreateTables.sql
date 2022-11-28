@@ -4,7 +4,8 @@ CREATE TABLE users_credentials (
    password  varchar(32),
    date_of_creation  timestamp,
    last_login  timestamp,
-   userType  int 
+   userType  int ,
+   primary key username
 );
 
 CREATE TABLE users_info(
@@ -13,7 +14,8 @@ CREATE TABLE users_info(
    last_name   varchar(32),
    phone_number    int,
    birthdate     timestamp,
-   location   varchar(32)
+   location   varchar(32),
+   primary key username
 );
 
 CREATE TABLE users_reservation_history (
@@ -22,7 +24,8 @@ CREATE TABLE users_reservation_history (
    reservation_date     timestamp,
    check_in     timestamp,
    check_out     timestamp,
-   cancelled     timestamp
+   cancelled     timestamp,
+   primary key username
 );
 
 CREATE TABLE room_info (
@@ -34,7 +37,8 @@ CREATE TABLE room_info (
    num_of_beds    int,
    floor    int,
    price_per_night     double precision ,
-   booked_until     timestamp
+   booked_until     timestamp ,
+   primary key room_id
 );
 
 CREATE TABLE room_reservation_history (
@@ -42,5 +46,6 @@ CREATE TABLE room_reservation_history (
    room_id    int,
    booked_in    timestamp,
    booked_until     timestamp,
-   cancelled boolean 
+   cancelled boolean ,
+   primary key reservation_id
 );

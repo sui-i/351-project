@@ -3,6 +3,8 @@ import Security.md5;
 import cmdClientPackage.C_InformationDB;
 
 import roomsPackage.R_InformationDB;
+import requestsrepliescodes.IdentificationCodes; 
+import requestsrepliescodes.ReservationCodes;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -230,7 +232,9 @@ public class DB_API {
 	 * 				<li> 2 if they are valid but email is not verified </li>
 	 * 			</ul>
 	 */
-	 public  int checkLoginCredentials(String username, String password,String email)
+
+	 //IdentificationCodes
+	 public  IdentificationCodes checkLoginCredentials(String username, String password,String email)
 	{
 		
 		assert conn !=null : "No connection mate";
@@ -239,7 +243,7 @@ public class DB_API {
 			ArrayList<HashMap<String,String>> results= extractQuery(query,new String [] {"username","password","email"});
 			if(results.size()==0 || results.size()>1 ){
 				//Report replicated usernames
-				return 1;
+				return IdentificationCodes.UsernameAlreadyExists;
 			}
 
 			else{
@@ -248,14 +252,14 @@ public class DB_API {
         	String c_email= results.get(0).get("email");
         	String passwordHash= md5.getMd5(password);
         	if(c_username.equals(username)&& c_password.equals(passwordHash) && c_email.equals(email) ) {
-        		return 0;
+        		return IdentificationCodes.LoginSuccessful;
         	}
         	else if (c_username.equals(username)&& c_password.equals(passwordHash)) {
-        		return 2;
+        		return IdentificationCodes.EmailNotVerified;
         	}
         	else {
         	
-        		return 1;
+        		return IdentificationCodes.WrongPassword;
         	}
 			}
 
@@ -264,7 +268,7 @@ public class DB_API {
 		
         catch(Exception e) {
         	System.out.println(e.getStackTrace());
-        	return -1;
+        	return IdentificationCodes.InternalError;
         }
         
 		
@@ -278,36 +282,33 @@ public class DB_API {
 	 * @param  password : password
 	 * @param email : email
 	 * @return  <ul> 
-	 * 				<li> 0 if user was successfully added</li>
-	 * 				<li> 1 if user already exists </li>
-	 * 				<li> 2 if some other error occurs </li>
+	 * 				<li> {@code RegistrationSuccessul} if user was successfully added</li>
+	 * 				<li> {@code UsernameAlreadyExists} if user already exists </li>
+	 * 				<li> {@code InternalError if some} other error occurs </li>
 	 * 			</ul>
+	 * 
 	 */
-	 public  int RegisterUser(String username, String email, String password)
+	 public  IdentificationCodes RegisterUser(String username, String email, String password)
 		{
 			try {
 				if(checkMembershipUserName(username)==true) {
-					return 1;
+					return IdentificationCodes.UsernameAlreadyExists;
 				}
 				else {
-					Statement stmt = conn.createStatement();
-					//TO_DO:
-					// Hash the password bro
 					String time= "NOW()";
 					String lastLogin = "NOW()";
 					password= md5.getMd5(password);
 					String query = String.format("Insert INTO %s (username,password,email,date_of_creation,last_login,userType) VALUES('%s','%s','%s',%s,%s,1) ;",TableNames.get("credentials"),username,password,email,time,lastLogin);  
-					
-					//System.out.println(query);
-					stmt.execute(query );
-					
-					return 0;
+
+					if (insertQuery(query)) return IdentificationCodes.RegistrationSuccessul;
+
+					return IdentificationCodes.InternalError;
 					
 				}
 			}
 			catch (Exception e) {
 				System.out.println(e.getMessage());
-				return 2;
+				return IdentificationCodes.InternalError;
 			}
 			
 			//adds a new user
@@ -329,31 +330,27 @@ public class DB_API {
 	 * 				<li> 2 if some other error occurs </li>
 	 * 			</ul>
 	 */
-	public  int RegisterAdmin(String username, String email, String password)
+	public  IdentificationCodes RegisterAdmin(String username, String email, String password)
 	{
 		try {
 			if(checkMembershipUserName(username)==true) {
-				return 1;
+				return IdentificationCodes.UsernameAlreadyExists;
 			}
 			else {
-				Statement stmt = conn.createStatement();
-				//TO_DO:
-				// Hash the password bro
 				String time= "NOW()";
 				String lastLogin = "NOW()";
 				password= md5.getMd5(password);
-				String query = String.format("Insert INTO %s (username,password,email,date_of_creation,last_login,0) VALUES('%s','%s','%s',%s,%s,1) ;",TableNames.get("credentials"),username,password,email,time,lastLogin);  
-				
-				//System.out.println(query);
-				stmt.execute(query );
-				
-				return 0;
+				String query = String.format("Insert INTO %s (username,password,email,date_of_creation,last_login,userType) VALUES('%s','%s','%s',%s,%s,0) ;",TableNames.get("credentials"),username,password,email,time,lastLogin);  
+
+				if (insertQuery(query)) return IdentificationCodes.RegistrationSuccessul;
+
+				return IdentificationCodes.InternalError;
 				
 			}
 		}
 		catch (Exception e) {
 			System.out.println(e.getMessage());
-			return 2;
+			return IdentificationCodes.InternalError;
 		}
 		
 		//adds a new user
@@ -384,7 +381,7 @@ public class DB_API {
 	 * 			</ul>
 	 */
 
-	public  int checkRoomAvailability(int RoomID,String BookIn,String BookOut) {
+	public  ReservationCodes checkRoomAvailability(int RoomID,String BookIn,String BookOut) {
 		assert conn !=null : "No connection mate";
 		try {
 
@@ -396,7 +393,7 @@ public class DB_API {
 
         	if(usersDate.compareTo(booked_until)<=0 ){
         		//Note Valid Date Bro
-				return 1;
+				return ReservationCodes.RoomReservationtimeInvalid;
 			}
 
 			else{
@@ -404,19 +401,19 @@ public class DB_API {
 				results = extractQuery(query, new String [] {"count"});
 				if(results.size()==1){
 					if(results.get(0).get("count")!=null){
-						if(Integer.parseInt(results.get(0).get("count"))==0)return 0;
-						else return 1;	
+						if(Integer.parseInt(results.get(0).get("count"))==0) return null ; // return 0;
+						else return ReservationCodes.RoomAlreadyReserved;	
 					}
-					else return 2;
+					else return ReservationCodes.InternalError;
 					
 				}
-				return 2;
+				return ReservationCodes.InternalError;
 			}
 		}
 		
         catch(Exception e) {
         	System.out.println(e.getStackTrace());
-        	return 2;
+        	return ReservationCodes.InternalError;
         }
 }
 
@@ -431,11 +428,11 @@ public class DB_API {
 	 */
 
 	//TO-DO: Finish it 
-	public  int Reserve(String username,int RoomID,String BookIn,String BookOut) {
+	public  ReservationCodes Reserve(String username,int RoomID,String BookIn,String BookOut) {
 		assert conn !=null : "No connection mate";
 		try {
-			int available= checkRoomAvailability(RoomID,BookIn,BookOut);
-			if(available==0){
+			ReservationCodes available= checkRoomAvailability(RoomID,BookIn,BookOut);
+			if(available==null){
 				String query=String.format("Select reservation_id from room_reservation_history  ORDER BY reservation_id desc limit 1; ");
 
 				ArrayList<HashMap<String,String>> results= extractQuery(query, new String [] {"reservation_id"});
@@ -448,31 +445,31 @@ public class DB_API {
 					if(results.get(0).get("reservation_id")!=null){
 						newId= Integer.parseInt(results.get(0).get("reservation_id"));
 					}
-					//TO_DO handle exception
-					else return 2;
+
+					else return ReservationCodes.InternalError;
 				}
 			
 			TimeStamp Book_In = new TimeStamp(BookIn);
 			TimeStamp Book_Out = new TimeStamp(BookOut);
 			//Note here we are inserting two seperate records in room_reservation_history and users_reservation_history
 			query = String.format("INSERT INTO room_reservation_history (reservation_id,room_id,booked_in,booked_until,cancelled) values (%s,%s,'%s','%s',false) ; ",newId,RoomID,Book_In.toString(),Book_Out.toString());
-			if(! insertQuery(query)) return 2;
-			
+			if(! insertQuery(query)) return ReservationCodes.RoomNotReserved;
+			//MEOW: TO DO : 
+
 			query = String.format("INSERT INTO users_reservation_history (username,room_id,reservation_id,reservation_date,check_in,check_out,cancelled) values ('%s',%s,%s,NOW(),%s,'%s',null) ; ",username,RoomID,newId,Book_In.toString(),Book_Out.toString());
 
-			if(! insertQuery(query)) return 2;
-			return 0;
+			if(! insertQuery(query)) return ReservationCodes.RoomNotReserved;
+			return ReservationCodes.RoomStatusChangedSuccessfully;
 
 
 			}
-
-			else return 1;
+			return available;
 			
 		}
 		
         catch(Exception e) {
         	System.out.println(e.getStackTrace());
-        	return 2;
+        	return ReservationCodes.InternalError;
         }
 }
 	/**
@@ -487,39 +484,67 @@ public class DB_API {
 	 * 				<li> 4 if some other error occurs </li>	
 	 * 				<li> 5 if some other error occurs </li>
 	 * 			</ul>
-	 * 
+	 * IndentityError(115),
+		RoomStatusChangedSuccessfully(210),
+		RoomAlreadyReserved(211),
+		RoomReservationtimeInvalid(212),
+		RoomRechedulingFailed(241),
+
+		RoomFoundSuccessfully(220),
+		RoomIDInvalid(221),
+		RoomNotFound(226),
+		RoomNotReserved(225),
+		HotelNotFound(224),
+		PlanetNotFound(223),
+		SolarSystemNotFound(222),
+		
+		InvalidDateFormat(231),
+		
+		InternalError(500);
 	 * 
 	 */
-	public int ValidateRoom(int RoomID)
+	public ReservationCodes ValidateRoom(int RoomID)
 	{
 
 	assert conn !=null : "No connection mate";
 	try {
-
-		String query = String.format("Select * from %s where room_id = '%s' ;",TableNames.get("Rooms"),RoomID);
+		HashMap<String,ReservationCodes> Errors = new HashMap<>();
 		String [] fields=  new String [] {"num_of_beds","floor","price_per_night","booked_until","solar_system","planet","hotel","room_type"};
+		ReservationCodes [] errors = new ReservationCodes [] {ReservationCodes.IndentityError,ReservationCodes.IndentityError,ReservationCodes.IndentityError,ReservationCodes.IndentityError,ReservationCodes.SolarSystemNotFound,
+		ReservationCodes.PlanetNotFound,ReservationCodes.HotelNotFound,ReservationCodes.IndentityError};
+		for(int i=0; i<fields.length;i++){
+			Errors.put(fields[i],errors[i]);
+		}
+		String query = String.format("Select * from %s where room_id = '%s' ;",TableNames.get("Rooms"),RoomID);
+		
 		ArrayList<HashMap<String,String>> results= extractQuery(query, fields);
 
 		
 		if(results.size()==0){
+			// Solar System
+			// Planet 
+			//
 			//No such ID exists
-			return -1;
+			return ReservationCodes.RoomIDInvalid;
+		}
+		else if (results.size()>1){
+			//Duplicated id Numbers
+			return ReservationCodes.IndentityError;
 		}
 
-		for(int i=0; i<results.size();i++){
-			for(String field : fields){
-				if(results.get(i).get(field)==null){
-					return -2;
-				}
-			}
-
-			R_InformationDB roomInformation = new R_InformationDB.Builder(RoomID, results.get(i).get("booked_until" )).Planet(results.get(i).get("planet" )).Hotel(
-				results.get(i).get("hotel" )).SolarSystem(results.get(i).get("solar_system" )).NumOfBeds(Integer.parseInt(results.get(i).get("num_of_beds" ))).PricePerNight(
-				Double.parseDouble(results.get(i).get("price_per_night" ))).Floor(Integer.parseInt(results.get(i).get("floor" ))).build();
-			
-			
+		
+		for(String field : fields){
+			if(results.get(0).get(field)==null){
+				return Errors.get(field);
+			}				
 		}
 		
+		R_InformationDB roomInformation = new R_InformationDB.Builder(RoomID, results.get(0).get("booked_until" )).Planet(results.get(0).get("planet" )).Hotel(
+				results.get(0).get("hotel" )).SolarSystem(results.get(0).get("solar_system" )).NumOfBeds(Integer.parseInt(results.get(0).get("num_of_beds" ))).PricePerNight(
+				Double.parseDouble(results.get(0).get("price_per_night" ))).Floor(Integer.parseInt(results.get(0).get("floor" ))).build();
+		//Add RoomInfo to static HashMapCache for the rooms info
+
+
 		return 0;
 		
 		
@@ -528,7 +553,7 @@ public class DB_API {
 
 	catch(Exception e) {
 		System.out.println(e.getMessage());
-		return -1;
+		return ReservationCodes.InternalError;
 	}
 	//checks if the roomID is within format returns 1
 	//checks if the solar system is a valid returns 2
@@ -639,8 +664,9 @@ public class DB_API {
 		assert conn!=null : "No connection mate";
 		try{
 			Statement stmt= conn.createStatement();
-			stmt.executeQuery(query);
+			int result=stmt.executeUpdate(query);
 			stmt.close();
+			if(result==0) return false;
 			return true;
 		}
 		catch(Exception e){
