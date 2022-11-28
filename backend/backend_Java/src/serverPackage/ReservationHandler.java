@@ -20,8 +20,8 @@ public class ReservationHandler {
 	String clientUsername;
 	String clientEmail;
 	String clientPassword;
-	String firstName;
-	String lastName;
+	String clientFirstName;
+	String clientLastName;
 	
 	/**
 	 * Constructing a reservation handler is not a public task, it should be verified by a token.
@@ -106,9 +106,43 @@ public class ReservationHandler {
 	 * */
 	private IdentificationCodes Logout() {
 		isLoggedIn=false;
-		clientUsername = clientEmail = clientPassword = firstName = lastName = null;
+		clientUsername = clientEmail = clientPassword = clientFirstName = clientLastName = null;
 		return IdentificationCodes.LogoutSuccessful;
 	}
+	
+	/** Get all user info
+	 * 
+	 * @return array[4] String of {username, email, firstname, lastname}
+	 */
+	public String[] getUserInfo() {
+		if (isLoggedIn && clientUsername!=null && clientEmail!=null 
+			&& clientLastName!=null && clientFirstName!=null)
+			return String.format("%s,%s,%s,%s", clientUsername, clientEmail, clientFirstName, clientLastName).split(",");
+		return new String[] {"","","",""};
+	}
+	
+	/** deletes the account with the given username
+	 * 
+	 * @param username
+	 * @return appropriate IdentificationCode
+	 */
+	public IdentificationCodes DeleteAccount(String username) {
+		if (!isLoggedIn)
+			return IdentificationCodes.InsufficientPermissions;
+		//TODO: Delete account
+		return IdentificationCodes.AccountDeletedSuccessfully;
+	}
+	
+	/** resends a new verification code for the given username and updates the database
+	 * @param username
+	 * @return appropriate IdentificationCode
+	 */
+	public IdentificationCodes ResendVerificationCode(String username) {
+		//TODO:resend and update databse
+		return IdentificationCodes.VerificationCodeResentSuccessfully;
+	}
+	
+	
 	
 	
 	/**
@@ -202,6 +236,9 @@ public class ReservationHandler {
 	 * 		b+registration					FORMAT: "Req120:username,password,email,firstname,lastname"
 	 * 		c+verification					FORMAT: "Req130:username,verificationcode"
 	 * 		d+logout						FORMAT: "Req140"
+	 * 		e+get all info					FORMAT: "Req150"
+	 * 		f+delete account 				FORMAT: "Req160:username"
+	 * 		g+resend verification code		FORMAT: "Req170"
 	 * 2-Reservation request:
 	 * 		a+reserve						FORMAT: "Req210:{ROOMID},YYYY-MM-DD HH:MM:SS^YYYY-MM-DD HH:MM:SS" 						(start date^finish date)
 	 * 		b+unreserve						FORMAT: "Req220:{ROOMID},YYYY-MM-DD HH:MM:SS"					  						(start date)
@@ -215,7 +252,7 @@ public class ReservationHandler {
 	 * 		+Email not verified				FORMAT: "Rep111"
 	 * 		+Username not found				FORMAT: "Rep112"
 	 * 		+Wrong Password					FORMAT: "Rep113"
-	 * 		+Identity error					FORMAT: "Rep115"
+	 * 		+Insufficient permissions  		FORMAT: "Rep115"
 	 * 
 	 * 1-b. registration replies
 	 * 		+Registered successfully		FORMAT: "Rep120"
@@ -230,6 +267,21 @@ public class ReservationHandler {
 	 * 
 	 * 1-d. logout
 	 * 		+logout successful				FORMAT: "Rep140"
+	 * 
+	 * 1-e. get all info
+	 * 		+not logged in					FORMAT: "Rep115"
+	 * 		+Info gotten					FORMAT: "Rep150:username,email,firstname,lastname"
+	 * 
+	 * 1-f. delete account
+	 * 		+Account deleted successfully	FORMAT: "Rep160"
+	 * 		+Not enough permissions			FORMAT: "Rep115"
+	 * 
+	 * 1-g. resend verification code
+	 * 		+Not logged in 					FORMAT: "Rep115"
+	 * 		+Email not Available			FORMAT: "Rep121"
+	 * 		+Email already exists			FORMAT: "Rep122"
+	 * 
+	 * 1-g.
 	 * 
 	 * 2-a. reserve							
 	 *  /b. Unreserve						
@@ -294,6 +346,23 @@ public class ReservationHandler {
 		if ("140".equals(RCode)) //logout
 		{
 			return "Rep"+Logout().ID;
+		}
+		if ("150".equals(RCode)) //verify email
+		{
+			String[] info = getUserInfo();
+			return String.format("Rep150:%s,%s,%s,%s",info[0],info[1],info[2],info[3]);	
+		}
+		if ("160".equals(RCode)) //verify email
+		{
+			String [] parser = request.split(":");
+			if (parser.length!=2)
+				return def;
+			return "Rep"+DeleteAccount(parser[1]);	
+		}
+		if ("170".equals(RCode)) //verify email
+		{			
+			String [] parser = request.split(":");
+			return "Rep"+ResendVerificationCode().ID;	
 		}
 		
 		//HANDLE RESERVATIONS:

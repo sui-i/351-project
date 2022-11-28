@@ -42,6 +42,6 @@ public class EmailPythonCaller {
 	public static void main(String[] args) {
 		System.out.println(send("Mounif 7aj tne2 ya khayye",
 								"Mounif enta ktir bt ne2 please wa2if tne2 7a nmout",
-								"mounifelkhatib@hotmail.com"));
+								"mounifelkhatib@gmail.com"));
 	}
 }

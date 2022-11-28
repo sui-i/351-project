@@ -9,7 +9,9 @@ import java.net.Socket;
 
 /**
  * Defines The client side commandline application.
- * 
+ * TODO: DeleteAccount
+ * 		 GetUserInfo
+ * 		 resendVerificationCode
  */
 public class C_Client {
 	private Socket socket;

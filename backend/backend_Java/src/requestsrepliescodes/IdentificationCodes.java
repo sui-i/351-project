@@ -17,6 +17,12 @@ public enum IdentificationCodes {
 	
 	LogoutSuccessful(140),
 	
+	AccountDeletedSuccessfully(160),
+	InsufficientPermissions(115),
+	
+	VerificationCodeResentSuccessfully(170),
+	
+	
 	InternalError(500);
 
 	public final int ID;
