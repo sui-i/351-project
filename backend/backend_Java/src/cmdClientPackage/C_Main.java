@@ -41,7 +41,7 @@ public class C_Main {
 	
 	public void startApp() {
 		System.out.println("Welcome to Hosteler commandLine reservation applet.");
-		List<Character> options = Arrays.asList(new Character[] {'L','R','V','B','U','S','Q'});
+		List<Character> options = Arrays.asList(new Character[] {'L','R','V','B','U','S','D','M','G','Q'});
 		char option = 'X';
 		boolean running = true;
 		while (running) {
@@ -71,6 +71,12 @@ public class C_Main {
 				UnreserveCMDInterface();
 			if (option=='S')
 				RescheduleCMDInterface();
+			if (option=='D')
+				DeleteAccountCMDInterface();
+			if (option=='M')
+				ResendVerificationCodeCMDInterface();
+			if (option=='G')
+				GetAllInfoCMDInterface();
 			else
 				System.out.println("[Error] Invalid option selected.");
 			option = 'X';
@@ -85,6 +91,9 @@ public class C_Main {
 		System.out.println("    -B  Reserve a room");
 		System.out.println("    -U  Unreserve a room");
 		System.out.println("    -S  Reschedule a room");
+		System.out.println("    -G  Get all user info");
+		System.out.println("    -D  Delete an account");
+		System.out.println("    -M  Resend verification code");
 		System.out.println("    -Q  Quit the app");
 		return cmdIn.nextLine().charAt(0);
 	}
@@ -167,6 +176,29 @@ public class C_Main {
 		String verificationCode = cmdIn.nextLine();
 		
 		System.out.println(web.AttemptVerifyEmail(username, verificationCode));
+	}
+	
+	public void GetAllInfoCMDInterface() {
+		System.out.println(web.AttemptGetUserInfo());
+	}
+	
+	public void DeleteAccountCMDInterface() {
+		System.out.println("Account deletetion:\nPlease enter your username: ");
+		String username = cmdIn.nextLine();
+		if (!ValidateSynthax.checkUsername(username)) {
+			System.out.println("Username must not contain spaces or commas");
+			return;
+		}
+		System.out.println(web.AttemptDeleteAccount(username));
+	}
+	public void ResendVerificationCodeCMDInterface() {
+		System.out.println("Resending VerificationCode:\nPlease enter your username: ");
+		String username = cmdIn.nextLine();
+		if (!ValidateSynthax.checkUsername(username)) {
+			System.out.println("Username must not contain spaces or commas");
+			return;
+		}
+		System.out.println(web.AttemptResendVerificaitonCode(username));
 	}
 	
 	/* //May not be needed

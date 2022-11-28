@@ -277,11 +277,10 @@ public class ReservationHandler {
 	 * 		+Not enough permissions			FORMAT: "Rep115"
 	 * 
 	 * 1-g. resend verification code
-	 * 		+Not logged in 					FORMAT: "Rep115"
+	 * 		+verification code resent		FORMAT: "Rep170"
+	 * 		+Email is already verified		FORMAT: "Rep115"
 	 * 		+Email not Available			FORMAT: "Rep121"
-	 * 		+Email already exists			FORMAT: "Rep122"
 	 * 
-	 * 1-g.
 	 * 
 	 * 2-a. reserve							
 	 *  /b. Unreserve						
@@ -362,7 +361,9 @@ public class ReservationHandler {
 		if ("170".equals(RCode)) //verify email
 		{			
 			String [] parser = request.split(":");
-			return "Rep"+ResendVerificationCode().ID;	
+			if (parser.length!=2)
+				return def;
+			return "Rep"+ResendVerificationCode(parser[1]).ID;	
 		}
 		
 		//HANDLE RESERVATIONS:

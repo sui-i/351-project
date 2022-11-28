@@ -10,7 +10,6 @@ import java.net.Socket;
 /**
  * Defines The client side commandline application.
  * TODO: DeleteAccount
- * 		 GetUserInfo
  * 		 resendVerificationCode
  */
 public class C_Client {
@@ -102,6 +101,41 @@ public class C_Client {
 		if ("Rep130".equals(reply)) return "Verification successful!";
 		if ("Rep131".equals(reply)) return "You entered the wrong verification code.";
 		if ("Rep132".equals(reply)) return "You are already verified.";
+		return "Try again, Server reply incomprehensible: " + reply;
+	}
+	
+	public String AttemptGetUserInfo()
+	{
+		send(String.format("Req150"));
+		String reply = receive();
+		if (!"".equals(RequestGenericReturns(reply))) return RequestGenericReturns(reply);
+		if ("Rep115".equals(reply)) return "Please login and try agin.";
+		if ("Rep150".equals(reply.subSequence(0, 6))) 
+		{
+			String[] X = ((String) reply.subSequence(6, reply.length()-1)).split(",");
+			return String.format("Your user information is:\n +Username:%s\n +Email:%s\n +First name:%s\n +Last name:%s",
+									X[0],X[1],X[2],X[3]);
+		}
+		return "Try again, Server reply incomprehensible: " + reply;
+	}
+	
+	public String AttemptDeleteAccount(String username)
+	{
+		send(String.format("Req160:%s",username));
+		String reply = receive();
+		if (!"".equals(RequestGenericReturns(reply))) return RequestGenericReturns(reply);
+		if ("Rep160".equals(reply)) return "The account was deleted successfully";
+		if ("Rep115".equals(reply)) return "you do not have enough permissions to delete this user.";
+		return "Try again, Server reply incomprehensible: " + reply;
+	}
+	public String AttemptResendVerificaitonCode(String username)
+	{
+		send(String.format("Req130:%s",username));
+		String reply = receive();
+		if (!"".equals(RequestGenericReturns(reply))) return RequestGenericReturns(reply);
+		if ("Rep170".equals(reply)) return "The verification Code";
+		if ("Rep121".equals(reply)) return "There seems to be an issue with email server";
+		if ("Rep115".equals(reply)) return "This user is already verified.";
 		return "Try again, Server reply incomprehensible: " + reply;
 	}
 	
