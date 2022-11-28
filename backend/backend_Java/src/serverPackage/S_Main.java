@@ -8,6 +8,7 @@ public class S_Main {
 		ServerSocket serverSocket = new ServerSocket(351);
 		S_Server server = new S_Server(serverSocket);
 		server.startServer();
+	
 	}
 
 }

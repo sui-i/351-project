@@ -61,30 +61,30 @@ public class C_Main {
 			}
 			if (option=='L')
 				LoginCMDInterface();
-			if (option=='R')
+			else if (option=='R')
 				RegisterCMDInterface();
-			if (option=='V')
+			else if (option=='V')
 				VerifyEmailCMDInterface();
-			if (option=='B')
+			else if (option=='B')
 				ReserveCMDInterface();
-			if (option=='U')
+			else if (option=='U')
 				UnreserveCMDInterface();
-			if (option=='S')
+			else if (option=='S')
 				RescheduleCMDInterface();
-			if (option=='D')
+			else if (option=='D')
 				DeleteAccountCMDInterface();
-			if (option=='M')
+			else if (option=='M')
 				ResendVerificationCodeCMDInterface();
-			if (option=='G')
+			else if (option=='G')
 				GetAllInfoCMDInterface();
 			else
-				System.out.println("[Error] Invalid option selected.");
+				System.err.println("[Error] Invalid option selected.");
 			option = 'X';
 		}
 	}
 	
 	public char selectOptionsMenu() throws IOException {
-		System.out.println("Please select one of the following options");
+		System.out.println("------------------------------------------\nPlease select one of the following options");
 		System.out.println("    -L  Login");
 		System.out.println("    -R  Register");
 		System.out.println("    -V  Verify email adress");
@@ -192,7 +192,7 @@ public class C_Main {
 		System.out.println(web.AttemptDeleteAccount(username));
 	}
 	public void ResendVerificationCodeCMDInterface() {
-		System.out.println("Resending VerificationCode:\nPlease enter your username: ");
+		System.out.println("Resend Verification Code:\nPlease enter your username: ");
 		String username = cmdIn.nextLine();
 		if (!ValidateSynthax.checkUsername(username)) {
 			System.out.println("Username must not contain spaces or commas");
