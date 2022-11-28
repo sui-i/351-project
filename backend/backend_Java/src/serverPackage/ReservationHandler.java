@@ -1,13 +1,10 @@
 package serverPackage;
-import DataBasePackage.TimeStamp;
-import requestsrepliescodes.IdentificationCodes;
-import requestsrepliescodes.ReservationCodes;
-import requestsrepliescodes.ValidateSynthax;
-
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Random;
-import java.util.Arrays;
-import java.util.Date;
+
+import requestsrepliescodes.IdentificationCodes;
+import requestsrepliescodes.ReservationCodes;
 public class ReservationHandler {
 	private static HashMap<Long,ReservationHandler> Clients = new HashMap<>();
 	private static Random rand = new Random();
@@ -23,8 +20,8 @@ public class ReservationHandler {
 	String clientUsername;
 	String clientEmail;
 	String clientPassword;
-	String firstName;
-	String lastName;
+	String clientFirstName;
+	String clientLastName;
 	
 	/**
 	 * Constructing a reservation handler is not a public task, it should be verified by a token.
@@ -109,9 +106,43 @@ public class ReservationHandler {
 	 * */
 	private IdentificationCodes Logout() {
 		isLoggedIn=false;
-		clientUsername = clientEmail = clientPassword = firstName = lastName = null;
+		clientUsername = clientEmail = clientPassword = clientFirstName = clientLastName = null;
 		return IdentificationCodes.LogoutSuccessful;
 	}
+	
+	/** Get all user info
+	 * 
+	 * @return array[4] String of {username, email, firstname, lastname}
+	 */
+	public String[] getUserInfo() {
+		if (isLoggedIn && clientUsername!=null && clientEmail!=null 
+			&& clientLastName!=null && clientFirstName!=null)
+			return String.format("%s,%s,%s,%s", clientUsername, clientEmail, clientFirstName, clientLastName).split(",");
+		return new String[] {"","","",""};
+	}
+	
+	/** deletes the account with the given username
+	 * 
+	 * @param username
+	 * @return appropriate IdentificationCode
+	 */
+	public IdentificationCodes DeleteAccount(String username) {
+		if (!isLoggedIn)
+			return IdentificationCodes.InsufficientPermissions;
+		//TODO: Delete account
+		return IdentificationCodes.AccountDeletedSuccessfully;
+	}
+	
+	/** resends a new verification code for the given username and updates the database
+	 * @param username
+	 * @return appropriate IdentificationCode
+	 */
+	public IdentificationCodes ResendVerificationCode(String username) {
+		//TODO:resend and update databse
+		return IdentificationCodes.VerificationCodeResentSuccessfully;
+	}
+	
+	
 	
 	
 	/**
@@ -126,7 +157,7 @@ public class ReservationHandler {
 	{
 		if (!isLoggedIn)
 			return ReservationCodes.IndentityError;
-		ReservationCodes roomCode = ValidateSynthax.validateRoomID(roomID);
+		ReservationCodes roomCode = validateRoomID(roomID);
 		if (roomCode!=ReservationCodes.RoomFoundSuccessfully)
 			return roomCode;
 		
@@ -143,7 +174,7 @@ public class ReservationHandler {
 	 * @param time
 	 * @return appropriate ReservationCode
 	 */
-	public ReservationCodes unReserve(String roomID, String startTime, String finishTime)
+	public ReservationCodes unReserve(String roomID, String startTime)
 	{
 		if (!isLoggedIn)
 			return ReservationCodes.IndentityError;
@@ -197,8 +228,7 @@ public class ReservationHandler {
 	}
 	
 	
-	/**
-	 * Handling requests.
+	/** Handling requests.
 	 * 
 	 * Requests come in 2 forms:
 	 * 1-Identification requests
@@ -206,6 +236,9 @@ public class ReservationHandler {
 	 * 		b+registration					FORMAT: "Req120:username,password,email,firstname,lastname"
 	 * 		c+verification					FORMAT: "Req130:username,verificationcode"
 	 * 		d+logout						FORMAT: "Req140"
+	 * 		e+get all info					FORMAT: "Req150"
+	 * 		f+delete account 				FORMAT: "Req160:username"
+	 * 		g+resend verification code		FORMAT: "Req170"
 	 * 2-Reservation request:
 	 * 		a+reserve						FORMAT: "Req210:{ROOMID},YYYY-MM-DD HH:MM:SS^YYYY-MM-DD HH:MM:SS" 						(start date^finish date)
 	 * 		b+unreserve						FORMAT: "Req220:{ROOMID},YYYY-MM-DD HH:MM:SS"					  						(start date)
@@ -219,7 +252,7 @@ public class ReservationHandler {
 	 * 		+Email not verified				FORMAT: "Rep111"
 	 * 		+Username not found				FORMAT: "Rep112"
 	 * 		+Wrong Password					FORMAT: "Rep113"
-	 * 		+Identity error					FORMAT: "Rep115"
+	 * 		+Insufficient permissions  		FORMAT: "Rep115"
 	 * 
 	 * 1-b. registration replies
 	 * 		+Registered successfully		FORMAT: "Rep120"
@@ -235,8 +268,23 @@ public class ReservationHandler {
 	 * 1-d. logout
 	 * 		+logout successful				FORMAT: "Rep140"
 	 * 
-	 * 2-a. reserve							FORMAT: "Req210"
-	 *  /b. Unreserve						FORMAT: "Req220"
+	 * 1-e. get all info
+	 * 		+not logged in					FORMAT: "Rep115"
+	 * 		+Info gotten					FORMAT: "Rep150:username,email,firstname,lastname"
+	 * 
+	 * 1-f. delete account
+	 * 		+Account deleted successfully	FORMAT: "Rep160"
+	 * 		+Not enough permissions			FORMAT: "Rep115"
+	 * 
+	 * 1-g. resend verification code
+	 * 		+Not logged in 					FORMAT: "Rep115"
+	 * 		+Email not Available			FORMAT: "Rep121"
+	 * 		+Email already exists			FORMAT: "Rep122"
+	 * 
+	 * 1-g.
+	 * 
+	 * 2-a. reserve							
+	 *  /b. Unreserve						
 	 * 		+Identity error					FORMAT: "Rep115"
 	 * 		 (user not logged 
 	 * 		  or insufficient permissions)
@@ -246,7 +294,7 @@ public class ReservationHandler {
 	 * 		+Invalid date format			FORMAT: "Rep231"
 	 * 		+Room rescheduling failed		FORMAT: "Rep241"
 	 * */
-	public String handleRequest(String request)
+	public String handleRequest(String request) throws Exception
 	{
 		lastSeen = date.getTime();
 		String def = "Rep000";
@@ -295,13 +343,30 @@ public class ReservationHandler {
 				return def;
 			return "Rep"+VerifyEmail(Cred[0],Cred[1]).ID;	
 		}
-		if (request.subSequence(3, 6)=="140") //logout
+		if ("140".equals(RCode)) //logout
 		{
 			return "Rep"+Logout().ID;
 		}
+		if ("150".equals(RCode)) //verify email
+		{
+			String[] info = getUserInfo();
+			return String.format("Rep150:%s,%s,%s,%s",info[0],info[1],info[2],info[3]);	
+		}
+		if ("160".equals(RCode)) //verify email
+		{
+			String [] parser = request.split(":");
+			if (parser.length!=2)
+				return def;
+			return "Rep"+DeleteAccount(parser[1]);	
+		}
+		if ("170".equals(RCode)) //verify email
+		{			
+			String [] parser = request.split(":");
+			return "Rep"+ResendVerificationCode().ID;	
+		}
 		
 		//HANDLE RESERVATIONS:
-		String[] parser = request.split(":");
+		String[] parser = request.split(":",2);
 		if (parser.length!=2)
 			return def;
 		String[] Param = parser[1].split(",");
@@ -309,14 +374,13 @@ public class ReservationHandler {
 			return def;
 		
 		//TODO: HANDLE TIMES
-		String[] timeRange = Param[1].split("^");
+		String[] timeRange = Param[1].split("\\^");
 		String RoomID = Param[0];
-
 		
 		if ("210".equals(RCode) && timeRange.length==2) //Reserve
 			return "Rep"+Reserve(RoomID,timeRange[0],timeRange[1]).ID;
 		if ("220".equals(RCode)&& timeRange.length==1) //Unreserve
-			return "Rep"+unReserve(RoomID,timeRange[0],timeRange[1]).ID;
+			return "Rep"+unReserve(RoomID,timeRange[0]).ID;
 		if ("240".equals(RCode) && timeRange.length==3) //Reschedule
 			return "Rep"+Reschedule(RoomID,timeRange[0],timeRange[1],timeRange[2]).ID;
 		

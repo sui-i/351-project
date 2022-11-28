@@ -8,7 +8,7 @@ import java.io.OutputStreamWriter;
 import java.net.Socket;
 
 
-public class EmailServer{
+public class RetiredEmailServer{
 	// Expected to use/configure the smtp library 
 	//This server just sends verification codes associated with usernames.
 	//in return it excepts an email of the following form:
@@ -23,7 +23,7 @@ public class EmailServer{
 		Socket socket = null;
 		BufferedWriter bufferedWriter = null;
 		BufferedReader bufferedReader = null;
-		String mailServerName = to.split("@")[1];
+		String mailServerName = "smtp." + to.split("@")[1];
 		try {
 			socket = new Socket(mailServerName, smtpPORT);
 			bufferedWriter = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
@@ -63,6 +63,6 @@ public class EmailServer{
 	}
 	
 	public static void main(String[] args) {
-		System.out.println(send("Hey nerd", "", accountsEmail));
+		System.out.println(send("Hey nerd", "ahmadelhajj110@gmail.com", accountsEmail));
 	}
 }
