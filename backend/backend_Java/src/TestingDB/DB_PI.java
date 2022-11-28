@@ -7,13 +7,14 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+
 public class DB_PI {
 	// TO-DO add connections
     static final String JDBC_DRIVER ="org.postgresql.Driver";
     static final String DB_URL = "jdbc:postgresql://localhost/Hostellar";
     private static Connection conn;
     static final String USER = "postgres";
-    static final String PASS ="password";
+    static final String PASS ="hungryshark2003";
     public static void main(String[] args) {
             
             Statement stmt = null;
@@ -67,6 +68,7 @@ public class DB_PI {
             
             System.out.println("Yessir");
             try {
+
             	System.out.println(extractQuery(String.format("Select username from userscredentials  ;"),new String[] {"username","password","email","date_of_creation","last_login"}));
     			stmt= conn.createStatement();
     			String username="hmk57";
