@@ -17,6 +17,7 @@ public class ReservationHandler {
 	
 	
 	long lastSeen; //Should be updated after method call.
+	int accountType;
 	String clientUsername;
 	String clientEmail;
 	String clientPassword;
@@ -73,7 +74,9 @@ public class ReservationHandler {
 	 * @return ID: appropriate enum identification code
 	 * */
 	public static IdentificationCodes Register(String username, String password, String email, String firstName, String lastName) {
-		//TODO:DO
+		//TODO: Search for username, if it exists and is verified, dump
+		//then create a registration code and try to send it by mail, if that fails, dump
+		//then add the new user.
 		return IdentificationCodes.RegistrationSuccessul;
 	}
 	
@@ -82,7 +85,9 @@ public class ReservationHandler {
 	 * returns either wrong or successful.
 	 * */
 	public static IdentificationCodes VerifyEmail(String username, String VerificationCode) {
-		//TODO:DO
+		//TODO: search for username, if its not found or is already verified, dump
+		//check if the verification code matches the one in the DB. if not, dump
+		//change the Account to verified user in DB, change the verification code field to an empty value
 		return IdentificationCodes.VerificationSuccessful;
 	}
 	
@@ -94,8 +99,9 @@ public class ReservationHandler {
 	 * 
 	 * @return ID: appropriate enum identification code
 	 * */
-	private IdentificationCodes Login(String username, String password) {
-		//TODO:DO
+	public IdentificationCodes Login(String username, String password) {
+		//TODO:check if username password pair matches. if so, isLoggedIn = True and import all userInfo
+		//else dump.
 		return IdentificationCodes.LoginSuccessful;
 	}
 	
@@ -104,7 +110,7 @@ public class ReservationHandler {
 	 * This function DOES NOT remove the client from the clients map,
 	 * as it gives the chance for a login attempt.
 	 * */
-	private IdentificationCodes Logout() {
+	public IdentificationCodes Logout() {
 		isLoggedIn=false;
 		clientUsername = clientEmail = clientPassword = clientFirstName = clientLastName = null;
 		return IdentificationCodes.LogoutSuccessful;
@@ -129,7 +135,9 @@ public class ReservationHandler {
 	public IdentificationCodes DeleteAccount(String username) {
 		if (!isLoggedIn)
 			return IdentificationCodes.InsufficientPermissions;
-		//TODO: Delete account
+		//check if logged in user is an admin, if so, delete the user associated with username.
+		//check if logged in user is the one holding the username, if so, also delete.
+		//else dump
 		return IdentificationCodes.AccountDeletedSuccessfully;
 	}
 	
@@ -138,7 +146,7 @@ public class ReservationHandler {
 	 * @return appropriate IdentificationCode
 	 */
 	public IdentificationCodes ResendVerificationCode(String username) {
-		//TODO:resend and update databse
+		//TODO:resend and check if it is sent, then update database of username
 		return IdentificationCodes.VerificationCodeResentSuccessfully;
 	}
 	
