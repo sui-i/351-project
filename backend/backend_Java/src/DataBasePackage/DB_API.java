@@ -1,6 +1,6 @@
 package DataBasePackage;
 import Security.md5;
-import cmdClientPackage.C_InformationDB;
+import cmdClientPackage.DB_UserInformation;
 
 import roomsPackage.R_InformationDB;
 import requestsrepliescodes.IdentificationCodes; 
@@ -49,7 +49,7 @@ public class DB_API {
     private static final String DB_URL = "jdbc:postgresql://localhost/'YourDataBase'";
     private static final String USER = "postgres";
     private static final String PASS ="YourPassword";
-    private static HashMap<String,C_InformationDB> users;
+    private static HashMap<String,DB_UserInformation> users;
     
 	public DB_API() {
 		if(!created) {
@@ -94,11 +94,11 @@ public class DB_API {
 	 * Table Used: users_info
 	 * Query Used: Select username,firstName,lastName,phoneNumber,birthDate,Location from users_info where username = ....;
 	 * @return  <ul> 
-	 * 				<li> {@code C_InformationDB} instance if user is Found</li>
+	 * 				<li> {@code DB_UserInformation} instance if user is Found</li>
 	 * 				<li> Null if otherwise </li>
 	 * 			</ul>
 	 */
-	 public  C_InformationDB getUserInfo(String username) {
+	 public  DB_UserInformation getUserInfo(String username) {
 		
 		//Assumption
 		
@@ -124,17 +124,17 @@ public class DB_API {
 					return null;
 				}
 
-		        return new C_InformationDB(username,C_firstName,C_lastName,C_phoneNumber,C_birthDate,C_Location);
+		        return new DB_UserInformation(username,C_firstName,C_lastName,C_phoneNumber,C_birthDate,C_Location);
 			}
 			else {
-				// TO-DO : return special instance of the C_InformationDB
+				// TO-DO : return special instance of the DB_UserInformation
 				
 				return null;
 			}
 		}
 		
 		catch (Exception e) {
-			// TO-DO : return special instance of the C_InformationDB
+			// TO-DO : return special instance of the DB_UserInformation
 			e.printStackTrace();
 			return null;
 		}
