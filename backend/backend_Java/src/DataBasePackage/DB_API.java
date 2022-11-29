@@ -208,9 +208,42 @@ public class DB_API {
 	 public boolean checkMembershipUserName(String username)
 		{
 		
+			assert conn !=null : "No connection mate";
+			try {
+				String query = String.format("Select username from userscredentials where username = '%s' ;",username);
+				ArrayList<HashMap<String,String>> results= extractQuery(query, new String [] {"username"});
+	
+				if(results.size()==0 || results.size()>1) return false;
+				else
+					return true;
+			}
+			
+			catch(Exception e) {
+				System.out.println(e.getMessage());
+				return false;
+			}
+			//return true;
+			//returns if username has an account
+		}
+	
+	/**
+	 * Checks if email exists in the database;
+	 * Table Used: users_credentials
+	 * <br>
+	 * Query Used: <br>
+	 * 		Select email from userscredentials where email = {@code username} ;
+	 * @param email : 
+	 * @return  <ul> 
+	 * 				<li> True if email exists</li>
+	 * 				<li> False if no such email exist </li>
+	 * 			</ul>
+	 * 
+	 * 
+	 */
+	public boolean checkMembershipEmail(String email){
 		assert conn !=null : "No connection mate";
 		try {
-			String query = String.format("Select username from userscredentials where username = '%s' ;",username);
+			String query = String.format("Select email from userscredentials where username = '%s' ;",email);
 			ArrayList<HashMap<String,String>> results= extractQuery(query, new String [] {"username"});
 
 			if(results.size()==0 || results.size()>1) return false;
@@ -224,7 +257,8 @@ public class DB_API {
         }
 		//return true;
 		//returns if username has an account
-		}
+
+	}
 	
 	
 	/**
@@ -285,7 +319,6 @@ public class DB_API {
 
 	
 	/**
-	 * TO-DO: IMPLEMENT ADMIN, VERIFIED USER, and NON VERIFIED USER
 	 * Query : Insert INTO userscredentials (username,password,email,date_of_creation,last_login) VALUES () ;
 	 * @param username : username 
 	 * @param  password : password
@@ -390,7 +423,7 @@ public class DB_API {
 	 * Query : "Select booked_until,Available from %s where RoomId = '%s' order by booked_until desc ;
 	 * @param ID : ID of the room 
 	 * @return  <ul> 
-	 * 				<li> 0 if available</li>
+	 * 				<li> {@code ReservationCodes.RoomAvailable} if available</li>
 	 * 				<li> 1 if the times aren't available </li>
 	 * 				<li> 2 if some other error occurs </li>
 	 * 			</ul>
@@ -417,7 +450,7 @@ public class DB_API {
 				results = extractQuery(query, new String [] {"count"});
 				if(results.size()==1){
 					if(results.get(0).get("count")!=null){
-						if(Integer.parseInt(results.get(0).get("count"))==0) return null ; // return 0;
+						if(Integer.parseInt(results.get(0).get("count"))==0) return ReservationCodes.RoomAvailable ; // return 0;
 						else return ReservationCodes.RoomAlreadyReserved;	
 					}
 					else return ReservationCodes.InternalError;
@@ -449,9 +482,9 @@ public class DB_API {
 		try {
 			if(!ValidateSynthax.checkTime(BookIn) || !ValidateSynthax.checkTime(BookOut)) return ReservationCodes.InvalidDateFormat;
 			ReservationCodes available= checkRoomAvailability(RoomID,BookIn,BookOut);
-			if(available==null){
+			if(available.equals(ReservationCodes.RoomAvailable)){
 				String query=String.format("Select reservation_id from room_reservation_history  ORDER BY reservation_id desc limit 1; ");
-				
+				 
 				ArrayList<HashMap<String,String>> results= extractQuery(query, new String [] {"reservation_id"});
 				int newId;
 				if(results.size()==0){
@@ -697,7 +730,7 @@ public class DB_API {
 	 * @param username
 	 * @return 
 	 */
-	public HashMap<String,String> getReservationHistoryUser(String username){
+	public ArrayList<HashMap<String,String>> getReservationHistoryUser(String username){
 		if(!checkMembershipUserName(username)) return null;
 		String query1= String.format(
 			"""
@@ -716,11 +749,7 @@ public class DB_API {
 		//String [] fields1=  new String [] {"room_id","reservation_date","check_in","check_out","cancelled"};
 		//String [] fields2=  new String [] {"num_of_beds","floor","price_per_night","booked_until","solar_system","planet","hotel","room_type"};
 		ArrayList<HashMap<String,String>> results= extractQuery(query1,fields1);
-		
-		if(results.size()==1){
-			return results.get(0);
-		}
-		return null;
+		return results;
 
 	}
 

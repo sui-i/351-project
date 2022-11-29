@@ -12,6 +12,9 @@ public enum ReservationCodes {
 	RoomFoundSuccessfully(220),
 	RoomIDInvalid(221),
 	RoomNotFound(226),
+	// Edit : Hashem
+	RoomAvailable(227),
+	//
 	RoomNotReserved(225),
 	HotelNotFound(224),
 	PlanetNotFound(223),
