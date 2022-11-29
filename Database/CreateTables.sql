@@ -5,6 +5,8 @@ CREATE TABLE users_credentials (
    date_of_creation  timestamp,
    last_login  timestamp,
    userType  int ,
+   verification_code varchar(6),
+   verified boolean ,
    primary key( username)
 );
 
