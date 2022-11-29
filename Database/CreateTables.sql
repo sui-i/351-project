@@ -6,7 +6,6 @@ CREATE TABLE users_credentials (
    last_login  timestamp,
    userType  int ,
    verification_code varchar(6),
-   verified boolean ,
    primary key( username)
 );
 
@@ -93,6 +92,5 @@ CREATE TABLE users_credentials_deleted (
    date_of_creation  timestamp,
    last_login  timestamp,
    userType  int ,
-   verification_code varchar(6),
-   verified boolean 
+   verification_code varchar(6)
 );

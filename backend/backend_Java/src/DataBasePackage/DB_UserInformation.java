@@ -14,6 +14,7 @@ public class DB_UserInformation {
 	private String password;
 	private String date_of_creation;
 	private String last_login;
+	private String verificationCode;
 	private UserTypeCodes usertype;
 
     public static class Builder{
@@ -28,6 +29,7 @@ public class DB_UserInformation {
 		private String password;
 		private String date_of_creation;
 		private String last_login;
+		private String verificationCode;
 		private UserTypeCodes usertype;
 
         public Builder(String username,String firstName,String lastName){
@@ -63,6 +65,10 @@ public class DB_UserInformation {
 			this.last_login=last_login;
 			return this;
 		}
+		public Builder VerificationCode(String verificationCode) {
+			this.verificationCode=verificationCode;
+			return this;
+		}
 		public Builder UserType (UserTypeCodes usertype){
 			this.usertype=usertype;
 			return this;
@@ -76,7 +82,7 @@ public class DB_UserInformation {
     private DB_UserInformation(Builder B){
 		username=B.username;first_name= B.first_name;last_name=B.last_name;phone_number=B.phone_number;
 		birthdate=B.birthdate;location=B.location;email=B.email;password=B.password;date_of_creation=B.date_of_creation;
-		last_login=B.last_login;usertype=B.usertype;
+		last_login=B.last_login;usertype=B.usertype;verificationCode=B.verificationCode;
 
     }
 	public String getuserName() {
@@ -111,10 +117,14 @@ public class DB_UserInformation {
 	public String getLastLogin(){
 		return last_login;
 	}
-
+	
+	public String getVerificationCode() {
+		return verificationCode;
+	}
 	public UserTypeCodes getUserType(){
 		return usertype;
 	}
+	
 
     @Override
     public String toString(){
