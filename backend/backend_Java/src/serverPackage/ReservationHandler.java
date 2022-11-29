@@ -4,10 +4,12 @@ import java.util.HashMap;
 import java.util.Random;
 
 import DataBasePackage.DB_API;
+import DataBasePackage.DB_UserInformation;
 import emailVerificationServer.EmailAPI;
 import requestsrepliescodes.IdentificationCodes;
 import requestsrepliescodes.MailCodes;
 import requestsrepliescodes.ReservationCodes;
+import requestsrepliescodes.UserTypeCodes;
 public class ReservationHandler {
 	private static HashMap<Long,ReservationHandler> Clients = new HashMap<>();
 	private static Random rand = new Random();
@@ -102,10 +104,26 @@ public class ReservationHandler {
 	 * Used to Verify email addresses.
 	 * returns either wrong or successful.
 	 * */
-	public IdentificationCodes VerifyEmail(String username, String VerificationCode) {
-		//TODO: search for username, if its not found or is already verified, dump
+	public IdentificationCodes VerifyEmail(String username, String verificationCode) {
+		//search for username, if its not found or is already verified, dump
+		UserTypeCodes idc = db.checkMembershipUserName(username);
+		if (idc.equals(UserTypeCodes.InternalError))
+			return IdentificationCodes.InternalError;
+		if (idc.equals(NOT FOUND))
+			return IdentificationCodes.UsernameNotFound;
+		if (!idc.equals(UserTypeCodes.NonVerifiedUser))
+			return IdentificationCodes.UserAlreadyVerified;
+		
 		//check if the verification code matches the one in the DB. if not, dump
+		DB_UserInformation userInfo = db.getUserInfo(username);
+		if (userInfo==null)
+			return IdentificationCodes.InternalError;
+		if (!userInfo.getVerificationCode().equals(verificationCode))
+			return IdentificationCodes.WrongVerrificationCode;
+		
 		//change the Account to verified user in DB, change the verification code field to an empty value
+		if (!db.verifyAccount(username))
+			return IdentificationCodes.InternalError;
 		return IdentificationCodes.VerificationSuccessful;
 	}
 	
@@ -130,7 +148,7 @@ public class ReservationHandler {
 	 * as it gives the chance for a login attempt.
 	 * */
 	public IdentificationCodes Logout() {
-		isLoggedIn=false;
+		accountType=UserTypeCodes.NotLoggedIn;
 		clientUsername = clientEmail = clientPassword = clientFirstName = clientLastName = null;
 		return IdentificationCodes.LogoutSuccessful;
 	}
@@ -140,7 +158,7 @@ public class ReservationHandler {
 	 * @return array[4] String of {username, email, firstname, lastname}
 	 */
 	public String[] getUserInfo() {
-		if (isLoggedIn && clientUsername!=null && clientEmail!=null 
+		if (!accountType.equals(UserTypeCodes.NotLoggedIn) && clientUsername!=null && clientEmail!=null 
 			&& clientLastName!=null && clientFirstName!=null)
 			return String.format("%s,%s,%s,%s", clientUsername, clientEmail, clientFirstName, clientLastName).split(",");
 		return new String[] {"","","",""};
@@ -152,7 +170,7 @@ public class ReservationHandler {
 	 * @return appropriate IdentificationCode
 	 */
 	public IdentificationCodes DeleteAccount(String username) {
-		if (!isLoggedIn)
+		if (accountType.equals(UserTypeCodes.NotLoggedIn))
 			return IdentificationCodes.InsufficientPermissions;
 		//check if logged in user is an admin, if so, delete the user associated with username.
 		//check if logged in user is the one holding the username, if so, also delete.
@@ -182,7 +200,7 @@ public class ReservationHandler {
 	 */
 	public ReservationCodes Reserve(String roomID, String startTime, String finishTime)
 	{
-		if (!isLoggedIn)
+		if (accountType.equals(UserTypeCodes.NotLoggedIn))
 			return ReservationCodes.IndentityError;
 		ReservationCodes roomCode = validateRoomID(roomID);
 		if (roomCode!=ReservationCodes.RoomFoundSuccessfully)
@@ -203,7 +221,7 @@ public class ReservationHandler {
 	 */
 	public ReservationCodes unReserve(String roomID, String startTime)
 	{
-		if (!isLoggedIn)
+		if (accountType.equals(UserTypeCodes.NotLoggedIn))
 			return ReservationCodes.IndentityError;
 		ReservationCodes roomCode = validateRoomID(roomID);
 		if (roomCode!=ReservationCodes.RoomFoundSuccessfully)
@@ -225,7 +243,7 @@ public class ReservationHandler {
 	public ReservationCodes Reschedule(String roomID, String oldStartTime, String newStartTime, String newFinishTime)
 	{
 		
-		if (!isLoggedIn)
+		if (accountType.equals(UserTypeCodes.NotLoggedIn))
 			return ReservationCodes.IndentityError;
 		ReservationCodes roomCode = validateRoomID(roomID);
 		if (roomCode!=ReservationCodes.RoomFoundSuccessfully)
@@ -375,7 +393,7 @@ public class ReservationHandler {
 		}
 		if ("150".equals(RCode)) //Get all User info
 		{
-			if (!isLoggedIn)
+			if (accountType.equals(UserTypeCodes.NotLoggedIn))
 				return "Rep"+IdentificationCodes.InsufficientPermissions.ID;
 			String[] info = getUserInfo();
 			return String.format("Rep150:%s,%s,%s,%s",info[0],info[1],info[2],info[3]);	
