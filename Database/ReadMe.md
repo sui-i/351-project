@@ -1,11 +1,13 @@
 # Database Design:
-We have a total of 5 tables : 
-- Users' Credentials
-- Users' Personal Information
-- Users' Reservation History
-- Room details
-- RoomsReservationHistory
-- Settings 
+We have a total of 8 tables : 
+- users_credentials
+- users_info
+- users_reservation_history
+- room_info
+- room_reservation_history
+- solar_system_info
+- planet_info
+- hotel_info
 
 ## users_credentials 
 
@@ -57,25 +59,26 @@ The above table has the username as a unique identifier (no duplicate usernames 
 
 ## room_info
 
-| room_id     | solar_system| planet | hotel |room_type| num_of_beds| floor   | price_per_night | booked_until  
-| :---:        |    :----:   |      :----:   |  :----:   |   :---: |   :---: |  :---:        |    :----:   |          :---: |       
+| room_id      |room_type| num_of_beds| floor   | price_per_night  
+ :----:   |   :---: |   :---: |  :---:        |    :----:   |          
 |       |        |   | | | |
 |       |        |   | | | |
 
 The above table has the Room id as a unique identifier (no duplicate room ids allowed). It will have the following domains which are of types:
-- room_id : int
+- room_id : varchar(16) of format "SSSSPPPPHHHHRMRM":
+    - "SSSS" : short for the solar system
+    - "PPPP" : short for the planet
+    - "HHHH" : short for the hotel name
+    - "RMRM" : short for the room number
 - num_of_beds : int
 - floor : int
 - price_per_night  : double
-- booked_until : date ( or NULL if available)
-- solar_system : varchar
+
 - room_type : bit(2)
     - It b2b1 where
     - b2= 0 if room is single
     - b2= 1 if room is double
     - b1= 0 if it is smoking or 1 if otherwise
-- planet : varchar
-- hotel : varchar
 
 ## room_reservation_history
 
@@ -90,6 +93,39 @@ The above table has the Room id as a unique identifier (no duplicate room ids al
 - booked_in : timestamp
 - booked_until : date ( or NULL if available)
 - cancelled : boolean
+
+
+## solar_system_info
+
+| simple_id     | simple_name
+| :---:        |    :----:  |        
+
+The above table has the simple_id as a unique identifier (no duplicate room ids allowed). It will have the following domains which are of types:
+- simple_id : varchar(4)
+- simple_name : varchar(16)
+
+## planet_info
+
+| simple_id     | simple_name
+| :---:        |    :----:  |        
+
+The above table has the simple_id as a unique identifier (no duplicate room ids allowed). It will have the following domains which are of types:
+- simple_id : varchar(4)
+- simple_name : varchar(16)
+
+
+## hotel_info
+
+| simple_id     | simple_name | number_of_floors|number_of_rooms
+| :---:        |    :----:  |     :----:  |  :----:  |  
+
+The above table has the simple_id as a unique identifier (no duplicate room ids allowed). It will have the following domains which are of types:
+- simple_id : varchar(4)
+- simple_name : varchar(16)
+- number_of_floors : int 
+- number_of_rooms : int 
+
+
 
 ## Security : 
 We will use md5 hashing to store the passwords in the database.

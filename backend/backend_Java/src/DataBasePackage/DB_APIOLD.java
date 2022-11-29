@@ -7,7 +7,7 @@ import java.sql.Statement;
 import java.util.HashMap;
 
 import Security.md5;
-import cmdClientPackage.C_InformationDB;
+
 
 public class DB_APIOLD {
 	

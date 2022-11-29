@@ -1,8 +1,8 @@
 package roomsPackage;
 
 public class R_InformationDB {
-    
-    private final int ID;
+    //"room_type|num_of_beds|floor|price_per_night|planet_name|solar_system_name|hotel_name"
+    private final String ID;
     private final int number_of_beds;
     private final int floor;
     private final double price_per_night;
@@ -13,7 +13,7 @@ public class R_InformationDB {
 	
 
     public static class Builder{
-        private final int ID;
+        private final String ID;
         private final String booked_until;
         
         // Optional parameters - initialized to default values
@@ -25,7 +25,7 @@ public class R_InformationDB {
         private  double price_per_night=0;
         
             
-        public Builder(int ID,String booked_until){
+        public Builder(String ID,String booked_until){
             this.ID=ID;
             this.booked_until=booked_until;
         }
@@ -62,7 +62,7 @@ public class R_InformationDB {
         ID=B.ID;number_of_beds=B.number_of_beds;floor=B.floor;price_per_night=B.price_per_night;booked_until=B.booked_until;
         hotel=B.hotel;solar_system=B.solar_system;planet=B.planet;
     }
-	public int getID() {
+	public String getID() {
 		return ID;
 	}
 	public int getNumOfBeds() {
