@@ -119,13 +119,47 @@ The above table has the simple_id as a unique identifier (no duplicate room ids 
 ## hotel_info
 
 | simple_id     | simple_name | number_of_floors|number_of_rooms
-| :---:        |    :----:  |     :----:  |  :----:  |  
+| :---:        |    :----:  |     :----:  |  :----:  | 
 
 The above table has the simple_id as a unique identifier (no duplicate room ids allowed). It will have the following domains which are of types:
 - simple_id : varchar(4)
 - simple_name : varchar(16)
 - number_of_floors : int 
 - number_of_rooms : int 
+
+
+
+## users_credentials_deleted
+
+| username      | email | password   | date_of_creation | last_login | userType | verification_code | verified
+| :---:        |    :----:   |          :---: |  :---:        |    :----:   |          :---: | :---: | :---: |
+|       |        |   | | | |
+|       |        |   | | | |
+
+This table holds the deleted information from the users_credentials table.
+
+
+## users_info_deleted
+
+| username      | first_name | last_name   | phone_number | birthdate | location
+| :---:        |    :----:   |          :---: |  :---:        |    :----:   |          :---: |
+|       |        |   | | | |
+|       |        |   | | | |
+
+This table holds the deleted information from the users_info table.
+
+
+## users_reservation_history_deleted
+
+| username      | room_id | reservation_date   | check_in | check_out | cancelled
+| :---:        |    :----:   |          :---: |  :---:        |    :----:   |          :---: |
+|       |        |   | | | |
+|       |        |   | | | |
+
+This table holds the deleted information from the users_reservation_history table.
+
+
+
 
 
 

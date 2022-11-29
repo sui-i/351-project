@@ -29,7 +29,8 @@ import java.sql.Statement;
  * </ol>
  */
 
-//checkMembershipEmail(String)
+
+// TO-DO : Delete User deleteUserByUsername and deleteUserByEmail
 
 public class DB_API {
 	
@@ -108,30 +109,52 @@ public class DB_API {
 	 public  DB_UserInformation getUserInfo(String username) {
 		
 		//Assumption
-		
-		if(! checkMembershipUserName(username)) {
-			//UserNameNotFoundException
+		UserTypeCodes registered=checkMembershipUserName(username);
+		if(!(registered.ID ==0 ||  registered.ID ==1 || registered.ID ==2)) {
 			return null;
 		}
 		
+		
 		try {
 			if(ConnectDB()) {
+				String query2= String.format("""
+					SELECT users_info.username,first_name,last_name,phone_number,birthdate,location,
+					users_credentials.email ,users_credentials.password ,users_credentials.date_of_creation,
+					users_credentials.last_login,users_credentials.usertype
+					FROM users_info INNER JOIN users_credentials ON users_credentials.username=users_info.username
+					WHERE users_info.username='%s';
+						""",username);
+
+				String [] fields= new String [] {"username","first_name","last_name","phone_number","birthdate","location","email","password","date_of_creation","last_login","usertype"};
+
+				
+				String query = String.format("Select username,first_name,last_name,phone_number,birthdate,location from %s where username = '%s' ;",TableNames.get("Info"),username);
+				ArrayList<HashMap<String,String>> results= extractQuery(query2, fields);
 				String C_firstName = "",C_lastName= "",C_phoneNumber= "",C_birthDate="",C_Location="";
-				String query = String.format("Select username,firstName,lastName,phoneNumber,birthDate,Location from %s where username = '%s' ;",TableNames.get("Info"),username);
-				ArrayList<HashMap<String,String>> results= extractQuery(query, new String[] {"username","first_name","last_name","phone_number","birthdate","location"});
 				
 				if(results.size()==1){
-					C_firstName=results.get(0).get("first_name");
-					C_lastName=results.get(0).get("last_name");
-					C_phoneNumber=results.get(0).get("phone_number");
-					C_birthDate=results.get(0).get("birthdate");
-					C_Location=results.get(0).get("location");
+					C_firstName=results.get(0).get("first_name");C_lastName=results.get(0).get("last_name");
+					String userType= results.get(0).get("usertype");
+					if(userType==null) return null;
+					int UserType= Integer.parseInt(userType);
+					UserTypeCodes userCode ;
+					if(UserType==0) userCode=UserTypeCodes.Admin ;
+					else if(UserType==1) userCode=UserTypeCodes.VerifiedUser;
+					else if (UserType==2) userCode=UserTypeCodes.NonVerifiedUser;
+					else return null;
+					return new DB_UserInformation.Builder(username,C_firstName,C_lastName).PhoneNumber(
+					results.get(0).get("phone_number")).Birthdate(results.get(0).get("birthdate")
+					).Location(results.get(0).get("location")).Email(results.get(0).get("email")
+					).Password(results.get(0).get("password")).DateOfCreation(
+					results.get(0).get("date_of_creation")).LastLogin(
+						results.get(0).get("last_login")
+					).UserType(userCode).build();
 				}
 				else{
 					return null;
 				}
 
-		        return new DB_UserInformation(username,C_firstName,C_lastName,C_phoneNumber,C_birthDate,C_Location);
+		        
 			}
 			else {
 				// TO-DO : return special instance of the DB_UserInformation
@@ -202,10 +225,12 @@ public class DB_API {
 	 * 		Select username from userscredentials where username = {@code username} ;
 	 * @param username : 
 	 * @return  <ul> 
+	 * 				<li> {@code UserTypeCodes.Admin } </li>
+	 * 				<li> {@code UserTypeCodes.DuplicatedUsers } </li>
+	 *  			<li> {@code UserTypeCodes.InternalError }</li>
 	 * 				<li> {@code UserTypeCodes.NotFound } </li>
-	 * 				<li> {@code UserTypeCodes.DuplicatedUsers } </li>
-	 *  			<li> {@code UserTypeCodes.VerifiedUser }</li>
-	 * 				<li> {@code UserTypeCodes.DuplicatedUsers } </li>
+	 * 				<li> {@code  return UserTypeCodes.NonVerifiedUser }</li>
+	 * 				<li> {@code UserTypeCodes.VerifiedUser } </li>
 	 * 			</ul>
 	 * 
 	 * 
@@ -224,12 +249,10 @@ public class DB_API {
 				else if (results.size()>1) return UserTypeCodes.DuplicatedUsers;
 				
 				if(results.get(0).get("usertype") !=null) return UserTypeCodes.InternalError;
-				int ID=Integer.parseInt(results.get(0).get("usertype");
-				switch(ID){
-					case UserTypeCodes.VerifiedUser.ID: return UserTypeCodes.VerifiedUser;
-					case UserTypeCodes.NonVerifiedUser.ID : return UserTypeCodes.NonVerifiedUser;
-					case UserTypeCodes.Admin.ID : return UserTypeCodes.Admin;
-				}
+				int ID=Integer.parseInt(results.get(0).get("usertype"));
+				if(ID==UserTypeCodes.VerifiedUser.ID) return UserTypeCodes.VerifiedUser;
+				if(ID==UserTypeCodes.NonVerifiedUser.ID) return UserTypeCodes.NonVerifiedUser;
+				if(ID==UserTypeCodes.Admin.ID) return UserTypeCodes.Admin;
 				return UserTypeCodes.InternalError;
 				
 			}
@@ -250,31 +273,43 @@ public class DB_API {
 	 * 		Select email from userscredentials where email = {@code username} ;
 	 * @param email : 
 	 * @return  <ul> 
-	 * 				<li> True if email exists</li>
-	 * 				<li> False if no such email exist </li>
+	 * 				<li> {@code UserTypeCodes.Admin } </li>
+	 * 				<li> {@code UserTypeCodes.DuplicatedUsers } </li>
+	 *  			<li> {@code UserTypeCodes.InternalError }</li>
+	 * 				<li> {@code UserTypeCodes.NotFound } </li>
+	 * 				<li> {@code  return UserTypeCodes.NonVerifiedUser }</li>
+	 * 				<li> {@code UserTypeCodes.VerifiedUser } </li>
 	 * 			</ul>
 	 * 
 	 * 
 	 */
-	public boolean checkMembershipEmail(String email){
-		assert conn !=null : "No connection mate";
-		try {
-			String query = String.format("Select email from userscredentials where username = '%s' ;",email);
-			ArrayList<HashMap<String,String>> results= extractQuery(query, new String [] {"username"});
-
-			if(results.size()==0 || results.size()>1) return false;
-			else
-				return true;
-		}
+	public UserTypeCodes checkMembershipEmail(String email)
+		{
 		
-        catch(Exception e) {
-        	System.out.println(e.getMessage());
-        	return false;
-        }
-		//return true;
-		//returns if username has an account
+			
+			try {
+				assert conn !=null : "No connection mate";
+				String query = String.format("Select email , usertype from users_credentials where email = '%s' ;",email);
+				ArrayList<HashMap<String,String>> results= extractQuery(query, new String [] {"email","usertype"});
+	
+				if(results.size()==0 ) return UserTypeCodes.NotFound;
+				else if (results.size()>1) return UserTypeCodes.DuplicatedUsers;
+				
+				if(results.get(0).get("usertype") !=null) return UserTypeCodes.InternalError;
+				int ID=Integer.parseInt(results.get(0).get("usertype"));
+				if(ID==UserTypeCodes.VerifiedUser.ID) return UserTypeCodes.VerifiedUser;
+				if(ID==UserTypeCodes.NonVerifiedUser.ID) return UserTypeCodes.NonVerifiedUser;
+				if(ID==UserTypeCodes.Admin.ID) return UserTypeCodes.Admin;
+				return UserTypeCodes.InternalError;
+				
+			}
+			
+			catch(Exception e) {
+				System.out.println(e.getMessage());
+				return UserTypeCodes.InternalError;
+			}
 
-	}
+		}
 	
 	
 	/**
@@ -351,7 +386,8 @@ public class DB_API {
 			
 			try {
 				assert conn != null : "No Connection Mate";
-				if(checkMembershipUserName(username)==true) {
+				UserTypeCodes registered=checkMembershipUserName(username);
+				if(registered.ID ==0 ||  registered.ID ==1 || registered.ID ==2) {
 					return IdentificationCodes.UsernameAlreadyExists;
 				}
 				else {
@@ -389,7 +425,8 @@ public class DB_API {
 		
 		try {
 			assert conn != null : "No Connection Mate";
-			if(checkMembershipUserName(username)==true) {
+			UserTypeCodes registered=checkMembershipUserName(username);
+			if(registered.ID ==0 ||  registered.ID ==1 || registered.ID ==2) {
 				return IdentificationCodes.UsernameAlreadyExists;
 			}
 			else {
@@ -426,7 +463,10 @@ public class DB_API {
 	 */
 	public  boolean verifyAccount(String username){
 		//Do-Something: A counter you can try the code up to three times 
-		if(!checkMembershipUserName(username)) return false;
+		UserTypeCodes registered=checkMembershipUserName(username);
+		if(!(registered.ID ==0 ||  registered.ID ==1 || registered.ID ==2)) {
+			return false;
+		}
 		//String query = String.format("Insert INTO %s (username,password,email,date_of_creation,last_login,userType) VALUES('%s','%s','%s',%s,%s,%s,'%s') ;",TableNames.get("credentials"),username,password,email,time,lastLogin,UserTypeCodes.Admin);  
 		return true;
 		
@@ -542,17 +582,14 @@ public class DB_API {
 	 * Query : "Select * from {@code room_info} where RoomId = {@code ID} ;
 	 * @param ID : ID of the room 
 	 * @return  <ul> 
-	 * 				<li> 0 if the room is validated</li>
-	 * 				<li> 1 if user already exists </li>
-	 * 				<li> 2 if some other error occurs </li>
-	 * 				<li> 3 if some other error occurs </li>
-	 * 				<li> 4 if some other error occurs </li>	
-	 * 				<li> 5 if some other error occurs </li>
+	 * 				<li> ReservationCodes.RoomIDInvalid</li>
+	 * 				<li> ReservationCodes.RoomFoundSuccessfully </li>
+	 * 				<li> ReservationCodes.IndentityError </li>
 	 * 			</ul>
 	 */
 	public ReservationCodes ValidateRoom(String RoomID)
 	{
-
+	
 	assert conn !=null : "No connection mate";
 	if(RoomID.length()!=16){
 		return ReservationCodes.RoomIDInvalid;
@@ -613,12 +650,6 @@ public class DB_API {
 		System.out.println(e.getMessage());
 		return ReservationCodes.InternalError;
 	}
-	//checks if the roomID is within format returns 1
-	//checks if the solar system is a valid returns 2
-	//checks if the Planet is valid returns 3
-	//checks if the Hotel is valid returns 4
-	//checks if the room is within range of rooms 5
-	//if all is well return 0
 	}
 	
 	
@@ -641,7 +672,8 @@ public class DB_API {
 	 */
 	public ReservationCodes CancelReservation(String username, String RoomID,String ReservationDate) {
 		assert conn != null : "No Connection mate";
-		if(checkMembershipUserName(username)){
+		UserTypeCodes registered=checkMembershipUserName(username);		
+		if(registered.ID ==0 ||  registered.ID ==1 || registered.ID ==2){
 			try{
 				if(!ValidateSynthax.checkTime(ReservationDate)) return ReservationCodes.InvalidDateFormat;
 				
@@ -676,15 +708,16 @@ public class DB_API {
 
 	/**
 	 * Executes a get query and extracts the information from it into ArrayList of {@code Hashmap<String,String>}
-	 *  <br>
+	 * <br>
 	 * The value of invalid columns will be null <br>
 	 * // Question: Exception Handling
 	 * @param query : String (Must be SQL query)
 	 * @param keys : String [] Column names of the table.
 	 * @return <ul>
-	 * 				<li> </li>
-	 * 				<li> </li>
+	 * 				<li> Empty {@code ArrayList<HashMap<String,String>>} if internal error occurs </li>
+	 * 				<li> {@code ArrayList<HashMap<String,String>>} with keylist=keys </li>
 	 * 		   </ul>
+	 * The resulting fields values are either null or the result extracted from the database
 	 */
 	public ArrayList<HashMap<String,String>> extractQuery(String query, String [] keys ){
 		assert conn!=null : "No connection mate";
@@ -746,7 +779,10 @@ public class DB_API {
 	 * @return 
 	 */
 	public ArrayList<HashMap<String,String>> getReservationHistoryUser(String username){
-		if(!checkMembershipUserName(username)) return null;
+		UserTypeCodes registered=checkMembershipUserName(username);
+		if(!(registered.ID ==0 ||  registered.ID ==1 || registered.ID ==2)) {
+			return null;
+		}
 		String query1= String.format(
 			"""
 			SELECT users_reservation_history.* ,  solar_system_info.simple_name as "solar_system_name" , planet_info.simple_name as "planet_name", hotel_info.simple_name as "hotel_name" from users_reservation_history 
@@ -766,6 +802,80 @@ public class DB_API {
 		ArrayList<HashMap<String,String>> results= extractQuery(query1,fields1);
 		return results;
 
+	}
+
+	/**
+	 * Tables= {users_credentials,users_info,users_reservation_history}
+	 * for table in Tables:
+	 * 	Move all deleted data of username from table to table_deleted 
+	 * 
+	 * 
+	 * @param username
+	 * @return 
+	 * 		<ol> 
+	 * 			<li>True if the deletion was successful  </li>
+	 * 			<li> False otherwise </li>
+	 * 		</ol>
+	 */
+	public boolean deleteUserByUsername(String username){
+		//Backup Info: FOR FBI PURPOSES : INSERT INTO planet_info_deleted SELECT * from planet_info;
+		
+		try {
+			assert conn!=null : "No connection mate";
+			String move_query = String.format(
+			""" 
+				INSERT INTO users_credentials_deleted SELECT * from users_credentials where username= '%s';
+				INSERT INTO users_info_deleted SELECT * from users_info where username= '%s';
+				INSERT INTO users_reservation_history_deleted SELECT * from users_reservation_history where username= '%s';
+			""",
+			username,username,username);
+			String delete_query= String.format(
+				"""
+					DELETE FROM users_credentials WHERE username='%s';
+					DELETE FROM users_info WHERE username='%s';
+					DELETE FROM users_reservation_history WHERE username='%s';
+					""", username,username,username);
+			
+			if(insertQuery(move_query)) return true;
+			if(insertQuery(delete_query)) return true;
+			return false;
+		}
+		catch(Exception e){
+			e.printStackTrace();
+			return false;
+		}
+		
+
+	}
+
+	/**
+	 * Tables= {users_credentials,users_info,users_reservation_history}
+	 * for table in Tables:
+	 * 	Move all deleted data of username from table to table_deleted 
+	 * 
+	 * 
+	 * @param username
+	 * @return 
+	 * 		<ol> 
+	 * 			<li>True if the deletion was successful  </li>
+	 * 			<li> False otherwise </li>
+	 * 		</ol>
+	 */
+	public boolean deleteUserByEmail(String email){
+		try{
+			assert conn!=null: "No connection mate";
+			String query1= String.format("SELECT username from users_credentials where email='%s'", email);
+			ArrayList<HashMap<String,String>> results= extractQuery(query1, new String[] {"username"});
+			if(results.size()!=1) return false;
+			String username= results.get(0).get("username");
+			if(username == null) return false;
+			return deleteUserByUsername(username);
+		}
+		catch(Exception e){
+			e.printStackTrace();
+			return false;
+		}
+		
 	}
 
 }
