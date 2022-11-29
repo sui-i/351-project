@@ -5,7 +5,7 @@ import Security.md5;
 import roomsPackage.R_InformationDB;
 import requestsrepliescodes.IdentificationCodes; 
 import requestsrepliescodes.ReservationCodes;
-
+import requestsrepliescodes.UserTypeCodes;
 import requestsrepliescodes.ValidateSynthax;
 
 import java.util.ArrayList;
@@ -46,13 +46,14 @@ public class DB_API {
 	 * RoomsHistory | room_reservation_history
 	 */
 	private static HashMap<String,String> TableNames;
-	private static boolean created=false;
+	private boolean created=false;
 	private static final String JDBC_DRIVER ="org.postgresql.Driver";
     private static final String DB_URL = "jdbc:postgresql://localhost/'YourDataBase'";
     private static final String USER = "postgres";
     private static final String PASS ="YourPassword";
     private static HashMap<String,DB_UserInformation> users;
 	private static HashMap<String,R_InformationDB> rooms;
+	private static HashMap<String,String> IDCodes;
     
 	public DB_API() {
 		if(!created) {
@@ -157,10 +158,13 @@ public class DB_API {
 		if(users.containsKey(username)) {
 			return users.get(username).getfirstName();
 		}
+		DB_UserInformation user=getUserInfo(username);
+		if(user!=null){ 
+			users.put(username,user);
+			return user.getfirstName();
 
-		users.put(username,getUserInfo(username));
-		
-		return users.get(username).getfirstName();
+		}
+		return null;
 		//returns FirstName From DataBase
 		
 	}
@@ -178,10 +182,13 @@ public class DB_API {
 			return users.get(username).getlastName();
 		}
 		// Throwing Exception
-		users.put(username,getUserInfo(username));
-		
-		return users.get(username).getfirstName();
-		//returns LastName From DataBase
+		DB_UserInformation user=getUserInfo(username);
+		if(user!=null){ 
+			users.put(username,user);
+			return user.getlastName();
+
+		}
+		return null;
 	}
 	
 	/**
@@ -229,10 +236,12 @@ public class DB_API {
 	 * @param username : username 
 	 * @param  password : password
 	 * @return  <ul> 
-	 * 				<li> -1 if there was an error </li>
-	 * 				<li> 0 if username and password are valid, and email is verified.</li>
-	 * 				<li> 1 if they are invalid </li>
-	 * 				<li> 2 if they are valid but email is not verified </li>
+	 * 				<li> {@code IdentificationCodes.LoginSuccessful } if credentials were correct </li>
+	 * 				<li> {@code IdentificationCodes.UsernameNotFound} (self explanotory).</li>
+	 * 				<li> {@code IdentificationCodes.UsernameAlreadyExists }  </li>
+	 * 				<li> {@code IdentificationCodes.InternalError}  </li>
+	 * 				<li> {@code IdentificationCodes.EmailNotVerified} </li>
+	 *  			<li> {@code IdentificationCodes.WrongPassword}  </li>
 	 * 			</ul>
 	 */
 
@@ -240,30 +249,27 @@ public class DB_API {
 	 public  IdentificationCodes checkLoginCredentials(String username, String password,String email)
 	{
 		
-		assert conn !=null : "No connection mate";
+		
+		if(!ValidateSynthax.checkEmail(email)) return IdentificationCodes.EmailNotVerified;
 		try {
+			assert conn !=null : "No connection mate";
 			String query = String.format("Select username,password,email from %s where username = '%s' ;",TableNames.get("credentials"),username);
 			ArrayList<HashMap<String,String>> results= extractQuery(query,new String [] {"username","password","email"});
-			if(results.size()==0 || results.size()>1 ){
+			if(results.size()==0){
+				return IdentificationCodes.UsernameNotFound;
+			}
+			if(results.size()>1 ){
 				//Report replicated usernames
 				return IdentificationCodes.UsernameAlreadyExists;
 			}
 
 			else{
-			String c_username = results.get(0).get("username");
         	String c_password=results.get(0).get("password");
         	String c_email= results.get(0).get("email");
         	String passwordHash= md5.getMd5(password);
-        	if(c_username.equals(username)&& c_password.equals(passwordHash) && c_email.equals(email) ) {
-        		return IdentificationCodes.LoginSuccessful;
-        	}
-        	else if (c_username.equals(username)&& c_password.equals(passwordHash)) {
-        		return IdentificationCodes.EmailNotVerified;
-        	}
-        	else {
-        	
-        		return IdentificationCodes.WrongPassword;
-        	}
+			if(! c_email.equals(email)) return IdentificationCodes.EmailNotVerified;
+			if(! c_password.equals(passwordHash)) return IdentificationCodes.WrongPassword;
+			return IdentificationCodes.LoginSuccessful;
 			}
 
         	
@@ -287,41 +293,37 @@ public class DB_API {
 	 * @return  <ul> 
 	 * 				<li> {@code RegistrationSuccessul} if user was successfully added</li>
 	 * 				<li> {@code UsernameAlreadyExists} if user already exists </li>
-	 * 				<li> {@code InternalError if some} other error occurs </li>
+	 * 				<li> {@code InternalError } if some other error occurs </li>
 	 * 			</ul>
 	 * 
 	 */
-	 public  IdentificationCodes RegisterUser(String username, String email, String password)
+	 public  IdentificationCodes RegisterUser(String username, String email, String password, String FirstName,String LastName,String VerificationCode)
 		{
+			
 			try {
+				assert conn != null : "No Connection Mate";
 				if(checkMembershipUserName(username)==true) {
 					return IdentificationCodes.UsernameAlreadyExists;
 				}
 				else {
+					//TO-DO: Implement the codes
 					String time= "NOW()";
 					String lastLogin = "NOW()";
 					password= md5.getMd5(password);
-					String query = String.format("Insert INTO %s (username,password,email,date_of_creation,last_login,userType) VALUES('%s','%s','%s',%s,%s,1) ;",TableNames.get("credentials"),username,password,email,time,lastLogin);  
-
-					if (insertQuery(query)) return IdentificationCodes.RegistrationSuccessul;
-
+					String query = String.format("Insert INTO %s (username,password,email,date_of_creation,last_login,userType,verification_code) VALUES('%s','%s','%s',%s,%s,%s,'%s') ;",TableNames.get("credentials"),username,password,email,time,lastLogin,UserTypeCodes.NonVerifiedUser,VerificationCode);  
+					String query2= String.format("INSERT INTO users_info (username,first_name,last_name) VALUES ('%s','%s','%s');",username,FirstName,LastName);
+					if (!insertQuery(query+query2)) return IdentificationCodes.RegistrationSuccessul;
 					return IdentificationCodes.InternalError;
-					
 				}
 			}
 			catch (Exception e) {
 				System.out.println(e.getMessage());
 				return IdentificationCodes.InternalError;
 			}
-			
-			//adds a new user
-			//returns 0 if user was successfully added
-			//returns 1 if user already exists
-			//returns 2 if some other error occurs
 		}
 
 	
-		/**
+	/**
 	 * TO-DO: IMPLEMENT ADMIN, VERIFIED USER, and NON VERIFIED USER
 	 * Query : Insert INTO userscredentials (username,password,email,date_of_creation,last_login) VALUES () ;
 	 * @param username : username 
@@ -335,44 +337,54 @@ public class DB_API {
 	 */
 	public  IdentificationCodes RegisterAdmin(String username, String email, String password)
 	{
+		
 		try {
+			assert conn != null : "No Connection Mate";
 			if(checkMembershipUserName(username)==true) {
 				return IdentificationCodes.UsernameAlreadyExists;
 			}
 			else {
+				//TO-DO: Implement the codes
 				String time= "NOW()";
 				String lastLogin = "NOW()";
 				password= md5.getMd5(password);
-				String query = String.format("Insert INTO %s (username,password,email,date_of_creation,last_login,userType) VALUES('%s','%s','%s',%s,%s,0) ;",TableNames.get("credentials"),username,password,email,time,lastLogin);  
-
-				if (insertQuery(query)) return IdentificationCodes.RegistrationSuccessul;
-
+				String query = String.format("Insert INTO %s (username,password,email,date_of_creation,last_login,userType) VALUES('%s','%s','%s',%s,%s,%s,'%s') ;",TableNames.get("credentials"),username,password,email,time,lastLogin,UserTypeCodes.Admin);  
+				String query2= String.format("INSERT INTO users_info (username,first_name,last_name) VALUES ('%s','%s','%s');",username,"Admin","Admin");
+				if (!insertQuery(query+query2)) return IdentificationCodes.RegistrationSuccessul;
 				return IdentificationCodes.InternalError;
-				
 			}
 		}
 		catch (Exception e) {
 			System.out.println(e.getMessage());
 			return IdentificationCodes.InternalError;
 		}
-		
-		//adds a new user
-		//returns 0 if user was successfully added
-		//returns 1 if user already exists
-		//returns 2 if some other error occurs
 	}
-	/**
-	 * HashMap for the tableNames (static)
-	 * Key (String) | Value (tableName)
-	 * --------------------------------
-	 * Credentials  | users_credentials
-	 * Info		    | users_info
-	 * Reservation  | users_reservation_history
-	 * Rooms  	    | room_info
-	 * RoomsHistory | room_reservation_history
-	 */
-
 	
+
+	/**
+	 *  TO-DO: IMPLEMENT ADMIN, VERIFIED USER, and NON VERIFIED USER
+	 * 
+	 * Query : Insert INTO userscredentials (username,password,email,date_of_creation,last_login) VALUES () ;
+	 * @param username : username 
+	 * @param  password : password
+	 * @param email : email
+	 * @return  <ul> 
+	 * 				<li> 0 if user was successfully added</li>
+	 * 				<li> 1 if user already exists </li>
+	 * 				<li> 2 if some other error occurs </li>
+	 * 			</ul>
+	 * 
+	 */
+	public  IdentificationCodes VerifyRegistration(String username,String code ){
+		//Do-Something: A counter you can try the code up to three times 
+		if(IDCodes.get(username)!= null && IDCodes.get(username).equals(code) ){
+
+		}
+		// Return INVALID CODE - TRY AGAIN
+		return IdentificationCodes.InternalError;
+	}
+	
+
 	/**
 	 * NOT FINISHED : HANDLING BOOLEAN SHIT
 	 * Query : "Select booked_until,Available from %s where RoomId = '%s' order by booked_until desc ;
@@ -685,7 +697,7 @@ public class DB_API {
 	 * @param username
 	 * @return 
 	 */
-	public ArrayList<HashMap<String,String>> getReservationHistoryUser(String username){
+	public HashMap<String,String> getReservationHistoryUser(String username){
 		if(!checkMembershipUserName(username)) return null;
 		String query1= String.format(
 			"""
@@ -705,11 +717,11 @@ public class DB_API {
 		//String [] fields2=  new String [] {"num_of_beds","floor","price_per_night","booked_until","solar_system","planet","hotel","room_type"};
 		ArrayList<HashMap<String,String>> results= extractQuery(query1,fields1);
 		
-		
-
-		return results;
+		if(results.size()==1){
+			return results.get(0);
+		}
+		return null;
 
 	}
-
 
 }

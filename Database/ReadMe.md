@@ -11,8 +11,8 @@ We have a total of 8 tables :
 
 ## users_credentials 
 
-| username      | email | password   | date_of_creation | last_login | userType
-| :---:        |    :----:   |          :---: |  :---:        |    :----:   |          :---: |
+| username      | email | password   | date_of_creation | last_login | userType | verification_code | verified
+| :---:        |    :----:   |          :---: |  :---:        |    :----:   |          :---: | :---: | :---: |
 |       |        |   | | | |
 |       |        |   | | | |
 
@@ -23,6 +23,8 @@ The above table has the username as a unique identifier (no duplicate usernames 
 - date_of_creation : timestamp
 - last_login : timestamp
 - userType : int  
+- verification_code : int
+- verified: boolean
 
 
 ## users_info
