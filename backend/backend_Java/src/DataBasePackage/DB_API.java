@@ -147,7 +147,7 @@ public class DB_API {
 					).Password(results.get(0).get("password")).DateOfCreation(
 					results.get(0).get("date_of_creation")).LastLogin(
 						results.get(0).get("last_login")
-					).VerificationCode(results.get("verification_code")).UserType(userCode).build();
+					).VerificationCode(results.get(0).get("verification_code")).UserType(userCode).build();
 				}
 				else{
 					return null;
