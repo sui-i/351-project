@@ -1,6 +1,6 @@
-package RETIREDclientPackage;
+package DataBasePackage;
 
-public class C_InformationDB {
+public class DB_UserInformation {
 	
 	private String userName;
 	private String firstName;
@@ -9,7 +9,7 @@ public class C_InformationDB {
 	private String birthDate;
 	private String Location;
 	
-	public C_InformationDB(String username, String firstname, String lastname,String phonenumber, String birthdate, String location) 
+	public DB_UserInformation(String username, String firstname, String lastname,String phonenumber, String birthdate, String location) 
 	{
 		// Shouldn't these be setters? ~Mounif
 		userName=username;

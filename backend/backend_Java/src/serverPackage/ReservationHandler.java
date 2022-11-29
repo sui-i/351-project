@@ -102,6 +102,7 @@ public class ReservationHandler {
 	public IdentificationCodes Login(String username, String password) {
 		//TODO:check if username password pair matches. if so, isLoggedIn = True and import all userInfo
 		//else dump.
+		
 		return IdentificationCodes.LoginSuccessful;
 	}
 	
@@ -354,19 +355,21 @@ public class ReservationHandler {
 		{
 			return "Rep"+Logout().ID;
 		}
-		if ("150".equals(RCode)) //verify email
+		if ("150".equals(RCode)) //Get all User info
 		{
+			if (!isLoggedIn)
+				return "Rep"+IdentificationCodes.InsufficientPermissions.ID;
 			String[] info = getUserInfo();
 			return String.format("Rep150:%s,%s,%s,%s",info[0],info[1],info[2],info[3]);	
 		}
-		if ("160".equals(RCode)) //verify email
+		if ("160".equals(RCode)) //Delete Account
 		{
 			String [] parser = request.split(":");
 			if (parser.length!=2)
 				return def;
-			return "Rep"+DeleteAccount(parser[1]);	
+			return "Rep"+DeleteAccount(parser[1]).ID;	
 		}
-		if ("170".equals(RCode)) //verify email
+		if ("170".equals(RCode)) //Resend verification codes
 		{			
 			String [] parser = request.split(":");
 			if (parser.length!=2)

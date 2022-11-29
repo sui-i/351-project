@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.net.Socket;
+import java.util.Arrays;
 
 
 /**
@@ -113,6 +114,8 @@ public class C_Client {
 		if ("Rep150".equals(reply.subSequence(0, 6))) 
 		{
 			String[] X = ((String) reply.subSequence(6, reply.length()-1)).split(",");
+			System.out.println(reply);
+			System.out.println(Arrays.deepToString(X));
 			return String.format("Your user information is:\n +Username:%s\n +Email:%s\n +First name:%s\n +Last name:%s",
 									X[0],X[1],X[2],X[3]);
 		}
@@ -130,10 +133,10 @@ public class C_Client {
 	}
 	public String AttemptResendVerificaitonCode(String username)
 	{
-		send(String.format("Req130:%s",username));
+		send(String.format("Req170:%s",username));
 		String reply = receive();
 		if (!"".equals(RequestGenericReturns(reply))) return RequestGenericReturns(reply);
-		if ("Rep170".equals(reply)) return "The verification Code";
+		if ("Rep170".equals(reply)) return "The verification Code has been sucessfully resent";
 		if ("Rep121".equals(reply)) return "There seems to be an issue with email server";
 		if ("Rep115".equals(reply)) return "This user is already verified.";
 		return "Try again, Server reply incomprehensible: " + reply;
