@@ -1,3 +1,4 @@
+CREATE DATABASE Hostellar;
 CREATE TABLE users_credentials (
    username  varchar(32),
    email  varchar(64),

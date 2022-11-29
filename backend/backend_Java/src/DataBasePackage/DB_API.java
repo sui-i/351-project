@@ -51,9 +51,9 @@ public class DB_API {
 	private static HashMap<String,String> TableNames;
 	private boolean created=false;
 	private static final String JDBC_DRIVER ="org.postgresql.Driver";
-    private static final String DB_URL = "jdbc:postgresql://localhost/'YourDataBase'";
+    private static final String DB_URL = "jdbc:postgresql://localhost/Hostellar";
     private static final String USER = "postgres";
-    private static final String PASS ="YourPassword";
+    private static final String PASS ="password";
     private static HashMap<String,DB_UserInformation> users;
 	private static HashMap<String,R_InformationDB> rooms;
     
@@ -115,7 +115,7 @@ public class DB_API {
 		
 		
 		try {
-			if(ConnectDB()) {
+			assert conn!=null:"No Connection mate";
 				String query2= String.format("""
 					SELECT users_info.username,first_name,last_name,phone_number,birthdate,location,
 					users_credentials.email ,users_credentials.password ,users_credentials.date_of_creation,
@@ -129,6 +129,7 @@ public class DB_API {
 				
 				String query = String.format("Select username,first_name,last_name,phone_number,birthdate,location from %s where username = '%s' ;",TableNames.get("Info"),username);
 				ArrayList<HashMap<String,String>> results= extractQuery(query2, fields);
+				System.out.println(results);
 				String C_firstName = "",C_lastName= "",C_phoneNumber= "",C_birthDate="",C_Location="";
 				
 				if(results.size()==1){
@@ -147,19 +148,15 @@ public class DB_API {
 					).Password(results.get(0).get("password")).DateOfCreation(
 					results.get(0).get("date_of_creation")).LastLogin(
 						results.get(0).get("last_login")
-					).VerificationCode(results.get("verification_code")).UserType(userCode).build();
+					).VerificationCode(results.get(0).get("verification_code")).UserType(userCode).build();
 				}
 				else{
 					return null;
 				}
 
 		        
-			}
-			else {
-				// TO-DO : return special instance of the DB_UserInformation
-				
-				return null;
-			}
+			
+			
 		}
 		
 		catch (Exception e) {
@@ -247,7 +244,7 @@ public class DB_API {
 				if(results.size()==0 ) return UserTypeCodes.NotFound;
 				else if (results.size()>1) return UserTypeCodes.DuplicatedUsers;
 				
-				if(results.get(0).get("usertype") !=null) return UserTypeCodes.InternalError;
+				if(results.get(0).get("usertype") ==null) return UserTypeCodes.InternalError;
 				int ID=Integer.parseInt(results.get(0).get("usertype"));
 				if(ID==UserTypeCodes.VerifiedUser.ID) return UserTypeCodes.VerifiedUser;
 				if(ID==UserTypeCodes.NonVerifiedUser.ID) return UserTypeCodes.NonVerifiedUser;
@@ -294,7 +291,7 @@ public class DB_API {
 				if(results.size()==0 ) return UserTypeCodes.NotFound;
 				else if (results.size()>1) return UserTypeCodes.DuplicatedUsers;
 				
-				if(results.get(0).get("usertype") !=null) return UserTypeCodes.InternalError;
+				if(results.get(0).get("usertype") ==null) return UserTypeCodes.InternalError;
 				int ID=Integer.parseInt(results.get(0).get("usertype"));
 				if(ID==UserTypeCodes.VerifiedUser.ID) return UserTypeCodes.VerifiedUser;
 				if(ID==UserTypeCodes.NonVerifiedUser.ID) return UserTypeCodes.NonVerifiedUser;
@@ -337,7 +334,7 @@ public class DB_API {
 		if(!ValidateSynthax.checkEmail(email)) return IdentificationCodes.EmailNotVerified;
 		try {
 			assert conn !=null : "No connection mate";
-			String query = String.format("Select username,password,email from %s where username = '%s' ;",TableNames.get("credentials"),username);
+			String query = String.format("Select username,password,email from %s where username = '%s' ;",TableNames.get("Credentials"),username);
 			ArrayList<HashMap<String,String>> results= extractQuery(query,new String [] {"username","password","email"});
 			if(results.size()==0){
 				return IdentificationCodes.UsernameNotFound;
@@ -394,7 +391,7 @@ public class DB_API {
 					String time= "NOW()";
 					String lastLogin = "NOW()";
 					password= md5.getMd5(password);
-					String query = String.format("Insert INTO %s (username,password,email,date_of_creation,last_login,userType,verification_code) VALUES('%s','%s','%s',%s,%s,%s,'%s') ;",TableNames.get("credentials"),username,password,email,time,lastLogin,UserTypeCodes.NonVerifiedUser,VerificationCode);  
+					String query = String.format("Insert INTO %s (username,password,email,date_of_creation,last_login,userType,verification_code) VALUES('%s','%s','%s',%s,%s,%s,%s) ;",TableNames.get("Credentials"),username,password,email,time,lastLogin,UserTypeCodes.NonVerifiedUser.ID,VerificationCode);  
 					String query2= String.format("INSERT INTO users_info (username,first_name,last_name) VALUES ('%s','%s','%s');",username,FirstName,LastName);
 					if (!insertQuery(query+query2)) return IdentificationCodes.RegistrationSuccessul;
 					return IdentificationCodes.InternalError;
@@ -424,7 +421,9 @@ public class DB_API {
 		
 		try {
 			assert conn != null : "No Connection Mate";
+			System.out.println("Yes");
 			UserTypeCodes registered=checkMembershipUserName(username);
+			System.out.println(registered);
 			if(registered.ID ==0 ||  registered.ID ==1 || registered.ID ==2) {
 				return IdentificationCodes.UsernameAlreadyExists;
 			}
@@ -433,8 +432,11 @@ public class DB_API {
 				String time= "NOW()";
 				String lastLogin = "NOW()";
 				password= md5.getMd5(password);
-				String query = String.format("Insert INTO %s (username,password,email,date_of_creation,last_login,userType) VALUES('%s','%s','%s',%s,%s,%s,'%s') ;",TableNames.get("credentials"),username,password,email,time,lastLogin,UserTypeCodes.Admin);  
+				String query = String.format("Insert INTO %s (username,password,email,date_of_creation,last_login,userType,verification_code) VALUES('%s','%s','%s',NOW(),NOW(),%s,123456) ;",TableNames.get("Credentials"),username,password,email,UserTypeCodes.Admin.ID);  
+				System.out.println(query);
 				String query2= String.format("INSERT INTO users_info (username,first_name,last_name) VALUES ('%s','%s','%s');",username,"Admin","Admin");
+				
+				System.out.println(query2);
 				if (!insertQuery(query+query2)) return IdentificationCodes.RegistrationSuccessul;
 				return IdentificationCodes.InternalError;
 			}
@@ -835,9 +837,9 @@ public class DB_API {
 					DELETE FROM users_reservation_history WHERE username='%s';
 					""", username,username,username);
 			
-			if(insertQuery(move_query)) return true;
-			if(insertQuery(delete_query)) return true;
-			return false;
+			if(! insertQuery(move_query)) return false;
+			if(! insertQuery(delete_query)) return false;
+			return true;
 		}
 		catch(Exception e){
 			e.printStackTrace();
