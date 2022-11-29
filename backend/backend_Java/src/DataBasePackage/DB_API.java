@@ -56,7 +56,6 @@ public class DB_API {
     private static final String PASS ="YourPassword";
     private static HashMap<String,DB_UserInformation> users;
 	private static HashMap<String,R_InformationDB> rooms;
-	private static HashMap<String,String> IDCodes;
     
 	public DB_API() {
 		if(!created) {
@@ -120,12 +119,12 @@ public class DB_API {
 				String query2= String.format("""
 					SELECT users_info.username,first_name,last_name,phone_number,birthdate,location,
 					users_credentials.email ,users_credentials.password ,users_credentials.date_of_creation,
-					users_credentials.last_login,users_credentials.usertype
+					users_credentials.last_login,users_credentials.usertype , users_credentials.verification_code
 					FROM users_info INNER JOIN users_credentials ON users_credentials.username=users_info.username
 					WHERE users_info.username='%s';
 						""",username);
 
-				String [] fields= new String [] {"username","first_name","last_name","phone_number","birthdate","location","email","password","date_of_creation","last_login","usertype"};
+				String [] fields= new String [] {"username","first_name","last_name","phone_number","birthdate","location","email","password","date_of_creation","last_login","usertype","verification_code"};
 
 				
 				String query = String.format("Select username,first_name,last_name,phone_number,birthdate,location from %s where username = '%s' ;",TableNames.get("Info"),username);
@@ -148,7 +147,7 @@ public class DB_API {
 					).Password(results.get(0).get("password")).DateOfCreation(
 					results.get(0).get("date_of_creation")).LastLogin(
 						results.get(0).get("last_login")
-					).UserType(userCode).build();
+					).VerificationCode(results.get("verification_code")).UserType(userCode).build();
 				}
 				else{
 					return null;
