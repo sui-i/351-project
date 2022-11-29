@@ -5,7 +5,6 @@ public enum MailCodes {
 	EmailRecipientNotFound(351),
 	EmailServiceNotAvailable(352),
 	
-	
 	InternalError(500);
 
 	public final int ID;
