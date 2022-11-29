@@ -22,6 +22,7 @@ public class ReservationHandler {
 	private long lastSeen; //Should be updated after method call.
 	
 	UserTypeCodes accountType;
+	DB_UserInformation clientInfo;
 	String clientUsername;
 	String clientEmail;
 	String clientPassword;
@@ -70,6 +71,19 @@ public class ReservationHandler {
 		return new ReservationHandler();
 	}
 	
+	/**Updates the info of the user based on the database user information object.
+	 * 
+	 *@param info: database user information object.
+	 */
+	private void updateInfo(DB_UserInformation info) {
+		this.clientInfo = info;
+		this.clientUsername = info.getuserName();
+		this.clientEmail = info.getEmail();
+		this.clientFirstName = info.getfirstName();
+		this.clientLastName = info.getlastName();
+		this.accountType = info.getUserType();
+	}
+	
 	/**INCOMPLETE.
 	 * Registering the user uses the database interface to add a new user, and calls on the Email
 	 * server to send a verification code.
@@ -81,10 +95,16 @@ public class ReservationHandler {
 	 * */
 	public IdentificationCodes Register(String username, String password, String email, String firstName, String lastName) {
 		//Search for username, if it exists and is verified, dump
-		if (db.checkMembershipUserName(username))
+		UserTypeCodes idcByUsername = db.checkMembershipUserName(username);
+		if (idcByUsername.equals(UserTypeCodes.InternalError))
+			return IdentificationCodes.InternalError;
+		if (idcByUsername.equals(UserTypeCodes.VerifiedUser) || idcByUsername.equals(UserTypeCodes.Admin))
 			return IdentificationCodes.UsernameAlreadyExists;
-		if (db.checkMembershipEmail(email))
+		
+		UserTypeCodes idcByEmail = db.checkMembershipUserName(username);
+		if (idcByEmail.equals(UserTypeCodes.VerifiedUser) || idcByUsername.equals(UserTypeCodes.Admin))
 			return IdentificationCodes.EmailAlreadyExists;
+		
 		//then create a registration code and try to send it by mail, if that fails, dump
 		String verificationCode = ""; 
 		for(int i=0;i<6;i++)
@@ -93,7 +113,18 @@ public class ReservationHandler {
 		boolean mailCode = EmailAPI.send("Verify your email!","Your verification code is: "+verificationCode,email);
 		if (!mailCode)
 			return IdentificationCodes.EmailSendingError;
+		
 		//then add the new user.
+		//remove email or username if it exists
+		if (idcByEmail.equals(UserTypeCodes.NonVerifiedUser))
+		{
+			db.deleteUserByEmail(username);
+		}
+		if (idcByUsername.equals(UserTypeCodes.NonVerifiedUser))
+		{
+			db.deleteUserByUsername(username);
+		}
+		
 		IdentificationCodes register = db.RegisterUser(username,email,password,firstName,lastName,verificationCode);
 		if (!register.equals(IdentificationCodes.RegistrationSuccessul))
 			return register;
@@ -109,7 +140,7 @@ public class ReservationHandler {
 		UserTypeCodes idc = db.checkMembershipUserName(username);
 		if (idc.equals(UserTypeCodes.InternalError))
 			return IdentificationCodes.InternalError;
-		if (idc.equals(NOT FOUND))
+		if (idc.equals(UserTypeCodes.NotFound))
 			return IdentificationCodes.UsernameNotFound;
 		if (!idc.equals(UserTypeCodes.NonVerifiedUser))
 			return IdentificationCodes.UserAlreadyVerified;
@@ -138,9 +169,18 @@ public class ReservationHandler {
 	public IdentificationCodes Login(String username, String password) {
 		//TODO:check if username password pair matches. if so, isLoggedIn = True and import all userInfo
 		//else dump.
-		
+		UserTypeCodes idc = db.checkMembershipUserName(username);
+		if (idc.equals(UserTypeCodes.InternalError))
+			return IdentificationCodes.InternalError;
+		if (idc.equals(UserTypeCodes.NotFound))
+			return IdentificationCodes.UsernameNotFound;
+		if (!idc.equals(UserTypeCodes.NonVerifiedUser))
+			return IdentificationCodes.EmailNotVerified;
+		DB_UserInformation info = db.getUserInfo(username);
+		updateInfo(info);
 		return IdentificationCodes.LoginSuccessful;
 	}
+	
 	
 	/**
 	 * Logs the client out by reseting all parameters.
