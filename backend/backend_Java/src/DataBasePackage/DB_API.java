@@ -53,7 +53,7 @@ public class DB_API {
 	private static final String JDBC_DRIVER ="org.postgresql.Driver";
     private static final String DB_URL = "jdbc:postgresql://localhost/Hostellar";
     private static final String USER = "postgres";
-    private static final String PASS ="hungryshark2003";
+    private static final String PASS ="password";
     private static HashMap<String,DB_UserInformation> users;
 	private static HashMap<String,R_InformationDB> rooms;
     
@@ -129,7 +129,7 @@ public class DB_API {
 				
 				String query = String.format("Select username,first_name,last_name,phone_number,birthdate,location from %s where username = '%s' ;",TableNames.get("Info"),username);
 				ArrayList<HashMap<String,String>> results= extractQuery(query2, fields);
-				System.out.println(results);
+				
 				String C_firstName = "",C_lastName= "",C_phoneNumber= "",C_birthDate="",C_Location="";
 				
 				if(results.size()==1){
@@ -246,6 +246,8 @@ public class DB_API {
 				
 				if(results.get(0).get("usertype") ==null) return UserTypeCodes.InternalError;
 				int ID=Integer.parseInt(results.get(0).get("usertype"));
+				query= String.format("UPDATE users_credentials SET last_login=NOW() WHERE username='%s';", username);
+				if(!insertQuery(query)) return UserTypeCodes.InternalError;
 				if(ID==UserTypeCodes.VerifiedUser.ID) return UserTypeCodes.VerifiedUser;
 				if(ID==UserTypeCodes.NonVerifiedUser.ID) return UserTypeCodes.NonVerifiedUser;
 				if(ID==UserTypeCodes.Admin.ID) return UserTypeCodes.Admin;
@@ -293,6 +295,8 @@ public class DB_API {
 				
 				if(results.get(0).get("usertype") ==null) return UserTypeCodes.InternalError;
 				int ID=Integer.parseInt(results.get(0).get("usertype"));
+				query= String.format("UPDATE users_credentials SET last_login=NOW() WHERE username='%s';", username);
+				if(!insertQuery(query)) return UserTypeCodes.InternalError;
 				if(ID==UserTypeCodes.VerifiedUser.ID) return UserTypeCodes.VerifiedUser;
 				if(ID==UserTypeCodes.NonVerifiedUser.ID) return UserTypeCodes.NonVerifiedUser;
 				if(ID==UserTypeCodes.Admin.ID) return UserTypeCodes.Admin;
@@ -388,12 +392,12 @@ public class DB_API {
 				}
 				else {
 					//TO-DO: Implement the codes
-					String time= "NOW()";
-					String lastLogin = "NOW()";
 					password= md5.getMd5(password);
-					String query = String.format("Insert INTO %s (username,password,email,date_of_creation,last_login,userType,verification_code) VALUES('%s','%s','%s',%s,%s,%s,%s) ;",TableNames.get("Credentials"),username,password,email,time,lastLogin,UserTypeCodes.NonVerifiedUser.ID,VerificationCode);  
+					String query = String.format("Insert INTO %s (username,password,email,date_of_creation,last_login,userType,verification_code) VALUES('%s','%s','%s',NOW(),NOW(),%s,%s) ;",TableNames.get("Credentials"),username,password,email,UserTypeCodes.NonVerifiedUser.ID,VerificationCode);  
 					String query2= String.format("INSERT INTO users_info (username,first_name,last_name) VALUES ('%s','%s','%s');",username,FirstName,LastName);
-					if (!insertQuery(query+query2)) return IdentificationCodes.RegistrationSuccessul;
+					
+					
+					if (insertQuery(query+query2)) return IdentificationCodes.RegistrationSuccessul;
 					return IdentificationCodes.InternalError;
 				}
 			}
@@ -421,23 +425,20 @@ public class DB_API {
 		
 		try {
 			assert conn != null : "No Connection Mate";
-			System.out.println("Yes");
+			
 			UserTypeCodes registered=checkMembershipUserName(username);
-			System.out.println(registered);
+			
 			if(registered.ID ==0 ||  registered.ID ==1 || registered.ID ==2) {
 				return IdentificationCodes.UsernameAlreadyExists;
 			}
 			else {
 				//TO-DO: Implement the codes
-				String time= "NOW()";
-				String lastLogin = "NOW()";
 				password= md5.getMd5(password);
 				String query = String.format("Insert INTO %s (username,password,email,date_of_creation,last_login,userType,verification_code) VALUES('%s','%s','%s',NOW(),NOW(),%s,123456) ;",TableNames.get("Credentials"),username,password,email,UserTypeCodes.Admin.ID);  
-				System.out.println(query);
 				String query2= String.format("INSERT INTO users_info (username,first_name,last_name) VALUES ('%s','%s','%s');",username,"Admin","Admin");
 				
-				System.out.println(query2);
-				if (!insertQuery(query+query2)) return IdentificationCodes.RegistrationSuccessul;
+				
+				if (insertQuery(query+query2)) return IdentificationCodes.RegistrationSuccessul;
 				return IdentificationCodes.InternalError;
 			}
 		}
@@ -464,18 +465,26 @@ public class DB_API {
 	 */
 	public  boolean verifyAccount(String username){
 		//Do-Something: A counter you can try the code up to three times 
-		UserTypeCodes registered=checkMembershipUserName(username);
-		if(!(registered.ID ==0 ||  registered.ID ==1 || registered.ID ==2)) {
+		try {
+			UserTypeCodes registered=checkMembershipUserName(username);
+			if(registered.ID !=2) {
+				return false;
+			}
+			String query= String.format("UPDATE user_credentials SET usertype= %s WHERE username='%s'; ", 1,username);
+			return insertQuery(query);
+					
+		}
+		catch(Exception e) {
+			e.printStackTrace();
 			return false;
 		}
-		//String query = String.format("Insert INTO %s (username,password,email,date_of_creation,last_login,userType) VALUES('%s','%s','%s',%s,%s,%s,'%s') ;",TableNames.get("credentials"),username,password,email,time,lastLogin,UserTypeCodes.Admin);  
-		return true;
+		
 		
 	}
 	
 
 	/**
-	 * NOT FINISHED : HANDLING BOOLEAN SHIT
+	 *
 	 * Query : "Select booked_until,Available from %s where RoomId = '%s' order by booked_until desc ;
 	 * @param ID : ID of the room 
 	 * @return  <ul> 
@@ -488,6 +497,8 @@ public class DB_API {
 	public  ReservationCodes checkRoomAvailability(String RoomID,String BookIn,String BookOut) {
 		assert conn !=null : "No connection mate";
 		try {
+			ReservationCodes status= ValidateRoom(RoomID);
+			if(!(status.equals(ReservationCodes.RoomFoundSuccessfully))) return status;
 			if(!ValidateSynthax.checkTime(BookIn) || !ValidateSynthax.checkTime(BookOut)) return ReservationCodes.InvalidDateFormat;
 
 			String query="";
@@ -591,11 +602,12 @@ public class DB_API {
 	public ReservationCodes ValidateRoom(String RoomID)
 	{
 	
-	assert conn !=null : "No connection mate";
+	
 	if(RoomID.length()!=16){
 		return ReservationCodes.RoomIDInvalid;
 	}
 	try {
+		assert conn !=null : "No connection mate";
 		HashMap<String,ReservationCodes> Errors = new HashMap<>();
 		
 		String s="room_type|num_of_beds|floor|price_per_night|planet_name|solar_system_name|hotel_name";
