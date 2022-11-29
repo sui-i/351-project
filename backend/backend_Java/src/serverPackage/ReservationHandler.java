@@ -14,13 +14,12 @@ public class ReservationHandler {
 	private static Date date = new Date();
 	private static int userConnections = 0;
 	private static int checkAt = 10;
-	
+
+	private DB_API db;
 	final long TOKENID;
-	private boolean isLoggedIn;
-	private DB_API DB;
 	private long lastSeen; //Should be updated after method call.
 	
-	int accountType;
+	UserTypeCodes accountType;
 	String clientUsername;
 	String clientEmail;
 	String clientPassword;
@@ -36,8 +35,8 @@ public class ReservationHandler {
 	 * @return a client handler object
 	 */
 	private ReservationHandler(){
-		DB = new DB_API();
-		DB.ConnectDB();
+		db = new DB_API();
+		db.ConnectDB();
 		long Tok = 0; while (Tok==0) Tok = rand.nextLong();
 		TOKENID=Tok;
 		lastSeen = date.getTime();
@@ -78,23 +77,23 @@ public class ReservationHandler {
 	 * 
 	 * @return ID: appropriate enum identification code
 	 * */
-	public static IdentificationCodes Register(String username, String password, String email, String firstName, String lastName) {
+	public IdentificationCodes Register(String username, String password, String email, String firstName, String lastName) {
 		//Search for username, if it exists and is verified, dump
-		if (DB.checkMembershipUserName(username))
+		if (db.checkMembershipUserName(username))
 			return IdentificationCodes.UsernameAlreadyExists;
-		if (DB.checkMembershipEmail(email))
+		if (db.checkMembershipEmail(email))
 			return IdentificationCodes.EmailAlreadyExists;
 		//then create a registration code and try to send it by mail, if that fails, dump
 		String verificationCode = ""; 
 		for(int i=0;i<6;i++)
 			verificationCode+=(char) rand.nextInt((int)'A', (int)'Z');
-		//TODO: switch it to MailCodes
+			//TODO: switch it to MailCodes
 		boolean mailCode = EmailAPI.send("Verify your email!","Your verification code is: "+verificationCode,email);
 		if (!mailCode)
 			return IdentificationCodes.EmailSendingError;
 		//then add the new user.
-		IdentificationCodes register = DB.RegisterUser(username,email,password,firstName,lastName);
-		if (register.equals(IdentificationCodes.UsernameAlreadyExists))
+		IdentificationCodes register = db.RegisterUser(username,email,password,firstName,lastName,verificationCode);
+		if (!register.equals(IdentificationCodes.RegistrationSuccessul))
 			return register;
 		return IdentificationCodes.RegistrationSuccessul;
 	}
@@ -103,7 +102,7 @@ public class ReservationHandler {
 	 * Used to Verify email addresses.
 	 * returns either wrong or successful.
 	 * */
-	public static IdentificationCodes VerifyEmail(String username, String VerificationCode) {
+	public IdentificationCodes VerifyEmail(String username, String VerificationCode) {
 		//TODO: search for username, if its not found or is already verified, dump
 		//check if the verification code matches the one in the DB. if not, dump
 		//change the Account to verified user in DB, change the verification code field to an empty value
