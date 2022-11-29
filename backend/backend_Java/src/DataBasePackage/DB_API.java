@@ -1,6 +1,6 @@
 package DataBasePackage;
 import Security.md5;
-import cmdClientPackage.DB_UserInformation;
+
 
 import roomsPackage.R_InformationDB;
 import requestsrepliescodes.IdentificationCodes; 
@@ -52,6 +52,7 @@ public class DB_API {
     private static final String USER = "postgres";
     private static final String PASS ="YourPassword";
     private static HashMap<String,DB_UserInformation> users;
+	private static HashMap<String,R_InformationDB> rooms;
     
 	public DB_API() {
 		if(!created) {
