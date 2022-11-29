@@ -5,13 +5,7 @@ public enum ReservationCodes {
 	RoomStatusChangedSuccessfully(210),
 	RoomAlreadyReserved(211),
 	RoomReservationtimeInvalid(212),
-	/*Added By Hashem
-	 * 
-	 */
 	RoomReservationInvalid(213),
-	/*Added By Hashem
-		* 
-		*/
 
 	RoomRechedulingFailed(241),
 
