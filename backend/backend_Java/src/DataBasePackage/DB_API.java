@@ -53,7 +53,7 @@ public class DB_API {
 	private static final String JDBC_DRIVER ="org.postgresql.Driver";
     private static final String DB_URL = "jdbc:postgresql://localhost/Hostellar";
     private static final String USER = "postgres";
-    private static final String PASS ="password";
+    private static final String PASS ="hungryshark2003";
     private static HashMap<String,DB_UserInformation> users;
 	private static HashMap<String,R_InformationDB> rooms;
     
