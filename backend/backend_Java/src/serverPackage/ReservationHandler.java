@@ -3,7 +3,10 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Random;
 
+import DataBasePackage.DB_API;
+import emailVerificationServer.EmailAPI;
 import requestsrepliescodes.IdentificationCodes;
+import requestsrepliescodes.MailCodes;
 import requestsrepliescodes.ReservationCodes;
 public class ReservationHandler {
 	private static HashMap<Long,ReservationHandler> Clients = new HashMap<>();
@@ -14,9 +17,9 @@ public class ReservationHandler {
 	
 	final long TOKENID;
 	private boolean isLoggedIn;
+	private DB_API DB;
+	private long lastSeen; //Should be updated after method call.
 	
-	
-	long lastSeen; //Should be updated after method call.
 	int accountType;
 	String clientUsername;
 	String clientEmail;
@@ -33,6 +36,8 @@ public class ReservationHandler {
 	 * @return a client handler object
 	 */
 	private ReservationHandler(){
+		DB = new DB_API();
+		DB.ConnectDB();
 		long Tok = 0; while (Tok==0) Tok = rand.nextLong();
 		TOKENID=Tok;
 		lastSeen = date.getTime();
@@ -74,9 +79,23 @@ public class ReservationHandler {
 	 * @return ID: appropriate enum identification code
 	 * */
 	public static IdentificationCodes Register(String username, String password, String email, String firstName, String lastName) {
-		//TODO: Search for username, if it exists and is verified, dump
+		//Search for username, if it exists and is verified, dump
+		if (DB.checkMembershipUserName(username))
+			return IdentificationCodes.UsernameAlreadyExists;
+		if (DB.checkMembershipEmail(email))
+			return IdentificationCodes.EmailAlreadyExists;
 		//then create a registration code and try to send it by mail, if that fails, dump
+		String verificationCode = ""; 
+		for(int i=0;i<6;i++)
+			verificationCode+=(char) rand.nextInt((int)'A', (int)'Z');
+		//TODO: switch it to MailCodes
+		boolean mailCode = EmailAPI.send("Verify your email!","Your verification code is: "+verificationCode,email);
+		if (!mailCode)
+			return IdentificationCodes.EmailSendingError;
 		//then add the new user.
+		IdentificationCodes register = DB.RegisterUser(username,email,password,firstName,lastName);
+		if (register.equals(IdentificationCodes.UsernameAlreadyExists))
+			return register;
 		return IdentificationCodes.RegistrationSuccessul;
 	}
 	

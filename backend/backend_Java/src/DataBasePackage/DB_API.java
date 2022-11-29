@@ -27,7 +27,7 @@ import java.sql.Statement;
  * </ol>
  */
 
-
+//checkMembershipEmail(String)
 
 public class DB_API {
 	
