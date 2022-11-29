@@ -36,14 +36,16 @@ public class DB_API {
 	private Connection conn;
 	boolean connectionInitiliazed=false;
 	/**
-	 * HashMap for the tableNames (static)
-	 * Key (String) | Value (tableName)
-	 * --------------------------------
-	 * Credentials  | users_credentials
-	 * Info		    | users_info
-	 * Reservation  | users_reservation_history
-	 * Rooms  	    | room_info
-	 * RoomsHistory | room_reservation_history
+	 * 
+	 * <h4>HashMap for the tableNames (static):</h4>
+	 * 
+	 * Key (String) | Value (tableName) <br><br>
+	 * -------------------------------- <br><br>
+	 * Credentials  | users_credentials <br><br>
+	 * Info		    | users_info <br><br>
+	 * Reservation  | users_reservation_history <br><br>
+	 * Rooms  	    | room_info <br><br>
+	 * RoomsHistory | room_reservation_history <br><br>
 	 */
 	private static HashMap<String,String> TableNames;
 	private boolean created=false;
@@ -94,6 +96,7 @@ public class DB_API {
 
 	
 	/**
+	 * TO-DO: Update the DB_UserInformation
 	 * Extracts the information of the user from the database;
 	 * Table Used: users_info
 	 * Query Used: Select username,firstName,lastName,phoneNumber,birthDate,Location from users_info where username = ....;
@@ -199,28 +202,41 @@ public class DB_API {
 	 * 		Select username from userscredentials where username = {@code username} ;
 	 * @param username : 
 	 * @return  <ul> 
-	 * 				<li> True if username exists</li>
-	 * 				<li> False if no such username exist </li>
+	 * 				<li> {@code UserTypeCodes.NotFound } </li>
+	 * 				<li> {@code UserTypeCodes.DuplicatedUsers } </li>
+	 *  			<li> {@code UserTypeCodes.VerifiedUser }</li>
+	 * 				<li> {@code UserTypeCodes.DuplicatedUsers } </li>
 	 * 			</ul>
 	 * 
 	 * 
+	 * 
 	 */
-	 public boolean checkMembershipUserName(String username)
+	 public UserTypeCodes checkMembershipUserName(String username)
 		{
 		
-			assert conn !=null : "No connection mate";
+			
 			try {
-				String query = String.format("Select username from userscredentials where username = '%s' ;",username);
-				ArrayList<HashMap<String,String>> results= extractQuery(query, new String [] {"username"});
+				assert conn !=null : "No connection mate";
+				String query = String.format("Select username , usertype from users_credentials where username = '%s' ;",username);
+				ArrayList<HashMap<String,String>> results= extractQuery(query, new String [] {"username","usertype"});
 	
-				if(results.size()==0 || results.size()>1) return false;
-				else
-					return true;
+				if(results.size()==0 ) return UserTypeCodes.NotFound;
+				else if (results.size()>1) return UserTypeCodes.DuplicatedUsers;
+				
+				if(results.get(0).get("usertype") !=null) return UserTypeCodes.InternalError;
+				int ID=Integer.parseInt(results.get(0).get("usertype");
+				switch(ID){
+					case UserTypeCodes.VerifiedUser.ID: return UserTypeCodes.VerifiedUser;
+					case UserTypeCodes.NonVerifiedUser.ID : return UserTypeCodes.NonVerifiedUser;
+					case UserTypeCodes.Admin.ID : return UserTypeCodes.Admin;
+				}
+				return UserTypeCodes.InternalError;
+				
 			}
 			
 			catch(Exception e) {
 				System.out.println(e.getMessage());
-				return false;
+				return UserTypeCodes.InternalError;
 			}
 			//return true;
 			//returns if username has an account
@@ -408,13 +424,12 @@ public class DB_API {
 	 * 			</ul>
 	 * 
 	 */
-	public  IdentificationCodes VerifyRegistration(String username,String code ){
+	public  boolean verifyAccount(String username){
 		//Do-Something: A counter you can try the code up to three times 
-		if(IDCodes.get(username)!= null && IDCodes.get(username).equals(code) ){
-
-		}
-		// Return INVALID CODE - TRY AGAIN
-		return IdentificationCodes.InternalError;
+		if(!checkMembershipUserName(username)) return false;
+		//String query = String.format("Insert INTO %s (username,password,email,date_of_creation,last_login,userType) VALUES('%s','%s','%s',%s,%s,%s,'%s') ;",TableNames.get("credentials"),username,password,email,time,lastLogin,UserTypeCodes.Admin);  
+		return true;
+		
 	}
 	
 

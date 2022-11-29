@@ -1,7 +1,8 @@
 package requestsrepliescodes;
 
 public enum UserTypeCodes {
-    
+    DuplicatedUsers(-2),
+    NotFound(-1),
     Admin(0),
     VerifiedUser(1),
     NonVerifiedUser(2),
