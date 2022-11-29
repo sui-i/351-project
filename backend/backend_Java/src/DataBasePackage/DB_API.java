@@ -6,6 +6,8 @@ import roomsPackage.R_InformationDB;
 import requestsrepliescodes.IdentificationCodes; 
 import requestsrepliescodes.ReservationCodes;
 
+import requestsrepliescodes.ValidateSynthax;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.sql.Connection;
@@ -50,6 +52,7 @@ public class DB_API {
     private static final String USER = "postgres";
     private static final String PASS ="YourPassword";
     private static HashMap<String,C_InformationDB> users;
+	private static HashMap<String,R_InformationDB> rooms;
     
 	public DB_API() {
 		if(!created) {
@@ -381,9 +384,10 @@ public class DB_API {
 	 * 			</ul>
 	 */
 
-	public  ReservationCodes checkRoomAvailability(int RoomID,String BookIn,String BookOut) {
+	public  ReservationCodes checkRoomAvailability(String RoomID,String BookIn,String BookOut) {
 		assert conn !=null : "No connection mate";
 		try {
+			if(!ValidateSynthax.checkTime(BookIn) || !ValidateSynthax.checkTime(BookOut)) return ReservationCodes.InvalidDateFormat;
 
 			String query="";
 			ArrayList<HashMap<String,String>> results= new ArrayList<>();
@@ -428,13 +432,14 @@ public class DB_API {
 	 */
 
 	//TO-DO: Finish it 
-	public  ReservationCodes Reserve(String username,int RoomID,String BookIn,String BookOut) {
+	public  ReservationCodes Reserve(String username,String RoomID,String BookIn,String BookOut) {
 		assert conn !=null : "No connection mate";
 		try {
+			if(!ValidateSynthax.checkTime(BookIn) || !ValidateSynthax.checkTime(BookOut)) return ReservationCodes.InvalidDateFormat;
 			ReservationCodes available= checkRoomAvailability(RoomID,BookIn,BookOut);
 			if(available==null){
 				String query=String.format("Select reservation_id from room_reservation_history  ORDER BY reservation_id desc limit 1; ");
-
+				
 				ArrayList<HashMap<String,String>> results= extractQuery(query, new String [] {"reservation_id"});
 				int newId;
 				if(results.size()==0){
@@ -452,11 +457,11 @@ public class DB_API {
 			TimeStamp Book_In = new TimeStamp(BookIn);
 			TimeStamp Book_Out = new TimeStamp(BookOut);
 			//Note here we are inserting two seperate records in room_reservation_history and users_reservation_history
-			query = String.format("INSERT INTO room_reservation_history (reservation_id,room_id,booked_in,booked_until,cancelled) values (%s,%s,'%s','%s',false) ; ",newId,RoomID,Book_In.toString(),Book_Out.toString());
+			query = String.format("INSERT INTO room_reservation_history (reservation_id,room_id,booked_in,booked_until,cancelled) values (%s,'%s','%s','%s',false) ; ",newId,RoomID,Book_In.toString(),Book_Out.toString());
 			if(! insertQuery(query)) return ReservationCodes.RoomNotReserved;
 			//MEOW: TO DO : 
 
-			query = String.format("INSERT INTO users_reservation_history (username,room_id,reservation_id,reservation_date,check_in,check_out,cancelled) values ('%s',%s,%s,NOW(),%s,'%s',null) ; ",username,RoomID,newId,Book_In.toString(),Book_Out.toString());
+			query = String.format("INSERT INTO users_reservation_history (username,room_id,reservation_id,reservation_date,check_in,check_out,cancelled) values ('%s','%s',%s,NOW(),%s,'%s',null) ; ",username,RoomID,newId,Book_In.toString(),Book_Out.toString());
 
 			if(! insertQuery(query)) return ReservationCodes.RoomNotReserved;
 			return ReservationCodes.RoomStatusChangedSuccessfully;
@@ -484,47 +489,38 @@ public class DB_API {
 	 * 				<li> 4 if some other error occurs </li>	
 	 * 				<li> 5 if some other error occurs </li>
 	 * 			</ul>
-	 * IndentityError(115),
-		RoomStatusChangedSuccessfully(210),
-		RoomAlreadyReserved(211),
-		RoomReservationtimeInvalid(212),
-		RoomRechedulingFailed(241),
-
-		RoomFoundSuccessfully(220),
-		RoomIDInvalid(221),
-		RoomNotFound(226),
-		RoomNotReserved(225),
-		HotelNotFound(224),
-		PlanetNotFound(223),
-		SolarSystemNotFound(222),
-		
-		InvalidDateFormat(231),
-		
-		InternalError(500);
-	 * 
 	 */
-	public ReservationCodes ValidateRoom(int RoomID)
+	public ReservationCodes ValidateRoom(String RoomID)
 	{
 
 	assert conn !=null : "No connection mate";
+	if(RoomID.length()!=16){
+		return ReservationCodes.RoomIDInvalid;
+	}
 	try {
 		HashMap<String,ReservationCodes> Errors = new HashMap<>();
-		String [] fields=  new String [] {"num_of_beds","floor","price_per_night","booked_until","solar_system","planet","hotel","room_type"};
-		ReservationCodes [] errors = new ReservationCodes [] {ReservationCodes.IndentityError,ReservationCodes.IndentityError,ReservationCodes.IndentityError,ReservationCodes.IndentityError,ReservationCodes.SolarSystemNotFound,
-		ReservationCodes.PlanetNotFound,ReservationCodes.HotelNotFound,ReservationCodes.IndentityError};
+		
+		String s="room_type|num_of_beds|floor|price_per_night|planet_name|solar_system_name|hotel_name";
+		String [] fields=  s.split("|");
+		//String [] fields=  new String [] {"num_of_beds","floor","price_per_night","booked_until","solar_system","planet","hotel","room_type"};
+		ReservationCodes [] errors = new ReservationCodes [] {ReservationCodes.IndentityError,ReservationCodes.IndentityError,ReservationCodes.IndentityError,ReservationCodes.IndentityError,ReservationCodes.PlanetNotFound,ReservationCodes.SolarSystemNotFound,
+		ReservationCodes.HotelNotFound};
 		for(int i=0; i<fields.length;i++){
 			Errors.put(fields[i],errors[i]);
 		}
-		String query = String.format("Select * from %s where room_id = '%s' ;",TableNames.get("Rooms"),RoomID);
-		
+		//String query = String.format("Select * from %s where room_id = '%s' ;",TableNames.get("Rooms"),RoomID);
+		String query= String.format(
+					"""
+					SELECT room_info.* , planet_info.simple_name as "planet_name", solar_system_info.simple_name as "solar_system_name" ,hotel_info.simple_name as "hotel_name" from room_info 
+					INNER JOIN planet_info on SUBSTRING('%s' from 5 for 4)=planet_info.simple_id
+					INNER JOIN solar_system_info  on SUBSTRING('%s' from 1 for 4)=solar_system_info.simple_id
+					INNER JOIN hotel_info  on SUBSTRING('%s' from 9 for 4)=hotel_info.simple_id;
+					""",RoomID
+				);
 		ArrayList<HashMap<String,String>> results= extractQuery(query, fields);
 
 		
 		if(results.size()==0){
-			// Solar System
-			// Planet 
-			//
-			//No such ID exists
 			return ReservationCodes.RoomIDInvalid;
 		}
 		else if (results.size()>1){
@@ -538,14 +534,16 @@ public class DB_API {
 				return Errors.get(field);
 			}				
 		}
+		//Query for extracting the information
 		
-		R_InformationDB roomInformation = new R_InformationDB.Builder(RoomID, results.get(0).get("booked_until" )).Planet(results.get(0).get("planet" )).Hotel(
-				results.get(0).get("hotel" )).SolarSystem(results.get(0).get("solar_system" )).NumOfBeds(Integer.parseInt(results.get(0).get("num_of_beds" ))).PricePerNight(
+		
+		R_InformationDB roomInformation = new R_InformationDB.Builder(RoomID, results.get(0).get("booked_until" )).Planet(results.get(0).get("planet_name" )).Hotel(
+				results.get(0).get("hotel_name" )).SolarSystem(results.get(0).get("solar_system_name" )).NumOfBeds(Integer.parseInt(results.get(0).get("num_of_beds" ))).PricePerNight(
 				Double.parseDouble(results.get(0).get("price_per_night" ))).Floor(Integer.parseInt(results.get(0).get("floor" ))).build();
 		//Add RoomInfo to static HashMapCache for the rooms info
 
-
-		return 0;
+		rooms.put(RoomID,roomInformation);
+		return ReservationCodes.RoomFoundSuccessfully;
 		
 		
 	
@@ -571,42 +569,47 @@ public class DB_API {
 	 * The value of invalid columns will be null <br>
 	 * // Question: Exception Handling
 	 * @param username : String 
-	 * @param RoomID : Int
+	 * @param RoomID : String
+	 * @param ReservationDate : String of format "YYYY-MM-DD HH:MM:SS.MSMSMS"
 	 * @return <ul>
-	 * 				<li> 0 if cancellation was successful </li>
-	 * 				<li> 1 if not</li>
-	 * 				<li> 2 if some error occured </li>
+	 * 				<li> {@code ReservationCodes.RoomStatusChangedSuccessfully} if cancellation was successful </li>
+	 * 				<li> {@code ReservationCodes.RoomRechedulingFailed} if not</li>
+	 * 				<li> {@code ReservationCodes.InternalError} if duplicate RoomID obtained</li>
+	 * 				<li> {@code ReservationCodes.InternalError} if some error occured </li>
 	 * 		   </ul>
+	 *
 	 */
-	public int CancelReservation(String username, int RoomID,String ReservationDate) {
+	public ReservationCodes CancelReservation(String username, String RoomID,String ReservationDate) {
 		assert conn != null : "No Connection mate";
 		if(checkMembershipUserName(username)){
 			try{
+				if(!ValidateSynthax.checkTime(ReservationDate)) return ReservationCodes.InvalidDateFormat;
+				
 				String reservation_id="";
 				String query = String.format("SELECT * from users_reservation_history where username= '%s' AND room_id= %s AND reservation_date=%s ; ", username, RoomID,ReservationDate);
 				ArrayList<HashMap<String,String>> results= extractQuery(query, new String [] {"reservation_id"});
 				if(results.size()==1){
 					reservation_id= results.get(0).get("reservation_id");
-					if(reservation_id==null) return 2;
+					if(reservation_id==null) return ReservationCodes.RoomRechedulingFailed;
 				}
 				else{
-					return 1;
+					return ReservationCodes.RoomRechedulingFailed;
 				}
 				String query1=String.format("UPDATE users_reservation_history SET cancelled=NOW() WHERE reservation_id=%s;", reservation_id);
 				String query2=String.format("UPDATE room_reservation_history SET cancelled=true WHERE reservation_id=%s;", reservation_id);
-				if(! insertQuery(query1)) return 2;
-				if(! insertQuery(query2)) return 2;
-				return 0;
+				if(! insertQuery(query1)) return ReservationCodes.RoomRechedulingFailed;
+				if(! insertQuery(query2)) return ReservationCodes.RoomRechedulingFailed;
+				return ReservationCodes.RoomStatusChangedSuccessfully;
 			}
 
 			catch(Exception e){
 				e.printStackTrace();
-				return 2;
+				return ReservationCodes.InternalError;
 			}
 			
 		}
 		else{
-			return 1;
+			return ReservationCodes.RoomReservationInvalid;
 		}
 	
 	}
@@ -684,9 +687,21 @@ public class DB_API {
 	 */
 	public ArrayList<HashMap<String,String>> getReservationHistoryUser(String username){
 		if(!checkMembershipUserName(username)) return null;
-		String query1 = String.format("Select * from user_reservation_history where username='%s';", username);
+		String query1= String.format(
+			"""
+			SELECT users_reservation_history.* ,  solar_system_info.simple_name as "solar_system_name" , planet_info.simple_name as "planet_name", hotel_info.simple_name as "hotel_name" from users_reservation_history 
+			INNER JOIN room_info on users_reservation_history.room_id=room_info.room_id
+			INNER JOIN planet_info on SUBSTRING(room_info.room_id from 5 for 4)=planet_info.simple_id
+			INNER JOIN solar_system_info  on SUBSTRING(room_info.room_id from 1 for 4)=solar_system_info.simple_id
+			INNER JOIN hotel_info  on SUBSTRING(room_info.room_id from 9 for 4)=hotel_info.simple_id 
+			WHERE username='%s';
+				""",username
+		);
+		//String query1 = String.format("Select * from user_reservation_history where username='%s';", username);
 		//String query2 = String.format("Select * from user_reservation_history where username='%s';", username);
-		String [] fields1=  new String [] {"room_id","reservation_date","check_in","check_out","cancelled"};
+		String fields="room_id|reservation_date|check_in|check_out|cancelled|solar_system_name|planet_name|hotel_name";
+		String [] fields1= fields.split("|");
+		//String [] fields1=  new String [] {"room_id","reservation_date","check_in","check_out","cancelled"};
 		//String [] fields2=  new String [] {"num_of_beds","floor","price_per_night","booked_until","solar_system","planet","hotel","room_type"};
 		ArrayList<HashMap<String,String>> results= extractQuery(query1,fields1);
 		
