@@ -39,15 +39,19 @@ public class S_Server {
 	
 	public void closeServerSocket()
 	{
-		S_Server.print("Stopping...");
 		try {
-			if (serverSocket!=null)
+			if (serverSocket!=null && !serverSocket.isClosed())
+			{
+			
+				S_Server.print("Stopping...");
 				serverSocket.close();
+				S_Server.print("Stopped.");
+			}
 		}
 		catch (IOException e) {
 			e.printStackTrace();
 		}
-		S_Server.print("Stopped.");
+		
 	}
 	
 	
