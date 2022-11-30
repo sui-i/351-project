@@ -295,7 +295,7 @@ public class DB_API {
 				
 				if(results.get(0).get("usertype") ==null) return UserTypeCodes.InternalError;
 				int ID=Integer.parseInt(results.get(0).get("usertype"));
-				query= String.format("UPDATE users_credentials SET last_login=NOW() WHERE username='%s';", username);
+				query= String.format("UPDATE users_credentials SET last_login=NOW() WHERE email='%s';", email);
 				if(!insertQuery(query)) return UserTypeCodes.InternalError;
 				if(ID==UserTypeCodes.VerifiedUser.ID) return UserTypeCodes.VerifiedUser;
 				if(ID==UserTypeCodes.NonVerifiedUser.ID) return UserTypeCodes.NonVerifiedUser;
