@@ -878,7 +878,7 @@ public class DB_API {
 		try{
 			assert conn!=null: "No connection mate";
 			String query1= String.format("SELECT username from users_credentials where email='%s'", email);
-			ArrayList<HashMap<String,String>> results= extractQuery(query1, new String[] {"username"});
+			ArrayList<HashMap<String,String>> results= extractQuery(query1, new String[] {"email"});
 			if(results.size()!=1) return false;
 			String username= results.get(0).get("username");
 			if(username == null) return false;

@@ -26,8 +26,7 @@ CREATE TABLE users_reservation_history (
    reservation_date     timestamp,
    check_in     timestamp,
    check_out     timestamp,
-   cancelled     timestamp,
-   primary key( username)
+   cancelled     timestamp
 );
 
 CREATE TABLE room_info (
