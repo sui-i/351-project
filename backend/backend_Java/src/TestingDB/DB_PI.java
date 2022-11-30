@@ -14,7 +14,7 @@ public class DB_PI {
     static final String DB_URL = "jdbc:postgresql://localhost/Hostellar";
     private static Connection conn;
     static final String USER = "postgres";
-    static final String PASS ="hungryshark2003";
+    static final String PASS ="password";
     public static void main(String[] args) {
             
             Statement stmt = null;

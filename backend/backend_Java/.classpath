@@ -7,6 +7,6 @@
 		</attributes>
 	</classpathentry>
 	<classpathentry kind="lib" path="lib/javax.mail.jar"/>
-	<classpathentry kind="lib" path="C:/Users/hashe/OneDrive - American University of Beirut/Desktop/AUB CSE/Fall 2022/EECE 351/Project/Project/351-project/backend/JarFile/postgresql-42.5.1.jar"/>
+	<classpathentry kind="lib" path="C:/Users/Pcito/Desktop/Univ/Fall 2022 2023/ece 351/351-project/backend/JarFile/postgresql-42.5.1.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
