@@ -1,3 +1,5 @@
+// Unused code
+
 var username = document.getElementById("username");
 var password = document.getElementById("password");
 var form = document.getElementById("form");
@@ -9,5 +11,6 @@ form.addEventListener("submit", function (e) {
     formData.append("password", password.value);
     username.value = "";
     password.value = "";
+    window.location.href = "/static/frontPage.html";
   }
 });

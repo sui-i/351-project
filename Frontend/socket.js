@@ -1,3 +1,5 @@
+// Unused code
+
 const express = require("express");
 const app = express();
 const http = require("http");
@@ -19,8 +21,8 @@ server.listen(3000, () => {
 
 io.on("connection", (socket) => {
   socket.on("output", (user, pass) => {
-    //console.log(login);
-    const obj = {
+    console.log(user + pass);
+    /* const obj = {
       username: user,
       password: pass,
     };
@@ -31,6 +33,7 @@ io.on("connection", (socket) => {
       if (err) console.log("error", err);
     });
     console.log(JSON.stringify(obj, null, 2));
+   */
   });
   //console.log("a user conneced");
 });

@@ -22,13 +22,14 @@
       <div class="verification">
         <br />
         <p>2-Step Authentication</p>
-        <form>
-          <p1>Enter the code that has been sent to [insert_mail] </p1>
+        <form id="form2">
+          <p1>Enter the code that has been sent to your mail </p1>
           <br /><br /><br />
           <input
             type="text"
             name="pincode"
             maxlength="6"
+            minlength="6"
             required
             onkeypress="return /[0-9]/i.test(event.key)"
             id="code"
@@ -40,9 +41,7 @@
           <br /><br />
           <div>
             <a>
-              <button class="nextButton Button" onclick="getCode()">
-                Next
-              </button>
+              <button class="nextButton Button">Next</button>
             </a>
           </div>
         </form>
@@ -50,3 +49,15 @@
     </div>
   </body>
 </html>
+<script>
+  var code = document.getElementById("code");
+  var form = document.getElementById("form2");
+
+  form.addEventListener("submit", function (e) {
+    e.preventDefault();
+    if (code.value) {
+      code.value = "";
+      window.location.href = "/static/loginPage.html";
+    }
+  });
+</script>

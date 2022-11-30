@@ -9,21 +9,24 @@
       crossorigin="anonymous"
     />
     <link rel="stylesheet" href="/static/buttonRipple.css" />
+    <link rel="stylesheet" href="buttonRipple.css" />
     <link
       rel="stylesheet"
       type="text/css"
       href="/static/loginPage_stylesheet.css"
     />
+    <link rel="stylesheet" type="text/css" href="loginPage_stylesheet.css" />
     <link
       rel="stylesheet"
       href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200"
     />
+    <script src="buttonRipple.js"></script>
     <script src="/static/buttonRipple.js"></script>
-    <!--script src="/socket.io/socket.io.js"></script-->
+    <script src="/socket.io/socket.io.js"></script>
 
-    <!--script>
+    <script>
       var socket = io();
-    </script-->
+    </script>
     <title>Login Page</title>
   </head>
 
@@ -40,7 +43,7 @@
           >account_circle</span
         >
         <br /><br />
-        <form id="form" action="httpServer.java" method="POST">
+        <form id="form" action="" method="POST">
           <input
             type="text"
             id="username"
@@ -53,12 +56,17 @@
             placeholder="Enter Password"
             required
           />
-          <button class="loginButton Button" id="getLoginInfo" type="submit">
+          <button
+            class="loginButton Button"
+            id="getLoginInfo"
+            type="submit"
+            href="/static/frontPage.html"
+          >
             Sign in
           </button>
         </form>
 
-        <a href="/static/httpServer.java"
+        <a
           ><br /><br />
           <p2>Forgot password?</p2>
         </a>
@@ -72,4 +80,4 @@
   </body>
 </html>
 <script src="/static/sendFormData.js"></script>
-<!--script src="clientSide.js"></script-->
+<script src="clientSide.js"></script>

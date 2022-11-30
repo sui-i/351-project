@@ -1,3 +1,5 @@
+// Code from stack overflow to serve static files like html and css and javascript to the server
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;

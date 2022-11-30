@@ -21,7 +21,7 @@
       <div class="registrationWindow">
         <br />
         <p>Register</p>
-        <form class="grid">
+        <form class="grid" id="form1">
           <input
             type="text"
             required
@@ -53,3 +53,27 @@
     </div>
   </body>
 </html>
+
+<script>
+  var username = document.getElementById("regUser");
+  var password = document.getElementById("regPass");
+  var reEnteredPassword = document.getElementById("regRePass");
+  var email = document.getElementById("regEmail");
+  var form = document.getElementById("form1");
+
+  form.addEventListener("submit", function (e) {
+    e.preventDefault();
+    if (
+      username.value &&
+      password.value &&
+      reEnteredPassword.value &&
+      email.value
+    ) {
+      username.value = "";
+      password.value = "";
+      reEnteredPassword.value = "";
+      email.value = "";
+      window.location.href = "/static/verificationWindow.html";
+    }
+  });
+</script>

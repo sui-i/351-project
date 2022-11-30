@@ -52,7 +52,6 @@ public class httpServer {
 				exchange.sendResponseHeaders(200, 0);
 				OutputStream os = exchange.getResponseBody();
 				copyStream(fis, os);
-
 				os.close();
 				fis.close();
 
@@ -61,7 +60,7 @@ public class httpServer {
 
 		httpserver.setExecutor(null);
 		httpserver.start();
-		System.out.println("Started server at " + HOSTNAME + ":" + PORT + "\nListening...");
+		System.out.println("Started server at " + HOSTNAME + ":" + PORT + "\n Listening...");
 
 	}
 
@@ -74,3 +73,5 @@ public class httpServer {
 	}
 
 }
+
+// java code to start the server
