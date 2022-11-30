@@ -1,5 +1,5 @@
 # Database Design:
-We have a total of 8 tables : 
+We have a total of 11 tables : 
 - users_credentials
 - users_info
 - users_reservation_history
@@ -8,11 +8,15 @@ We have a total of 8 tables :
 - solar_system_info
 - planet_info
 - hotel_info
+- users_credentials_deleted
+- users_info_deleted
+- users_reservation_history_deleted
+
 
 ## users_credentials 
 
-| username      | email | password   | date_of_creation | last_login | userType | verification_code | verified
-| :---:        |    :----:   |          :---: |  :---:        |    :----:   |          :---: | :---: | :---: |
+| username      | email | password   | date_of_creation | last_login | userType | verification_code 
+| :---:        |    :----:   |          :---: |  :---:        |    :----:   |          :---: | :---: | 
 |       |        |   | | | |
 |       |        |   | | | |
 
@@ -24,7 +28,7 @@ The above table has the username as a unique identifier (no duplicate usernames 
 - last_login : timestamp
 - userType : int  
 - verification_code : int
-- verified: boolean
+
 
 
 ## users_info
@@ -99,7 +103,7 @@ The above table has the Room id as a unique identifier (no duplicate room ids al
 
 ## solar_system_info
 
-| simple_id     | simple_name
+| simple_id     | simple_name 
 | :---:        |    :----:  |        
 
 The above table has the simple_id as a unique identifier (no duplicate room ids allowed). It will have the following domains which are of types:
@@ -130,9 +134,8 @@ The above table has the simple_id as a unique identifier (no duplicate room ids 
 
 
 ## users_credentials_deleted
-
-| username      | email | password   | date_of_creation | last_login | userType | verification_code | verified
-| :---:        |    :----:   |          :---: |  :---:        |    :----:   |          :---: | :---: | :---: |
+| username      | email | password   | date_of_creation | last_login | userType | verification_code 
+| :---:        |    :----:   |          :---: |  :---:        |    :----:   |          :---: | :---: | 
 |       |        |   | | | |
 |       |        |   | | | |
 
@@ -157,10 +160,6 @@ This table holds the deleted information from the users_info table.
 |       |        |   | | | |
 
 This table holds the deleted information from the users_reservation_history table.
-
-
-
-
 
 
 ## Security : 
