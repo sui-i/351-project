@@ -5,11 +5,14 @@ public enum ReservationCodes {
 	RoomStatusChangedSuccessfully(210),
 	RoomAlreadyReserved(211),
 	RoomReservationtimeInvalid(212),
+	RoomReservationInvalid(213),
+
 	RoomRechedulingFailed(241),
 
 	RoomFoundSuccessfully(220),
 	RoomIDInvalid(221),
 	RoomNotFound(226),
+	RoomAvailable(227),
 	RoomNotReserved(225),
 	HotelNotFound(224),
 	PlanetNotFound(223),

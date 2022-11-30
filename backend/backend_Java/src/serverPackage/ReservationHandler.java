@@ -1,14 +1,15 @@
 package serverPackage;
 
-import DataBasePackage.TimeStamp;
-import requestsrepliescodes.IdentificationCodes;
-import requestsrepliescodes.ReservationCodes;
-import requestsrepliescodes.ValidateSynthax;
-
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Random;
-import java.util.Arrays;
-import java.util.Date;
+
+import DataBasePackage.DB_API;
+import DataBasePackage.DB_UserInformation;
+import emailVerificationServer.EmailAPI;
+import requestsrepliescodes.IdentificationCodes;
+import requestsrepliescodes.ReservationCodes;
+import requestsrepliescodes.UserTypeCodes;
 
 public class ReservationHandler {
 	private static HashMap<Long, ReservationHandler> Clients = new HashMap<>();
@@ -17,15 +18,17 @@ public class ReservationHandler {
 	private static int userConnections = 0;
 	private static int checkAt = 10;
 
+	private DB_API db;
 	final long TOKENID;
-	private boolean isLoggedIn;
+	private long lastSeen; // Should be updated after method call.
 
-	long lastSeen; // Should be updated after method call.
+	UserTypeCodes accountType;
+	DB_UserInformation clientInfo;
 	String clientUsername;
 	String clientEmail;
 	String clientPassword;
-	String firstName;
-	String lastName;
+	String clientFirstName;
+	String clientLastName;
 
 	/**
 	 * Constructing a reservation handler is not a public task, it should be
@@ -38,6 +41,8 @@ public class ReservationHandler {
 	 * @return a client handler object
 	 */
 	private ReservationHandler() {
+		db = new DB_API();
+		db.ConnectDB();
 		long Tok = 0;
 		while (Tok == 0)
 			Tok = rand.nextLong();
@@ -74,6 +79,20 @@ public class ReservationHandler {
 	}
 
 	/**
+	 * Updates the info of the user based on the database user information object.
+	 * 
+	 * @param info: database user information object.
+	 */
+	private void updateInfo(DB_UserInformation info) {
+		this.clientInfo = info;
+		this.clientUsername = info.getuserName();
+		this.clientEmail = info.getEmail();
+		this.clientFirstName = info.getfirstName();
+		this.clientLastName = info.getlastName();
+		this.accountType = info.getUserType();
+	}
+
+	/**
 	 * INCOMPLETE.
 	 * Registering the user uses the database interface to add a new user, and calls
 	 * on the Email
@@ -84,9 +103,40 @@ public class ReservationHandler {
 	 * 
 	 * @return ID: appropriate enum identification code
 	 */
-	public static IdentificationCodes Register(String username, String password, String email, String firstName,
+	public IdentificationCodes Register(String username, String password, String email, String firstName,
 			String lastName) {
-		// TODO:DO
+		// Search for username, if it exists and is verified, dump
+		UserTypeCodes idcByUsername = db.checkMembershipUserName(username);
+		if (idcByUsername.equals(UserTypeCodes.InternalError))
+			return IdentificationCodes.InternalError;
+		if (idcByUsername.equals(UserTypeCodes.VerifiedUser) || idcByUsername.equals(UserTypeCodes.Admin))
+			return IdentificationCodes.UsernameAlreadyExists;
+
+		UserTypeCodes idcByEmail = db.checkMembershipUserName(username);
+		if (idcByEmail.equals(UserTypeCodes.VerifiedUser) || idcByUsername.equals(UserTypeCodes.Admin))
+			return IdentificationCodes.EmailAlreadyExists;
+
+		// then create a registration code and try to send it by mail, if that fails,
+		// dump
+		String verificationCode = "";
+		for (int i = 0; i < 6; i++)
+			verificationCode += (char) rand.nextInt((int) 'A', (int) 'Z');
+		// TODO: switch it to MailCodes
+		boolean mailCode = EmailAPI.send("Verify your email!", "Your verification code is: " + verificationCode, email);
+		if (!mailCode)
+			return IdentificationCodes.EmailSendingError;
+
+		// then add the new user.
+		// remove email or username if it exists
+		if (idcByEmail.equals(UserTypeCodes.NonVerifiedUser))
+			db.deleteUserByEmail(username);
+		if (idcByUsername.equals(UserTypeCodes.NonVerifiedUser))
+			db.deleteUserByUsername(username);
+
+		IdentificationCodes register = db.RegisterUser(username, email, password, firstName, lastName,
+				verificationCode);
+		if (!register.equals(IdentificationCodes.RegistrationSuccessul))
+			return register;
 		return IdentificationCodes.RegistrationSuccessul;
 	}
 
@@ -94,8 +144,27 @@ public class ReservationHandler {
 	 * Used to Verify email addresses.
 	 * returns either wrong or successful.
 	 */
-	public static IdentificationCodes VerifyEmail(String username, String VerificationCode) {
-		// TODO:DO
+	public IdentificationCodes VerifyEmail(String username, String verificationCode) {
+		// search for username, if its not found or is already verified, dump
+		UserTypeCodes idc = db.checkMembershipUserName(username);
+		if (idc.equals(UserTypeCodes.InternalError))
+			return IdentificationCodes.InternalError;
+		if (idc.equals(UserTypeCodes.NotFound))
+			return IdentificationCodes.UsernameNotFound;
+		if (!idc.equals(UserTypeCodes.NonVerifiedUser))
+			return IdentificationCodes.UserAlreadyVerified;
+
+		// check if the verification code matches the one in the DB. if not, dump
+		DB_UserInformation userInfo = db.getUserInfo(username);
+		if (userInfo == null)
+			return IdentificationCodes.InternalError;
+		if (!userInfo.getVerificationCode().equals(verificationCode))
+			return IdentificationCodes.WrongVerrificationCode;
+
+		// change the Account to verified user in DB, change the verification code field
+		// to an empty value
+		if (!db.verifyAccount(username))
+			return IdentificationCodes.InternalError;
 		return IdentificationCodes.VerificationSuccessful;
 	}
 
@@ -109,8 +178,19 @@ public class ReservationHandler {
 	 * 
 	 * @return ID: appropriate enum identification code
 	 */
-	private IdentificationCodes Login(String username, String password) {
-		// TODO:DO
+	public IdentificationCodes Login(String username, String password) {
+		// TODO:check if username password pair matches. if so, isLoggedIn = True and
+		// import all userInfo
+		// else dump.
+		UserTypeCodes idc = db.checkMembershipUserName(username);
+		if (idc.equals(UserTypeCodes.InternalError))
+			return IdentificationCodes.InternalError;
+		if (idc.equals(UserTypeCodes.NotFound))
+			return IdentificationCodes.UsernameNotFound;
+		if (!idc.equals(UserTypeCodes.NonVerifiedUser))
+			return IdentificationCodes.EmailNotVerified;
+		DB_UserInformation info = db.getUserInfo(username);
+		updateInfo(info);
 		return IdentificationCodes.LoginSuccessful;
 	}
 
@@ -119,10 +199,77 @@ public class ReservationHandler {
 	 * This function DOES NOT remove the client from the clients map,
 	 * as it gives the chance for a login attempt.
 	 */
-	private IdentificationCodes Logout() {
-		isLoggedIn = false;
-		clientUsername = clientEmail = clientPassword = firstName = lastName = null;
+	public IdentificationCodes Logout() {
+		accountType = UserTypeCodes.NotLoggedIn;
+		clientUsername = clientEmail = clientPassword = clientFirstName = clientLastName = null;
 		return IdentificationCodes.LogoutSuccessful;
+	}
+
+	/**
+	 * Get all user info
+	 * 
+	 * @return array[4] String of {username, email, firstname, lastname}
+	 */
+	public String[] getUserInfo() {
+		if (!accountType.equals(UserTypeCodes.NotLoggedIn) && clientUsername != null && clientEmail != null
+				&& clientLastName != null && clientFirstName != null)
+			return String.format("%s,%s,%s,%s", clientUsername, clientEmail, clientFirstName, clientLastName)
+					.split(",");
+		return new String[] { "", "", "", "" };
+	}
+
+	/**
+	 * deletes the account with the given username
+	 * 
+	 * @param username
+	 * @return appropriate IdentificationCode
+	 */
+	public IdentificationCodes DeleteAccount(String username) {
+		UserTypeCodes idc = db.checkMembershipUserName(username);
+		if (idc.equals(UserTypeCodes.InternalError))
+			return IdentificationCodes.InternalError;
+		if (idc.equals(UserTypeCodes.NotFound))
+			return IdentificationCodes.UsernameNotFound;
+		if (accountType.equals(UserTypeCodes.NotLoggedIn))
+			return IdentificationCodes.InsufficientPermissions;
+		// check if logged in user is an admin, if so, delete the user associated with
+		// username.
+		// check if logged in user is the one holding the username, if so, also delete.
+		if (clientUsername.equals(username) || accountType.equals(UserTypeCodes.Admin)) {
+			db.deleteUserByUsername(username);
+			return IdentificationCodes.AccountDeletedSuccessfully;
+		}
+		// else dump
+		return IdentificationCodes.InternalError;
+	}
+
+	/**
+	 * resends a new verification code for the given username and updates the
+	 * database
+	 * 
+	 * @param username
+	 * @return appropriate IdentificationCode
+	 */
+	public IdentificationCodes ResendVerificationCode(String username) {
+		UserTypeCodes idc = db.checkMembershipUserName(username);
+		if (idc.equals(UserTypeCodes.InternalError))
+			return IdentificationCodes.InternalError;
+		if (idc.equals(UserTypeCodes.NotFound))
+			return IdentificationCodes.UsernameNotFound;
+
+		// resend and check if it is sent, then update database of username
+		DB_UserInformation userInfo = db.getUserInfo(username);
+		if (userInfo == null)
+			return IdentificationCodes.InternalError;
+		if (!userInfo.getUserType().equals(UserTypeCodes.NonVerifiedUser))
+			return IdentificationCodes.UserAlreadyVerified;
+
+		boolean mailCode = EmailAPI.send("Verify your email!",
+				"Your verification code is: " + userInfo.getVerificationCode(), userInfo.getEmail());
+		if (!mailCode)
+			return IdentificationCodes.EmailSendingError;
+
+		return IdentificationCodes.VerificationCodeResentSuccessfully;
 	}
 
 	/**
@@ -134,14 +281,19 @@ public class ReservationHandler {
 	 * @return appropriate ReservationCode
 	 */
 	public ReservationCodes Reserve(String roomID, String startTime, String finishTime) {
-		if (!isLoggedIn)
+		if (accountType.equals(UserTypeCodes.NotLoggedIn))
 			return ReservationCodes.IndentityError;
-		ReservationCodes roomCode = ValidateSynthax.validateRoomID(roomID);
+		ReservationCodes roomCode = validateRoomID(roomID);
 		if (roomCode != ReservationCodes.RoomFoundSuccessfully)
 			return roomCode;
 
-		// TODO: RESERVE
-
+		// RESERVE
+		ReservationCodes rc = db.checkRoomAvailability(roomID, startTime, finishTime);
+		if (!rc.equals(ReservationCodes.RoomAvailable))
+			return rc;
+		rc = db.Reserve(clientUsername, roomID, startTime, finishTime);
+		if (rc.equals(ReservationCodes.RoomAvailable))
+			return rc;
 		return ReservationCodes.RoomStatusChangedSuccessfully;
 	}
 
@@ -154,14 +306,14 @@ public class ReservationHandler {
 	 * @param time
 	 * @return appropriate ReservationCode
 	 */
-	public ReservationCodes unReserve(String roomID, String startTime, String finishTime) {
-		if (!isLoggedIn)
+	public ReservationCodes unReserve(String roomID, String startTime) {
+		if (accountType.equals(UserTypeCodes.NotLoggedIn))
 			return ReservationCodes.IndentityError;
 		ReservationCodes roomCode = validateRoomID(roomID);
 		if (roomCode != ReservationCodes.RoomFoundSuccessfully)
 			return roomCode;
-
-		return ReservationCodes.RoomStatusChangedSuccessfully;
+		// unReserve
+		return db.CancelReservation(clientUsername, roomID, startTime);
 	}
 
 	/**
@@ -179,13 +331,20 @@ public class ReservationHandler {
 	 */
 	public ReservationCodes Reschedule(String roomID, String oldStartTime, String newStartTime, String newFinishTime) {
 
-		if (!isLoggedIn)
+		if (accountType.equals(UserTypeCodes.NotLoggedIn))
 			return ReservationCodes.IndentityError;
 		ReservationCodes roomCode = validateRoomID(roomID);
 		if (roomCode != ReservationCodes.RoomFoundSuccessfully)
 			return roomCode;
 
-		// TODO: As stated in documentation above.
+		ReservationCodes rc = unReserve(roomID, oldStartTime);
+		if (!rc.equals(ReservationCodes.RoomStatusChangedSuccessfully))
+			return rc;
+		rc = Reserve(roomID, newStartTime, newFinishTime);
+		if (!rc.equals(ReservationCodes.RoomStatusChangedSuccessfully)) {
+			// TODO: rereserve if unreserve was fine but reserve failed.
+			return rc;
+		}
 
 		return ReservationCodes.RoomStatusChangedSuccessfully;
 	}
@@ -216,6 +375,9 @@ public class ReservationHandler {
 	 * b+registration FORMAT: "Req120:username,password,email,firstname,lastname"
 	 * c+verification FORMAT: "Req130:username,verificationcode"
 	 * d+logout FORMAT: "Req140"
+	 * e+get all info FORMAT: "Req150"
+	 * f+delete account FORMAT: "Req160:username"
+	 * g+resend verification code FORMAT: "Req170"
 	 * 2-Reservation request:
 	 * a+reserve FORMAT: "Req210:{ROOMID},YYYY-MM-DD HH:MM:SS^YYYY-MM-DD HH:MM:SS"
 	 * (start date^finish date)
@@ -231,7 +393,7 @@ public class ReservationHandler {
 	 * +Email not verified FORMAT: "Rep111"
 	 * +Username not found FORMAT: "Rep112"
 	 * +Wrong Password FORMAT: "Rep113"
-	 * +Identity error FORMAT: "Rep115"
+	 * +Insufficient permissions FORMAT: "Rep115"
 	 * 
 	 * 1-b. registration replies
 	 * +Registered successfully FORMAT: "Rep120"
@@ -247,8 +409,22 @@ public class ReservationHandler {
 	 * 1-d. logout
 	 * +logout successful FORMAT: "Rep140"
 	 * 
-	 * 2-a. reserve FORMAT: "Req210"
-	 * /b. Unreserve FORMAT: "Req220"
+	 * 1-e. get all info
+	 * +not logged in FORMAT: "Rep115"
+	 * +Info gotten FORMAT: "Rep150:username,email,firstname,lastname"
+	 * 
+	 * 1-f. delete account
+	 * +Account deleted successfully FORMAT: "Rep160"
+	 * +Not enough permissions FORMAT: "Rep115"
+	 * 
+	 * 1-g. resend verification code
+	 * +verification code resent FORMAT: "Rep170"
+	 * +Email is already verified FORMAT: "Rep115"
+	 * +Email not Available FORMAT: "Rep121"
+	 * 
+	 * 
+	 * 2-a. reserve
+	 * /b. Unreserve
 	 * +Identity error FORMAT: "Rep115"
 	 * (user not logged
 	 * or insufficient permissions)
@@ -258,7 +434,7 @@ public class ReservationHandler {
 	 * +Invalid date format FORMAT: "Rep231"
 	 * +Room rescheduling failed FORMAT: "Rep241"
 	 */
-	public String handleRequest(String request) {
+	public String handleRequest(String request) throws Exception {
 		lastSeen = date.getTime();
 		String def = "Rep000";
 		if (request == null)
@@ -306,13 +482,34 @@ public class ReservationHandler {
 				return def;
 			return "Rep" + VerifyEmail(Cred[0], Cred[1]).ID;
 		}
-		if (request.subSequence(3, 6) == "140") // logout
+		if ("140".equals(RCode)) // logout
 		{
 			return "Rep" + Logout().ID;
 		}
+		if ("150".equals(RCode)) // Get all User info
+		{
+			if (accountType.equals(UserTypeCodes.NotLoggedIn))
+				return "Rep" + IdentificationCodes.InsufficientPermissions.ID;
+			String[] info = getUserInfo();
+			return String.format("Rep150:%s,%s,%s,%s", info[0], info[1], info[2], info[3]);
+		}
+		if ("160".equals(RCode)) // Delete Account
+		{
+			String[] parser = request.split(":");
+			if (parser.length != 2)
+				return def;
+			return "Rep" + DeleteAccount(parser[1]).ID;
+		}
+		if ("170".equals(RCode)) // Resend verification codes
+		{
+			String[] parser = request.split(":");
+			if (parser.length != 2)
+				return def;
+			return "Rep" + ResendVerificationCode(parser[1]).ID;
+		}
 
 		// HANDLE RESERVATIONS:
-		String[] parser = request.split(":");
+		String[] parser = request.split(":", 2);
 		if (parser.length != 2)
 			return def;
 		String[] Param = parser[1].split(",");
@@ -320,13 +517,13 @@ public class ReservationHandler {
 			return def;
 
 		// TODO: HANDLE TIMES
-		String[] timeRange = Param[1].split("^");
+		String[] timeRange = Param[1].split("\\^");
 		String RoomID = Param[0];
 
 		if ("210".equals(RCode) && timeRange.length == 2) // Reserve
 			return "Rep" + Reserve(RoomID, timeRange[0], timeRange[1]).ID;
 		if ("220".equals(RCode) && timeRange.length == 1) // Unreserve
-			return "Rep" + unReserve(RoomID, timeRange[0], timeRange[1]).ID;
+			return "Rep" + unReserve(RoomID, timeRange[0]).ID;
 		if ("240".equals(RCode) && timeRange.length == 3) // Reschedule
 			return "Rep" + Reschedule(RoomID, timeRange[0], timeRange[1], timeRange[2]).ID;
 

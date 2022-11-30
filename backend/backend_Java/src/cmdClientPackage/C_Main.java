@@ -1,13 +1,11 @@
 package cmdClientPackage;
 
 import java.io.IOException;
-
 import java.net.Socket;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Scanner;
 
-import requestsrepliescodes.ReservationCodes;
 import requestsrepliescodes.ValidateSynthax;
 public class C_Main {
 	private static void pressAnyKeyToContinue() {
@@ -43,7 +41,7 @@ public class C_Main {
 	
 	public void startApp() {
 		System.out.println("Welcome to Hosteler commandLine reservation applet.");
-		List<Character> options = Arrays.asList(new Character[] {'L','R','V','B','U','S','Q'});
+		List<Character> options = Arrays.asList(new Character[] {'L','R','V','B','U','S','D','M','G','Q'});
 		char option = 'X';
 		boolean running = true;
 		while (running) {
@@ -63,30 +61,39 @@ public class C_Main {
 			}
 			if (option=='L')
 				LoginCMDInterface();
-			if (option=='R')
+			else if (option=='R')
 				RegisterCMDInterface();
-			if (option=='V')
+			else if (option=='V')
 				VerifyEmailCMDInterface();
-			if (option=='B')
+			else if (option=='B')
 				ReserveCMDInterface();
-			if (option=='U')
+			else if (option=='U')
 				UnreserveCMDInterface();
-			if (option=='S')
+			else if (option=='S')
 				RescheduleCMDInterface();
+			else if (option=='D')
+				DeleteAccountCMDInterface();
+			else if (option=='M')
+				ResendVerificationCodeCMDInterface();
+			else if (option=='G')
+				GetAllInfoCMDInterface();
 			else
-				System.out.println("[Error] Invalid option selected.");
+				System.err.println("[Error] Invalid option selected.");
 			option = 'X';
 		}
 	}
 	
 	public char selectOptionsMenu() throws IOException {
-		System.out.println("Please select one of the following options");
+		System.out.println("------------------------------------------\nPlease select one of the following options");
 		System.out.println("    -L  Login");
 		System.out.println("    -R  Register");
 		System.out.println("    -V  Verify email adress");
 		System.out.println("    -B  Reserve a room");
 		System.out.println("    -U  Unreserve a room");
 		System.out.println("    -S  Reschedule a room");
+		System.out.println("    -G  Get all user info");
+		System.out.println("    -D  Delete an account");
+		System.out.println("    -M  Resend verification code");
 		System.out.println("    -Q  Quit the app");
 		return cmdIn.nextLine().charAt(0);
 	}
@@ -171,6 +178,29 @@ public class C_Main {
 		System.out.println(web.AttemptVerifyEmail(username, verificationCode));
 	}
 	
+	public void GetAllInfoCMDInterface() {
+		System.out.println(web.AttemptGetUserInfo());
+	}
+	
+	public void DeleteAccountCMDInterface() {
+		System.out.println("Account deletetion:\nPlease enter your username: ");
+		String username = cmdIn.nextLine();
+		if (!ValidateSynthax.checkUsername(username)) {
+			System.out.println("Username must not contain spaces or commas");
+			return;
+		}
+		System.out.println(web.AttemptDeleteAccount(username));
+	}
+	public void ResendVerificationCodeCMDInterface() {
+		System.out.println("Resend Verification Code:\nPlease enter your username: ");
+		String username = cmdIn.nextLine();
+		if (!ValidateSynthax.checkUsername(username)) {
+			System.out.println("Username must not contain spaces or commas");
+			return;
+		}
+		System.out.println(web.AttemptResendVerificaitonCode(username));
+	}
+	
 	/* //May not be needed
 	 * public static String CMDInterfaceValidateRoom(String roomID){
 			ReservationCodes RC = ValidateSynthax.validateRoomID(roomID);
@@ -215,7 +245,7 @@ public class C_Main {
 		String finishTime = cmdIn.nextLine();
 		if (!ValidateSynthax.checkTime(finishTime)) 
 		{
-			System.out.println("The format does not seem right.");
+			System.out.println("The format is not right.");
 			return;
 		}
 		
@@ -252,14 +282,14 @@ public class C_Main {
 		String newStartTime = cmdIn.nextLine();
 		if (!ValidateSynthax.checkTime(newStartTime)) 
 		{
-			System.out.println("The format does not seem right.");
+			System.out.println("The format is not right.");
 			return;
 		}
 		System.out.println("New finish time (same format): ");
 		String newFinishTime = cmdIn.nextLine();
 		if (!ValidateSynthax.checkTime(newFinishTime)) 
 		{
-			System.out.println("The format does not seem right.");
+			System.out.println("The format is not right.");
 			return;
 		}
 		

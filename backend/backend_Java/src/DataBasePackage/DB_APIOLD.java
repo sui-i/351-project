@@ -1,14 +1,13 @@
 package DataBasePackage;
-import Security.md5;
-import cmdClientPackage.C_InformationDB;
-
-import java.util.HashMap;
 import java.sql.Connection;
 import java.sql.DriverManager;
-import java.sql.SQLException;
 import java.sql.ResultSet;
 import java.sql.Statement;
 // Prerequiste: ADD .jar file to project libraries
+import java.util.HashMap;
+
+import Security.md5;
+
 
 public class DB_APIOLD {
 	
@@ -34,7 +33,7 @@ public class DB_APIOLD {
 	private static HashMap<String,Integer> cache;
 	
 	// Debate whether cache them or no
-	private static HashMap<String,C_InformationDB> users;
+	private static HashMap<String,DB_UserInformation> users;
 	
 	// For caching at max 10 userNames.
 	
@@ -117,7 +116,7 @@ public class DB_APIOLD {
 	}
 	
 	
-	 public static C_InformationDB getUserInfo(String username) {
+	 public static DB_UserInformation getUserInfo(String username) {
 		
 		//Assumption
 		
@@ -148,7 +147,7 @@ public class DB_APIOLD {
 		        }
 		        
 		        stmt.close();
-		        return new C_InformationDB(username,C_firstName,C_lastName,C_phoneNumber,C_birthDate,C_Location);
+		        return new DB_UserInformation(username,C_firstName,C_lastName,C_phoneNumber,C_birthDate,C_Location);
 			}
 			else {
 				// TO-DO : return special instance of the C_InformationDB

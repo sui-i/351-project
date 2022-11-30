@@ -2,10 +2,11 @@ package TestingDB;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
-import java.sql.SQLException;
 import java.sql.ResultSet;
 import java.sql.Statement;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+
 
 public class DB_PI {
 	// TO-DO add connections
@@ -67,6 +68,7 @@ public class DB_PI {
             
             System.out.println("Yessir");
             try {
+
             	System.out.println(extractQuery(String.format("Select username from userscredentials  ;"),new String[] {"username","password","email","date_of_creation","last_login"}));
     			stmt= conn.createStatement();
     			String username="hmk57";
