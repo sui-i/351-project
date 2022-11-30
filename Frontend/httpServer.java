@@ -10,15 +10,19 @@ import java.net.InetSocketAddress;
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.security.KeyStore;
 import java.util.List;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.Executor;
 import java.util.logging.Handler;
+import java.awt.image.BufferedImage;
+import java.net.http.HttpClient;
 
 import javax.imageio.ImageIO;
 import javax.swing.text.Document;
 
-import java.awt.image.BufferedImage;
+import org.w3c.dom.html.HTMLFormElement;
 
 import com.sun.net.httpserver.HttpServer;
 import com.sun.net.httpserver.HttpHandler;
@@ -27,40 +31,36 @@ import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.Headers;
 
 public class httpServer {
+
+	public static final String HOSTNAME = "127.0.0.1";
+	public static final int PORT = 3000;
+
 	public static void main(String[] args) throws Exception {
 
-		HttpServer httpserver = HttpServer.create(new InetSocketAddress(3000), 0);
+		HttpServer httpserver = HttpServer.create(new InetSocketAddress(HOSTNAME, PORT), 0);
 
 		HttpContext hc = httpserver.createContext("/");
+		httpserver.createContext("/static",
+				new StaticFileHandler("/static/", System.getProperty("user.dir"),
+						""));
 		hc.setHandler(new HttpHandler() {
 			@Override
 			public void handle(HttpExchange exchange) throws IOException {
 
 				FileInputStream fis = new FileInputStream("loginPage.html");
-				FileInputStream fis1 = new FileInputStream("loginPage_stylesheet.css");
+				exchange.getResponseHeaders().set("Content-Type", "text/html");
 				exchange.sendResponseHeaders(200, 0);
-				exchange.getResponseHeaders().add("Content-Type", "text/html");
-				// exchange.sendResponseHeaders(200, 0);
-				// exchange.getResponseHeaders().add("Content-Type", "text/css");
 				OutputStream os = exchange.getResponseBody();
 				copyStream(fis, os);
-				copyStream(fis1, os);
-				os.close();
 
-				/*
-				 * fis1.readAllBytes();
-				 * copyStream(fis1, os);
-				 * copyStream(fis, os);
-				 * os.close();
-				 * fis.close();
-				 * fis1.close();
-				 */
+				os.close();
 
 			}
 		});
 
 		httpserver.setExecutor(null);
 		httpserver.start();
+		System.out.println("Started server at " + HOSTNAME + ":" + PORT + "\nListening...");
 
 	}
 

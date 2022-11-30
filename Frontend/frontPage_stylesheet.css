@@ -51,6 +51,10 @@ p {
     color: gray;
 }
 
+select {
+    appearance: none;
+}
+
 p1 {
     font-size: 15px;
     color: gray;
@@ -125,6 +129,19 @@ p1 {
     justify-content: center;
     align-items: center;
     height: 100%;
+}
+
+.viewRegistrationInfo {
+    height: 98px;
+    width: 200px;
+    background-color: rgb(30, 34, 39);
+    margin-left: 85%;
+    border-radius: 5%;
+    font-size: 20px;
+    font-family: "comfortaaregular";
+    text-align: center;
+    display: none;
+    box-shadow: 0 8px 16px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
 }
 
 /* This block of code corrects the page zoom and scaling for different screen sizes */

@@ -22,31 +22,21 @@ body {
 
 p {
     font-family: "orbitronregular";
-
     font-size: 50px;
     margin-bottom: 20px;
     color: black;
+    text-align: center;
 }
 
 form {
-    /*display: table;*/
+    display: grid;
+    align-items: center;
+    justify-content: center;
 
-    margin-top: 20px;
-    margin-bottom: 40px;
-
-
-    color: black;
-}
-
-label {
-    font-family: "comfortaaregular";
-    display: table-cell;
-    font-size: 30px;
-    margin-left: 10px;
 }
 
 input {
-    display: table-cell;
+    display: inline-grid;
     background-color: rgb(112, 118, 122);
     color: rgba(255, 255, 255, 0.585);
     border: none;
@@ -54,12 +44,15 @@ input {
     border-radius: 5px;
     outline: none;
     width: 300px;
-    height: 29px;
+    height: 33px;
     font-family: Arial, Helvetica, sans-serif;
+    justify-self: center;
+    margin-top: 3%;
 }
 
-p1 {
-    display: table-row;
+::placeholder {
+    color: rgb(42, 42, 42);
+    font-family: 'comfortaaregular';
 }
 
 a {
@@ -68,17 +61,18 @@ a {
 }
 
 .registrationWindow {
-    width: 800px;
-    height: 470px;
+    width: 600px;
+    height: 450px;
     border-radius: 10px;
     box-shadow: 0 8px 16px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
     background: rgb(77, 84, 90);
 }
 
 .nextButton {
+    display: inline-grid;
     width: 100px;
-    height: 40px;
-    margin-top: 5%;
+    height: 33px;
+    margin-top: 20%;
     color: rgb(214, 214, 214);
     font-size: 25px;
     background-color: rgb(38, 133, 129);
@@ -86,6 +80,9 @@ a {
     border: none;
     outline: none !important;
     cursor: pointer;
+    align-self: center;
+    justify-self: center;
+    align-content: center;
 }
 
 .center {
@@ -93,12 +90,6 @@ a {
     justify-content: center;
     align-items: center;
     height: 100vh;
-}
-
-.center1 {
-    display: flex;
-    justify-content: center;
-    align-items: center;
 }
 
 /* This block of code corrects the page zoom and scaling for different screen sizes */

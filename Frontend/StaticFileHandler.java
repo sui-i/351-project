@@ -12,13 +12,14 @@ import com.sun.net.httpserver.HttpHandler;
 import com.sun.net.httpserver.HttpServer;
 
 public class StaticFileHandler implements HttpHandler {
-    private static final Map<String,String> MIME_MAP = new HashMap<>();
+    private static final Map<String, String> MIME_MAP = new HashMap<>();
     static {
+        MIME_MAP.put("woff2", "font/woff2");
         MIME_MAP.put("appcache", "text/cache-manifest");
         MIME_MAP.put("css", "text/css");
         MIME_MAP.put("gif", "image/gif");
         MIME_MAP.put("html", "text/html");
-        MIME_MAP.put("js", "application/javascript");
+        MIME_MAP.put("js", "text/javascript");
         MIME_MAP.put("json", "application/json");
         MIME_MAP.put("jpg", "image/jpeg");
         MIME_MAP.put("jpeg", "image/jpeg");
@@ -39,12 +40,15 @@ public class StaticFileHandler implements HttpHandler {
     private String directoryIndex;
 
     /**
-     * @param urlPrefix The prefix of all URLs.
-     *                   This is the first argument to createContext. Must start and end in a slash.
+     * @param urlPrefix      The prefix of all URLs.
+     *                       This is the first argument to createContext. Must start
+     *                       and end in a slash.
      * @param filesystemRoot The root directory in the filesystem.
-     *                       Only files under this directory will be served to the client.
+     *                       Only files under this directory will be served to the
+     *                       client.
      *                       For instance "./staticfiles".
-     * @param directoryIndex File to show when a directory is requested, e.g. "index.html".
+     * @param directoryIndex File to show when a directory is requested, e.g.
+     *                       "index.html".
      */
     public StaticFileHandler(String urlPrefix, String filesystemRoot, String directoryIndex) {
         if (!urlPrefix.startsWith("/")) {
@@ -67,12 +71,17 @@ public class StaticFileHandler implements HttpHandler {
 
     /**
      * Create and register a new static file handler.
-     * @param hs The HTTP server where the file handler will be registered.
-     * @param path The path in the URL prefixed to all requests, such as "/static/"
+     * 
+     * @param hs             The HTTP server where the file handler will be
+     *                       registered.
+     * @param path           The path in the URL prefixed to all requests, such as
+     *                       "/static/"
      * @param filesystemRoot The filesystem location.
      *                       For instance "/var/www/mystaticfiles/".
-     *                       A request to "/static/x/y.html" will be served from the filesystem file "/var/www/mystaticfiles/x/y.html"
-     * @param directoryIndex File to show when a directory is requested, e.g. "index.html".
+     *                       A request to "/static/x/y.html" will be served from the
+     *                       filesystem file "/var/www/mystaticfiles/x/y.html"
+     * @param directoryIndex File to show when a directory is requested, e.g.
+     *                       "index.html".
      */
     public static void create(HttpServer hs, String path, String filesystemRoot, String directoryIndex) {
         StaticFileHandler sfh = new StaticFileHandler(path, filesystemRoot, directoryIndex);
@@ -80,8 +89,8 @@ public class StaticFileHandler implements HttpHandler {
     }
 
     public void handle(HttpExchange he) throws IOException {
-        String method = he.getRequestMethod(); 
-        if (! ("HEAD".equals(method) || "GET".equals(method))) {
+        String method = he.getRequestMethod();
+        if (!("HEAD".equals(method) || "GET".equals(method))) {
             sendError(he, 501, "Unsupported HTTP method");
             return;
         }
@@ -90,7 +99,7 @@ public class StaticFileHandler implements HttpHandler {
         if (wholeUrlPath.endsWith("/")) {
             wholeUrlPath += directoryIndex;
         }
-        if (! wholeUrlPath.startsWith(urlPrefix)) {
+        if (!wholeUrlPath.startsWith(urlPrefix)) {
             throw new RuntimeException("Path is not in prefix - incorrect routing?");
         }
         String urlPath = wholeUrlPath.substring(urlPrefix.length());
@@ -107,7 +116,7 @@ public class StaticFileHandler implements HttpHandler {
         }
 
         String canonicalPath = canonicalFile.getPath();
-        if (! canonicalPath.startsWith(filesystemRoot)) {
+        if (!canonicalPath.startsWith(filesystemRoot)) {
             reportPathTraversal(he);
             return;
         }
@@ -116,20 +125,21 @@ public class StaticFileHandler implements HttpHandler {
         try {
             fis = new FileInputStream(canonicalFile);
         } catch (FileNotFoundException e) {
-            // The file may also be forbidden to us instead of missing, but we're leaking less information this way 
-            sendError(he, 404, "File not found"); 
+            // The file may also be forbidden to us instead of missing, but we're leaking
+            // less information this way
+            sendError(he, 404, "File not found");
             return;
         }
 
         String mimeType = lookupMime(urlPath);
         he.getResponseHeaders().set("Content-Type", mimeType);
         if ("GET".equals(method)) {
-            he.sendResponseHeaders(200, canonicalFile.length());            
+            he.sendResponseHeaders(200, canonicalFile.length());
             OutputStream os = he.getResponseBody();
             copyStream(fis, os);
             os.close();
         } else {
-            assert("HEAD".equals(method));
+            assert ("HEAD".equals(method));
             he.sendResponseHeaders(200, -1);
         }
         fis.close();
@@ -154,7 +164,7 @@ public class StaticFileHandler implements HttpHandler {
         os.close();
     }
 
-    // This is one function to avoid giving away where we failed 
+    // This is one function to avoid giving away where we failed
     private void reportPathTraversal(HttpExchange he) throws IOException {
         sendError(he, 400, "Path traversal attempt detected");
     }

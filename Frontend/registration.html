@@ -13,7 +13,6 @@
     <link rel="stylesheet" href="buttonRipple.css" />
     <link rel="stylesheet" href="registration_stylesheet.css" />
     <script src="buttonRipple.js"></script>
-    <script src="clientSide/inputs.js"></script>
     <title>Registration</title>
   </head>
 
@@ -21,36 +20,35 @@
     <div class="center">
       <div class="registrationWindow">
         <br />
-        <p style="text-align: center">Register</p>
-        <div class="center1">
-          <form>
-            <p1>
-              <label>Username:</label>
-              <input type="text" required id="regUser" />
-            </p1>
-            <p1>
-              <label>Email:</label>
-              <input type="email" id="regEmail" required />
-            </p1>
-            <p1>
-              <label>Password:</label>
-              <input type="password" required id="regPass" />
-            </p1>
-            <p1>
-              <label>Re-enter password:&nbsp;</label>
-              <input type="password" required id="regRePass" />
-            </p1>
-            <br />
-            <div class="center1">
-              <button
-                class="nextButton Button"
-                onclick="getRegistrationUsername(); getRegistrationEmail(); getRegistrationPassword(); getReEnteredPassword()"
-              >
-                Next
-              </button>
-            </div>
-          </form>
-        </div>
+        <p>Register</p>
+        <form class="grid">
+          <input
+            type="text"
+            required
+            id="regUser"
+            class="gridcell"
+            placeholder="Enter Username"
+          />
+          <input
+            type="email"
+            id="regEmail"
+            required
+            placeholder="Enter Email"
+          />
+          <input
+            type="password"
+            required
+            id="regPass"
+            placeholder="Enter Password"
+          />
+          <input
+            type="password"
+            required
+            id="regRePass"
+            placeholder="Re-enter Password"
+          />
+          <button class="nextButton Button">Next</button>
+        </form>
       </div>
     </div>
   </body>

@@ -31,16 +31,22 @@
           <img src="Items/Hotel logo.png" alt="Logo" /> HOSTELLAR
         </a>
         <div class="profileIconAtTop">
-          <a href="youtube">
+          <a href="#" onclick="toggle('registrationBox')">
             <span class="material-symbols-outlined profileIcon md-150">
               account_circle
             </span>
           </a>
         </div>
+        <div class="viewRegistrationInfo" id="registrationBox">
+          <a>Registration Info</a> <br /><a>Invoices</a><br />
+          <a href="/static/loginPage.html">Sign Out</a>
+        </div>
       </div>
       <div class="grid">
         <div class="gridCell">
-          <img src="Items/earthHotel1.jpg" class="galaxy cellMargin" />
+          <a>
+            <img src="Items/earthHotel1.jpg" class="galaxy cellMargin" />
+          </a>
         </div>
         <div class="gridCell">
           <img src="Items/earthHotel2.jpg" class="galaxy cellMargin" />
@@ -66,34 +72,6 @@
         <div class="gridCell">
           <img src="Items/terrariahotel.jpg" class="galaxy" />
         </div>
-        <!-- we were planning on putting 18 hotels but we gave up-->
-        <!--div class="gridCell">
-          <img src="Items/earthHotel1.jpg" class="galaxy" />
-        </div>
-        <div class="gridCell">
-          <img src="Items/earthHotel1.jpg" class="galaxy" />
-        </div>
-        <div class="gridCell">
-          <img src="Items/earthHotel1.jpg" class="galaxy" />
-        </div>
-        <div class="gridCell">
-          <img src="Items/earthHotel1.jpg" class="galaxy" />
-        </div>
-        <div class="gridCell">
-          <img src="Items/earthHotel1.jpg" class="galaxy" />
-        </div>
-        <div class="gridCell">
-          <img src="Items/earthHotel1.jpg" class="galaxy" />
-        </div>
-        <div class="gridCell">
-          <img src="Items/earthHotel1.jpg" class="galaxy" />
-        </div>
-        <div class="gridCell">
-          <img src="Items/earthHotel1.jpg" class="galaxy" />
-        </div>
-        <div class="gridCell">
-          <img src="Items/earthHotel1.jpg" class="galaxy" />
-        </div-->
       </div>
       <div class="footer">
         <div class="center">
@@ -103,3 +81,13 @@
     </div>
   </body>
 </html>
+<script>
+  function toggle(target) {
+    var el = document.getElementById(target);
+    if (el.style.display == "block") {
+      el.style.display = "none";
+    } else {
+      el.style.display = "block";
+    }
+  }
+</script>
