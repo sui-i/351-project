@@ -7,7 +7,6 @@ import DataBasePackage.DB_API;
 import DataBasePackage.DB_UserInformation;
 import emailVerificationServer.EmailAPI;
 import requestsrepliescodes.IdentificationCodes;
-import requestsrepliescodes.MailCodes;
 import requestsrepliescodes.ReservationCodes;
 import requestsrepliescodes.UserTypeCodes;
 public class ReservationHandler {
@@ -117,13 +116,9 @@ public class ReservationHandler {
 		//then add the new user.
 		//remove email or username if it exists
 		if (idcByEmail.equals(UserTypeCodes.NonVerifiedUser))
-		{
 			db.deleteUserByEmail(username);
-		}
 		if (idcByUsername.equals(UserTypeCodes.NonVerifiedUser))
-		{
 			db.deleteUserByUsername(username);
-		}
 		
 		IdentificationCodes register = db.RegisterUser(username,email,password,firstName,lastName,verificationCode);
 		if (!register.equals(IdentificationCodes.RegistrationSuccessul))
@@ -210,12 +205,22 @@ public class ReservationHandler {
 	 * @return appropriate IdentificationCode
 	 */
 	public IdentificationCodes DeleteAccount(String username) {
+		UserTypeCodes idc = db.checkMembershipUserName(username);
+		if (idc.equals(UserTypeCodes.InternalError))
+			return IdentificationCodes.InternalError;
+		if (idc.equals(UserTypeCodes.NotFound))
+			return IdentificationCodes.UsernameNotFound;
 		if (accountType.equals(UserTypeCodes.NotLoggedIn))
 			return IdentificationCodes.InsufficientPermissions;
 		//check if logged in user is an admin, if so, delete the user associated with username.
 		//check if logged in user is the one holding the username, if so, also delete.
+		if (clientUsername.equals(username) || accountType.equals(UserTypeCodes.Admin))
+		{
+			db.deleteUserByUsername(username);
+			return IdentificationCodes.AccountDeletedSuccessfully;
+		}
 		//else dump
-		return IdentificationCodes.AccountDeletedSuccessfully;
+		return IdentificationCodes.InternalError;
 	}
 	
 	/** resends a new verification code for the given username and updates the database
@@ -223,7 +228,24 @@ public class ReservationHandler {
 	 * @return appropriate IdentificationCode
 	 */
 	public IdentificationCodes ResendVerificationCode(String username) {
-		//TODO:resend and check if it is sent, then update database of username
+		UserTypeCodes idc = db.checkMembershipUserName(username);
+		if (idc.equals(UserTypeCodes.InternalError))
+			return IdentificationCodes.InternalError;
+		if (idc.equals(UserTypeCodes.NotFound))
+			return IdentificationCodes.UsernameNotFound;
+		
+		//resend and check if it is sent, then update database of username
+		DB_UserInformation userInfo = db.getUserInfo(username);
+		if (userInfo==null)
+			return IdentificationCodes.InternalError;
+		if (!userInfo.getUserType().equals(UserTypeCodes.NonVerifiedUser))
+			return IdentificationCodes.UserAlreadyVerified;
+		
+		boolean mailCode = EmailAPI.send("Verify your email!","Your verification code is: "+userInfo.getVerificationCode(),userInfo.getEmail());
+		if (!mailCode)
+			return IdentificationCodes.EmailSendingError;
+	
+		
 		return IdentificationCodes.VerificationCodeResentSuccessfully;
 	}
 	
@@ -246,8 +268,13 @@ public class ReservationHandler {
 		if (roomCode!=ReservationCodes.RoomFoundSuccessfully)
 			return roomCode;
 		
-		//TODO: RESERVE
-		
+		//RESERVE
+		ReservationCodes rc = db.checkRoomAvailability(roomID, startTime, finishTime);
+		if (!rc.equals(ReservationCodes.RoomAvailable))
+			return rc;
+		rc = db.Reserve(clientUsername, roomID, startTime, finishTime);
+		if (rc.equals(ReservationCodes.RoomAvailable))
+			return rc;
 		return ReservationCodes.RoomStatusChangedSuccessfully;
 	}
 	
@@ -266,8 +293,8 @@ public class ReservationHandler {
 		ReservationCodes roomCode = validateRoomID(roomID);
 		if (roomCode!=ReservationCodes.RoomFoundSuccessfully)
 			return roomCode;
-
-		return ReservationCodes.RoomStatusChangedSuccessfully;
+		//unReserve
+		return db.CancelReservation(clientUsername, roomID, startTime);
 	}
 	
 	/**
@@ -289,7 +316,15 @@ public class ReservationHandler {
 		if (roomCode!=ReservationCodes.RoomFoundSuccessfully)
 			return roomCode;
 		
-		//TODO: As stated in documentation above.
+		ReservationCodes rc = unReserve(roomID, oldStartTime);
+		if (!rc.equals(ReservationCodes.RoomStatusChangedSuccessfully))
+			return rc;
+		rc = Reserve(roomID,newStartTime,newFinishTime);
+		if (!rc.equals(ReservationCodes.RoomStatusChangedSuccessfully))
+		{
+			//TODO: rereserve if unreserve was fine but reserve failed.
+			return rc;
+		}
 		
 		return ReservationCodes.RoomStatusChangedSuccessfully;
 	}
