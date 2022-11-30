@@ -54,6 +54,7 @@ public class httpServer {
 				copyStream(fis, os);
 
 				os.close();
+				fis.close();
 
 			}
 		});
