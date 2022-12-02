@@ -375,6 +375,60 @@ public class DB_API {
 		
 	}
 
+		/**
+	 * Checks if the credentials of the username are valid in the database;
+	 * Table Used: users_credentials
+	 * <br>
+	 * Query Used: <br>
+	 * &nbsp &nbsp		SELECT username,password,email from {@code users_credentials} where username = {@code username};
+	 * @param username : username 
+	 * @param  password : password
+	 * @return  <ul> 
+	 * 				<li> {@code IdentificationCodes.LoginSuccessful } if credentials were correct </li>
+	 * 				<li> {@code IdentificationCodes.UsernameNotFound} (self explanotory).</li>
+	 * 				<li> {@code IdentificationCodes.UsernameAlreadyExists }  </li>
+	 * 				<li> {@code IdentificationCodes.InternalError}  </li>
+	 *  			<li> {@code IdentificationCodes.WrongPassword}  </li>
+	 * 			</ul>
+	 */
+
+	 //IdentificationCodes
+	 public  IdentificationCodes checkLoginCredentials(String username, String password)
+	{
+		
+		
+		
+		try {
+			assert conn !=null : "No connection mate";
+			String query = String.format("Select username,password from %s where username = '%s' ;",TableNames.get("Credentials"),username);
+			ArrayList<HashMap<String,String>> results= extractQuery(query,new String [] {"username","password"});
+			if(results.size()==0){
+				return IdentificationCodes.UsernameNotFound;
+			}
+			if(results.size()>1 ){
+				//Report replicated usernames
+				return IdentificationCodes.UsernameAlreadyExists;
+			}
+
+			else{
+        	String c_password=results.get(0).get("password");
+        	String passwordHash= md5.getMd5(password);
+			if(! c_password.equals(passwordHash)) return IdentificationCodes.WrongPassword;
+			return IdentificationCodes.LoginSuccessful;
+			}
+
+        	
+		}
+		
+        catch(Exception e) {
+        	System.out.println(e.getStackTrace());
+        	return IdentificationCodes.InternalError;
+        }
+        
+		
+	}
+
+
 	
 	/**
 	 * Query : Insert INTO userscredentials (username,password,email,date_of_creation,last_login) VALUES () ;
