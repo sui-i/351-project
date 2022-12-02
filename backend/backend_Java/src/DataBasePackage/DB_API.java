@@ -722,7 +722,7 @@ public class DB_API {
 				Double.parseDouble(results.get(0).get("price_per_night" ))).Floor(Integer.parseInt(results.get(0).get("floor" ))).build();
 		//Add RoomInfo to static HashMapCache for the rooms info
 
-		rooms.put(RoomID,roomInformation);
+		//rooms.put(RoomID,roomInformation);
 		return ReservationCodes.RoomFoundSuccessfully;
 		
 		
