@@ -51,7 +51,7 @@ public class DB_API {
 	private static HashMap<String,String> TableNames;
 	private boolean created=false;
 	private static final String JDBC_DRIVER ="org.postgresql.Driver";
-    private static final String DB_URL = "jdbc:postgresql://localhost/hostellar";
+    private static final String DB_URL = "jdbc:postgresql://localhost/Hostellar";
     private static final String USER = "postgres";
     private static final String PASS ="password";
     private static HashMap<String,DB_UserInformation> users;
@@ -68,7 +68,9 @@ public class DB_API {
 		
 	}
 	
-
+	private static void print(String message){
+		System.out.println(String.format("[Database] : ", message));
+	}
 	
 	/**
 	 * Must be used for each thread
@@ -83,9 +85,10 @@ public class DB_API {
 	public  boolean ConnectDB() {
 		try {
 			Class.forName(JDBC_DRIVER);
-            System.out.println("Connecting to database ... ");
+            System.out.println("[Server]: Connecting to database ... ");
             
             conn = DriverManager.getConnection(DB_URL  , USER, PASS);
+            System.out.println("[Server]: Database connection successful ");
             return true;
 		}
 		catch(Exception e){
@@ -135,22 +138,25 @@ public class DB_API {
 				if(results.size()==1){
 					C_firstName=results.get(0).get("first_name");C_lastName=results.get(0).get("last_name");
 					String userType= results.get(0).get("usertype");
-					if(userType==null) return null;
+					if(userType==null) { System.out.println(String.format("[Database]: Extraction of %s's information failed",username));return null;}
 					int UserType= Integer.parseInt(userType);
 					UserTypeCodes userCode ;
 					if(UserType==0) userCode=UserTypeCodes.Admin ;
 					else if(UserType==1) userCode=UserTypeCodes.VerifiedUser;
 					else if (UserType==2) userCode=UserTypeCodes.NonVerifiedUser;
-					else return null;
-					return new DB_UserInformation.Builder(username,C_firstName,C_lastName).PhoneNumber(
+					else {System.out.println(String.format("[Database]: Extraction of %s's information failed",username));return null;}
+					DB_UserInformation userInfo= new DB_UserInformation.Builder(username,C_firstName,C_lastName).PhoneNumber(
 					results.get(0).get("phone_number")).Birthdate(results.get(0).get("birthdate")
 					).Location(results.get(0).get("location")).Email(results.get(0).get("email")
 					).Password(results.get(0).get("password")).DateOfCreation(
 					results.get(0).get("date_of_creation")).LastLogin(
 						results.get(0).get("last_login")
 					).VerificationCode(results.get(0).get("verification_code")).UserType(userCode).build();
+					print(String.format("Extraction of %s's information was successful",username));
+					return userInfo;
 				}
 				else{
+					print(String.format("Extraction of %s's information was successful",username));
 					return null;
 				}
 
@@ -162,6 +168,7 @@ public class DB_API {
 		catch (Exception e) {
 			// TO-DO : return special instance of the DB_UserInformation
 			e.printStackTrace();
+			System.out.println(String.format("[Database]: Extraction of %s's information failed",username));
 			return null;
 		}
 		
@@ -241,7 +248,7 @@ public class DB_API {
 				String query = String.format("Select username , usertype from users_credentials where username = '%s' ;",username);
 				ArrayList<HashMap<String,String>> results= extractQuery(query, new String [] {"username","usertype"});
 	
-				if(results.size()==0 ) return UserTypeCodes.NotFound;
+				if(results.size()==0 ){ return UserTypeCodes.NotFound;}
 				else if (results.size()>1) return UserTypeCodes.DuplicatedUsers;
 				
 				if(results.get(0).get("usertype") ==null) return UserTypeCodes.InternalError;
@@ -429,6 +436,7 @@ public class DB_API {
 			UserTypeCodes registered=checkMembershipUserName(username);
 			
 			if(registered.ID ==0 ||  registered.ID ==1 || registered.ID ==2) {
+				System.out.println(String.format("[Server]: Registration of %s's failed (Username Already Exists)",username));
 				return IdentificationCodes.UsernameAlreadyExists;
 			}
 			else {
@@ -438,12 +446,14 @@ public class DB_API {
 				String query2= String.format("INSERT INTO users_info (username,first_name,last_name) VALUES ('%s','%s','%s');",username,"Admin","Admin");
 				
 				
-				if (insertQuery(query+query2)) return IdentificationCodes.RegistrationSuccessul;
+				if (insertQuery(query+query2)) { System.out.println(String.format("[Server]: Registration of %s's was succesful",username));return IdentificationCodes.RegistrationSuccessul;}
+				System.out.println(String.format("[Server]: Registration of %s's failed",username));
 				return IdentificationCodes.InternalError;
 			}
 		}
 		catch (Exception e) {
 			System.out.println(e.getMessage());
+			System.out.println(String.format("[Server]: Registration of %s's failed",username));
 			return IdentificationCodes.InternalError;
 		}
 	}
@@ -468,13 +478,21 @@ public class DB_API {
 		try {
 			UserTypeCodes registered=checkMembershipUserName(username);
 			if(registered.ID !=2) {
+				System.out.println(String.format("[Server]: Verfication of %s's failed",username));
 				return false;
 			}
 			String query= String.format("UPDATE user_credentials SET usertype= %s WHERE username='%s'; ", 1,username);
-			return insertQuery(query);
+			if(insertQuery(query)) {
+				System.out.println(String.format("[Server]: Verfication of %s's was successful",username));
+				return true;
+			}
+			
+			System.out.println(String.format("[Server]: Verfication of %s's failed",username));
+			return false;
 					
 		}
 		catch(Exception e) {
+			System.out.println(String.format("[Server]: Verfication of %s's failed",username));
 			e.printStackTrace();
 			return false;
 		}
