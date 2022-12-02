@@ -690,7 +690,7 @@ public class DB_API {
 		String s="room_type,num_of_beds,floor,price_per_night,planet_name,solar_system_name,hotel_name";
 		String [] fields=  s.split(",");
 		//String [] fields=  new String [] {"num_of_beds","floor","price_per_night","booked_until","solar_system","planet","hotel","room_type"};
-		ReservationCodes [] errors = new ReservationCodes [] {ReservationCodes.IndentityError,ReservationCodes.IndentityError,ReservationCodes.IndentityError,ReservationCodes.IndentityError,ReservationCodes.PlanetNotFound,ReservationCodes.SolarSystemNotFound,
+		ReservationCodes [] errors = new ReservationCodes [] {ReservationCodes.InternalError,ReservationCodes.InternalError,ReservationCodes.InternalError,ReservationCodes.InternalError,ReservationCodes.PlanetNotFound,ReservationCodes.SolarSystemNotFound,
 		ReservationCodes.HotelNotFound};
 		for(int i=0; i<fields.length;i++){
 			Errors.put(fields[i],errors[i]);
@@ -712,7 +712,7 @@ public class DB_API {
 		}
 		else if (results.size()>1){
 			//Duplicated id Numbers
-			return ReservationCodes.IndentityError;
+			return ReservationCodes.InternalError;
 		}
 
 		
