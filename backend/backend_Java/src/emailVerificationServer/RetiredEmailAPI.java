@@ -10,7 +10,7 @@ import javax.mail.Message;
 import javax.mail.MessagingException;
 import javax.mail.PasswordAuthentication;
 
-public class EmailAPI {
+public class RetiredEmailAPI {
 	public static boolean send(String subject, String message, String to)
 	{
 		Properties properties = new Properties();

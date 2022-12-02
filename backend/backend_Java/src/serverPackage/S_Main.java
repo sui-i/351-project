@@ -17,12 +17,13 @@ public class S_Main {
 		t1.start();
 		
 		System.out.println("[System] type /stop to stop the server");
-		Scanner in = new Scanner(System.in);
-		
-		String inp = "";
-		while (!inp.equals("/stop")) {
-			inp = in.nextLine().strip();
+		try (Scanner in = new Scanner(System.in)) {
+			String inp = "";
+			while (!inp.equals("/stop")) {
+				inp = in.nextLine().strip();
+			}
 		}
+		
 		System.out.println("[System] Stop command detected.");
 		server.closeServerSocket();
 	
