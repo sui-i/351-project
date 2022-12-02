@@ -592,7 +592,7 @@ public class DB_API {
 			}
 
 			else{
-				query = String.format("SELECT count(*) FROM room_reservation_history where NOT((booked_in <= '%s')  and  (booked_until >= '%s')) AND cancelled = false ; ",booked_until.toString(),usersDate.toString());
+				query = String.format("SELECT count(*) FROM room_reservation_history where (booked_in <= '%s')  and  (booked_until >= '%s') AND cancelled = false ; ",booked_until.toString(),usersDate.toString());
 				results = extractQuery(query, new String [] {"count"});
 				print(results.toString());
 				if(results.size()==1){
@@ -765,7 +765,8 @@ public class DB_API {
 				if(!ValidateSynthax.checkTime(ReservationDate)) return ReservationCodes.InvalidDateFormat;
 				
 				String reservation_id="";
-				String query = String.format("SELECT * from users_reservation_history where username= '%s' AND room_id= %s AND reservation_date=%s ; ", username, RoomID,ReservationDate);
+				String query = String.format("SELECT * from users_reservation_history where username= '%s' AND room_id= '%s' AND check_in='%s' ; ", username, RoomID,ReservationDate);
+				print(query);
 				ArrayList<HashMap<String,String>> results= extractQuery(query, new String [] {"reservation_id"});
 				if(results.size()==1){
 					reservation_id= results.get(0).get("reservation_id");

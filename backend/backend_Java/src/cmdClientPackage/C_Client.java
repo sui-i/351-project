@@ -171,6 +171,7 @@ public class C_Client {
 		if ("Rep115".equals(reply)) return "Access is denied to the room reserved at desired time.";
 		if ("Rep210".equals(reply)) return "Room Unreserved successfully!";
 		if ("Rep212".equals(reply)) return "Room is not reserved at desired time.";
+		if ("Rep241".equals(reply)) return "Room is not reserved at desired time.";
 		if ("Rep231".equals(reply)) return "The time format sent was not understood.";
 		return "Try again, Server reply incomprehensible: " + reply;
 	}
