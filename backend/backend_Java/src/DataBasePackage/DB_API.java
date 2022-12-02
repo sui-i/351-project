@@ -696,14 +696,7 @@ public class DB_API {
 			Errors.put(fields[i],errors[i]);
 		}
 		//String query = String.format("Select * from %s where room_id = '%s' ;",TableNames.get("Rooms"),RoomID);
-		String query= String.format(
-					"""
-					SELECT room_info.* , planet_info.simple_name as "planet_name", solar_system_info.simple_name as "solar_system_name" ,hotel_info.simple_name as "hotel_name" from room_info 
-					INNER JOIN planet_info on SUBSTRING('%s' from 5 for 4)=planet_info.simple_id
-					INNER JOIN solar_system_info  on SUBSTRING('%s' from 1 for 4)=solar_system_info.simple_id
-					INNER JOIN hotel_info  on SUBSTRING('%s' from 9 for 4)=hotel_info.simple_id;
-					""",RoomID,RoomID,RoomID
-				);
+		String query= String.format("SELECT room_info.* , planet_info.simple_name as planet_name, solar_system_info.simple_name as solar_system_name ,hotel_info.simple_name as hotel_name from room_info INNER JOIN planet_info on SUBSTRING('%s' from 5 for 4)=planet_info.simple_id INNER JOIN solar_system_info  on SUBSTRING('%s' from 1 for 4)=solar_system_info.simple_id INNER JOIN hotel_info  on SUBSTRING('%s' from 9 for 4)=hotel_info.simple_id;",RoomID,RoomID,RoomID);
 		ArrayList<HashMap<String,String>> results= extractQuery(query, fields);
 
 		
@@ -873,16 +866,7 @@ public class DB_API {
 		if(!(registered.ID ==0 ||  registered.ID ==1 || registered.ID ==2)) {
 			return null;
 		}
-		String query1= String.format(
-			"""
-			SELECT users_reservation_history.* ,  solar_system_info.simple_name as "solar_system_name" , planet_info.simple_name as "planet_name", hotel_info.simple_name as "hotel_name" from users_reservation_history 
-			INNER JOIN room_info on users_reservation_history.room_id=room_info.room_id
-			INNER JOIN planet_info on SUBSTRING(room_info.room_id from 5 for 4)=planet_info.simple_id
-			INNER JOIN solar_system_info  on SUBSTRING(room_info.room_id from 1 for 4)=solar_system_info.simple_id
-			INNER JOIN hotel_info  on SUBSTRING(room_info.room_id from 9 for 4)=hotel_info.simple_id 
-			WHERE username='%s';
-				""",username
-		);
+		String query1= String.format("SELECT users_reservation_history.* ,  solar_system_info.simple_name as solar_system_name , planet_info.simple_name as planet_name, hotel_info.simple_name as hotel_name from users_reservation_history INNER JOIN room_info on users_reservation_history.room_id=room_info.room_id INNER JOIN planet_info on SUBSTRING(room_info.room_id from 5 for 4)=planet_info.simple_id INNER JOIN solar_system_info  on SUBSTRING(room_info.room_id from 1 for 4)=solar_system_info.simple_id INNER JOIN hotel_info  on SUBSTRING(room_info.room_id from 9 for 4)=hotel_info.simple_id WHERE username='%s';",username);
 		//String query1 = String.format("Select * from user_reservation_history where username='%s';", username);
 		//String query2 = String.format("Select * from user_reservation_history where username='%s';", username);
 		String fields="room_id,reservation_date,check_in,check_out,cancelled,solar_system_name,planet_name,hotel_name";
@@ -912,19 +896,10 @@ public class DB_API {
 		
 		try {
 			assert conn!=null : "No connection mate";
-			String move_query = String.format(
-			""" 
-				INSERT INTO users_credentials_deleted SELECT * from users_credentials where username= '%s';
-				INSERT INTO users_info_deleted SELECT * from users_info where username= '%s';
-				INSERT INTO users_reservation_history_deleted SELECT * from users_reservation_history where username= '%s';
-			""",
+			String move_query = String.format("INSERT INTO users_credentials_deleted SELECT * from users_credentials where username= '%s';INSERT INTO users_info_deleted SELECT * from users_info where username= '%s';INSERT INTO users_reservation_history_deleted SELECT * from users_reservation_history where username= '%s';",
 			username,username,username);
 			String delete_query= String.format(
-				"""
-					DELETE FROM users_credentials WHERE username='%s';
-					DELETE FROM users_info WHERE username='%s';
-					DELETE FROM users_reservation_history WHERE username='%s';
-					""", username,username,username);
+				"DELETE FROM users_credentials WHERE username='%s';DELETE FROM users_info WHERE username='%s';DELETE FROM users_reservation_history WHERE username='%s';", username,username,username);
 			
 			if(! insertQuery(move_query)) return false;
 			if(! insertQuery(delete_query)) return false;
