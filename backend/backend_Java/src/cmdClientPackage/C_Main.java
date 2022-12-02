@@ -40,10 +40,9 @@ public class C_Main {
 	}
 	
 	public void startApp() {
-		System.out.println(web.AttemptDeleteAccount("Ahmade"));
-		if (true) return;
-		System.out.println(web.AttemptRegister("Ahmadef","12345678","yatovew117@ceoshub.com","Hashem","Khoror"));
-		if (1+1==2)return;
+		//System.out.println(web.AttemptDeleteAccount("Ahmad"));
+		//if (true) return;
+		//if (1+1==2)return;
 		System.out.println("Welcome to Hosteler commandLine reservation applet.");
 		List<Character> options = Arrays.asList(new Character[] {'L','R','V','B','U','S','D','M','G','Q'});
 		char option = 'X';
@@ -99,7 +98,8 @@ public class C_Main {
 		System.out.println("    -D  Delete an account");
 		System.out.println("    -M  Resend verification code");
 		System.out.println("    -Q  Quit the app");
-		return cmdIn.nextLine().charAt(0);
+		String i = cmdIn.nextLine();
+		return (i.length()>0 ? i.charAt(0):'X');
 	}
 	
 	

@@ -182,16 +182,19 @@ public class ReservationHandler {
 	 * @return ID: appropriate enum identification code
 	 */
 	public IdentificationCodes Login(String username, String password) {
-		// TODO:check if username password pair matches. if so, isLoggedIn = True and
+		// check if username password pair matches. if so
 		// import all userInfo
-		// else dump.
+		// else dump appropriately .
 		UserTypeCodes idc = db.checkMembershipUserName(username);
 		if (idc.equals(UserTypeCodes.InternalError))
 			return IdentificationCodes.InternalError;
 		if (idc.equals(UserTypeCodes.NotFound))
 			return IdentificationCodes.UsernameNotFound;
-		if (!idc.equals(UserTypeCodes.NonVerifiedUser))
+		if (idc.equals(UserTypeCodes.NonVerifiedUser))
 			return IdentificationCodes.EmailNotVerified;
+		IdentificationCodes loginCode = db.checkLoginCredentials(username, password);
+		if (!loginCode.equals(IdentificationCodes.LoginSuccessful))
+			return loginCode;
 		DB_UserInformation info = db.getUserInfo(username);
 		updateInfo(info);
 		return IdentificationCodes.LoginSuccessful;
@@ -468,7 +471,6 @@ public class ReservationHandler {
 		}
 		if ("120".equals(RCode)) // register
 		{
-			System.out.println("Got here");
 			if (request.length() < 8)
 				return def;
 			String[] parser = request.split(":");
