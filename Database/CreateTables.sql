@@ -23,7 +23,6 @@ CREATE TABLE users_info(
 CREATE TABLE users_reservation_history (
    username   varchar(32),
    room_id    varchar(16),
-   reservation_id varchar(16),
    reservation_date     timestamp,
    check_in     timestamp,
    check_out     timestamp,
