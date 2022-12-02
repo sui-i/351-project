@@ -85,10 +85,10 @@ public class DB_API {
 	public  boolean ConnectDB() {
 		try {
 			Class.forName(JDBC_DRIVER);
-            System.out.println("[Server]: Connecting to database ... ");
+            System.out.println("[Database]: Connecting to database ... ");
             
             conn = DriverManager.getConnection(DB_URL  , USER, PASS);
-            System.out.println("[Server]: Database connection successful ");
+            System.out.println("[Database]: Database connection successful ");
             return true;
 		}
 		catch(Exception e){
@@ -138,7 +138,7 @@ public class DB_API {
 				if(results.size()==1){
 					C_firstName=results.get(0).get("first_name");C_lastName=results.get(0).get("last_name");
 					String userType= results.get(0).get("usertype");
-					if(userType==null) { System.out.println(String.format("[Database]: Extraction of %s's information failed",username));return null;}
+					if(userType==null) return null;
 					int UserType= Integer.parseInt(userType);
 					UserTypeCodes userCode ;
 					if(UserType==0) userCode=UserTypeCodes.Admin ;
@@ -251,7 +251,7 @@ public class DB_API {
 				if(results.size()==0 ){ return UserTypeCodes.NotFound;}
 				else if (results.size()>1) return UserTypeCodes.DuplicatedUsers;
 				
-				if(results.get(0).get("usertype") ==null) return UserTypeCodes.InternalError;
+				if(results.get(0).get("usertype") ==null) return UserTypeCodes.NotFound;
 				int ID=Integer.parseInt(results.get(0).get("usertype"));
 				query= String.format("UPDATE users_credentials SET last_login=NOW() WHERE username='%s';", username);
 				if(!insertQuery(query)) return UserTypeCodes.InternalError;
