@@ -585,7 +585,8 @@ public class DB_API {
 			TimeStamp usersDate= new TimeStamp(BookIn);
 			TimeStamp booked_until = new TimeStamp(BookOut);
 
-        	if(usersDate.compareTo(booked_until)<=0 ){
+			//TO-DO: FIX
+        	if(usersDate.compareTo(booked_until)>=0 ){
         		//Note Valid Date Bro
 				return ReservationCodes.RoomReservationtimeInvalid;
 			}
