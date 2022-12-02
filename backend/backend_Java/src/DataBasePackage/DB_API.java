@@ -384,6 +384,7 @@ public class DB_API {
 	 * @return  <ul> 
 	 * 				<li> {@code RegistrationSuccessul} if user was successfully added</li>
 	 * 				<li> {@code UsernameAlreadyExists} if user already exists </li>
+	 * 				<li> {@code EmailAlreadyExists} if email already exists </li>
 	 * 				<li> {@code InternalError } if some other error occurs </li>
 	 * 			</ul>
 	 * 
@@ -394,9 +395,11 @@ public class DB_API {
 			try {
 				assert conn != null : "No Connection Mate";
 				UserTypeCodes registered=checkMembershipUserName(username);
+				UserTypeCodes registered1=checkMembershipEmail(email);
 				if(registered.ID ==0 ||  registered.ID ==1 || registered.ID ==2) {
 					return IdentificationCodes.UsernameAlreadyExists;
 				}
+				if(registered1.ID ==0 ||  registered1.ID ==1 || registered1.ID ==2) return IdentificationCodes.EmailAlreadyExists ;
 				else {
 					//TO-DO: Implement the codes
 					password= md5.getMd5(password);
