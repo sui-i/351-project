@@ -69,7 +69,7 @@ public class DB_API {
 	}
 	
 	private static void print(String message){
-		System.out.println(String.format("[Database] : %s", message));
+		System.out.println(String.format("[Database]: %s", message));
 	}
 	
 	/**
