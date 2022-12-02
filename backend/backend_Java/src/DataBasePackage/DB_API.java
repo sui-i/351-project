@@ -718,7 +718,7 @@ public class DB_API {
 		}
 		//Query for extracting the information
 		
-		
+		print("Okay");
 		R_InformationDB roomInformation = new R_InformationDB.Builder(RoomID, results.get(0).get("booked_until" )).Planet(results.get(0).get("planet_name" )).Hotel(
 				results.get(0).get("hotel_name" )).SolarSystem(results.get(0).get("solar_system_name" )).NumOfBeds(Integer.parseInt(results.get(0).get("num_of_beds" ))).PricePerNight(
 				Double.parseDouble(results.get(0).get("price_per_night" ))).Floor(Integer.parseInt(results.get(0).get("floor" ))).build();
