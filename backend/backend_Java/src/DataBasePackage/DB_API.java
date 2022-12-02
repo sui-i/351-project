@@ -592,8 +592,9 @@ public class DB_API {
 			}
 
 			else{
-				query = String.format("SELECT count(*) FROM room_reservation_history where NOT((booked_in <= '%s')  and  (booked_out >= '%s')) AND cancelled = false ; ",booked_until.toString(),usersDate.toString());
+				query = String.format("SELECT count(*) FROM room_reservation_history where NOT((booked_in <= '%s')  and  (booked_until >= '%s')) AND cancelled = false ; ",booked_until.toString(),usersDate.toString());
 				results = extractQuery(query, new String [] {"count"});
+				print(results.toString());
 				if(results.size()==1){
 					if(results.get(0).get("count")!=null){
 						if(Integer.parseInt(results.get(0).get("count"))==0) return ReservationCodes.RoomAvailable ; // return 0;
@@ -639,7 +640,7 @@ public class DB_API {
 				}
 				else{
 					if(results.get(0).get("reservation_id")!=null){
-						newId= Integer.parseInt(results.get(0).get("reservation_id"));
+						newId= Integer.parseInt(results.get(0).get("reservation_id")) + 1;
 					}
 
 					else return ReservationCodes.InternalError;
@@ -653,7 +654,7 @@ public class DB_API {
 			if(! insertQuery(query)) return ReservationCodes.RoomNotReserved;
 			//MEOW: TO DO : 
 
-			query = String.format("INSERT INTO users_reservation_history (username,room_id,reservation_id,reservation_date,check_in,check_out,cancelled) values ('%s','%s',%s,NOW(),%s,'%s',null) ; ",username,RoomID,newId,Book_In.toString(),Book_Out.toString());
+			query = String.format("INSERT INTO users_reservation_history (username,room_id,reservation_id,reservation_date,check_in,check_out,cancelled) values ('%s','%s',%s,NOW(),'%s','%s',null) ; ",username,RoomID,newId,Book_In.toString(),Book_Out.toString());
 			System.out.println(query);
 			if(! insertQuery(query)) return ReservationCodes.RoomNotReserved;
 			return ReservationCodes.RoomStatusChangedSuccessfully;
