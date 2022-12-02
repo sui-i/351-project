@@ -1,4 +1,4 @@
-CREATE DATABASE Hostellar;
+
 CREATE TABLE users_credentials (
    username  varchar(32),
    email  varchar(64),
@@ -7,7 +7,7 @@ CREATE TABLE users_credentials (
    last_login  timestamp,
    userType  int ,
    verification_code varchar(6),
-   primary key( username)
+   primary key( username ,email)
 );
 
 CREATE TABLE users_info(
