@@ -292,8 +292,10 @@ public class ReservationHandler {
 		if (!rc.equals(ReservationCodes.RoomAvailable))
 			return rc;
 		rc = db.Reserve(clientUsername, roomID, startTime, finishTime);
-		if (rc.equals(ReservationCodes.RoomAvailable))
+		if (!rc.equals(ReservationCodes.RoomStatusChangedSuccessfully))
 			return rc;
+		//send email
+		EmailAPI.send("New Invoice!", String.format("Thank you for reserving a Room %s with a Hostellar affliated hotel.\n Your total is %s$.", roomID, 800), clientEmail);
 		return ReservationCodes.RoomStatusChangedSuccessfully;
 	}
 
