@@ -342,7 +342,7 @@ public class ReservationHandler {
 			return rc;
 		rc = Reserve(roomID, newStartTime, newFinishTime);
 		if (!rc.equals(ReservationCodes.RoomStatusChangedSuccessfully)) {
-			// TODO: rereserve if unreserve was fine but reserve failed.
+			//rereserve if unreserve was fine but reserve failed.
 			return rc;
 		}
 
@@ -360,9 +360,11 @@ public class ReservationHandler {
 		ReservationCodes roomCode = validateRoomID(roomID);
 		if (roomCode != ReservationCodes.RoomFoundSuccessfully)
 			return false;
-
-		// TODO: check if its free within time range.
-
+		
+		//check if its free within time range.
+		ReservationCodes rc = db.checkRoomAvailability(roomID, startTime, finishTime);
+		if (!rc.equals(ReservationCodes.RoomAvailable))
+			return false;		
 		return true;
 	}
 
@@ -371,68 +373,67 @@ public class ReservationHandler {
 	 * 
 	 * Requests come in 2 forms:
 	 * 1-Identification requests
-	 * a+login FORMAT: "Req110:username,password"
-	 * b+registration FORMAT: "Req120:username,password,email,firstname,lastname"
-	 * c+verification FORMAT: "Req130:username,verificationcode"
-	 * d+logout FORMAT: "Req140"
-	 * e+get all info FORMAT: "Req150"
-	 * f+delete account FORMAT: "Req160:username"
-	 * g+resend verification code FORMAT: "Req170"
+	 * a+login 									FORMAT: "Req110:username,password"
+	 * b+registration 							FORMAT: "Req120:username,password,email,firstname,lastname"
+	 * c+verification 							FORMAT: "Req130:username,verificationcode"
+	 * d+logout 								FORMAT: "Req140"
+	 * e+get all info 							FORMAT: "Req150"
+	 * f+delete account 						FORMAT: "Req160:username"
+	 * g+resend verification code 				FORMAT: "Req170"
 	 * 2-Reservation request:
-	 * a+reserve FORMAT: "Req210:{ROOMID},YYYY-MM-DD HH:MM:SS^YYYY-MM-DD HH:MM:SS"
+	 * a+reserve 								FORMAT: "Req210:{ROOMID},YYYY-MM-DD HH:MM:SS^YYYY-MM-DD HH:MM:SS"
 	 * (start date^finish date)
-	 * b+unreserve FORMAT: "Req220:{ROOMID},YYYY-MM-DD HH:MM:SS" (start date)
-	 * c+reschedule FORMAT: "Req240:{ROOMID},YYYY-MM-DD HH:MM:SS^YYYY-MM-DD
-	 * HH:MM:SS^YYYY-MM-DD HH:MM:SS" (old start date^new start date^new finish date)
+	 * b+unreserve 								FORMAT: "Req220:{ROOMID},YYYY-MM-DD HH:MM:SS" (start date)
+	 * c+reschedule 							FORMAT: "Req240:{ROOMID},YYYY-MM-DD HH:MM:SS^YYYY-MM-DD HH:MM:SS^YYYY-MM-DD HH:MM:SS" (old start date^new start date^new finish date)
 	 * 
 	 * Replies by the server are:
-	 * 0-a. Invalid request FORMAT: "Rep000"
-	 * 0-b. Internal error FORMAT: "Rep231"
+	 * 0-a. Invalid request 					FORMAT: "Rep000"
+	 * 0-b. Internal error 						FORMAT: "Rep231"
 	 * 1-a. login replies
-	 * +logged in successfully FORMAT: "Rep110"
-	 * +Email not verified FORMAT: "Rep111"
-	 * +Username not found FORMAT: "Rep112"
-	 * +Wrong Password FORMAT: "Rep113"
-	 * +Insufficient permissions FORMAT: "Rep115"
+	 * +logged in successfully 					FORMAT: "Rep110"
+	 * +Email not verified 						FORMAT: "Rep111"
+	 * +Username not found 						FORMAT: "Rep112"
+	 * +Wrong Password 							FORMAT: "Rep113"
+	 * +Insufficient permissions 				FORMAT: "Rep115"
 	 * 
 	 * 1-b. registration replies
-	 * +Registered successfully FORMAT: "Rep120"
-	 * +Email not Available FORMAT: "Rep121"
-	 * +Email already exists FORMAT: "Rep122"
-	 * +Username already exists FORMAT: "Rep123"
+	 * +Registered successfully 				FORMAT: "Rep120"
+	 * +Email not Available 					FORMAT: "Rep121"
+	 * +Email already exists 					FORMAT: "Rep122"
+	 * +Username already exists 				FORMAT: "Rep123"
 	 * 
 	 * 1-c. verification replies
-	 * +Verification successful FORMAT: "Rep130"
-	 * +Wrong verificationCode FORMAT: "Rep131"
-	 * +User already verified FORMAT: "Rep132"
+	 * +Verification successful 				FORMAT: "Rep130"
+	 * +Wrong verificationCode 					FORMAT: "Rep131"
+	 * +User already verified 					FORMAT: "Rep132"
 	 * 
 	 * 1-d. logout
-	 * +logout successful FORMAT: "Rep140"
+	 * +logout successful 						FORMAT: "Rep140"
 	 * 
 	 * 1-e. get all info
-	 * +not logged in FORMAT: "Rep115"
-	 * +Info gotten FORMAT: "Rep150:username,email,firstname,lastname"
+	 * +not logged in 							FORMAT: "Rep115"
+	 * +Info gotten  							FORMAT: "Rep150:username,email,firstname,lastname"
 	 * 
 	 * 1-f. delete account
-	 * +Account deleted successfully FORMAT: "Rep160"
-	 * +Not enough permissions FORMAT: "Rep115"
+	 * +Account deleted successfully  			FORMAT: "Rep160"
+	 * +Not enough permissions 					FORMAT: "Rep115"
 	 * 
 	 * 1-g. resend verification code
-	 * +verification code resent FORMAT: "Rep170"
-	 * +Email is already verified FORMAT: "Rep115"
-	 * +Email not Available FORMAT: "Rep121"
+	 * +verification code resent  				FORMAT: "Rep170"
+	 * +Email is already verified  				FORMAT: "Rep115"
+	 * +Email not Available 					FORMAT: "Rep121"
 	 * 
 	 * 
 	 * 2-a. reserve
 	 * /b. Unreserve
-	 * +Identity error FORMAT: "Rep115"
-	 * (user not logged
-	 * or insufficient permissions)
-	 * +Room status changed FORMAT: "Rep210"
-	 * +Room already reserved FORMAT: "Rep211"
-	 * +Room reservation time Invalid FORMAT: "Rep212"
-	 * +Invalid date format FORMAT: "Rep231"
-	 * +Room rescheduling failed FORMAT: "Rep241"
+	 * +Identity error 							FORMAT: "Rep115"
+	 * 	(user not logged or 
+	 * 			insufficient permissions)
+	 * +Room status changed 					FORMAT: "Rep210"
+	 * +Room already reserved 					FORMAT: "Rep211"
+	 * +Room reservation time Invalid 			FORMAT: "Rep212"
+	 * +Invalid date format 					FORMAT: "Rep231"
+	 * +Room rescheduling failed 				FORMAT: "Rep241"
 	 */
 	public String handleRequest(String request) throws Exception {
 		lastSeen = date.getTime();
@@ -441,7 +442,6 @@ public class ReservationHandler {
 			return def;
 
 		// HANDLE IDENTIFICATIONS:
-		// MAYBE TODO: check for identification synthax validity here.
 		if (request.length() < 6 || !request.subSequence(0, 3).equals("Req"))
 			return def;
 		String RCode = (String) request.subSequence(3, 6);
@@ -551,12 +551,12 @@ public class ReservationHandler {
 	 * @param roomID
 	 * @return appropriate ReservationCode
 	 */
-	public static ReservationCodes validateRoomID(String roomID) {
+	public ReservationCodes validateRoomID(String roomID) {
 		if (roomID.length() != 16 || !isNumeric((String) roomID.subSequence(12, 15)))
 			return ReservationCodes.RoomIDInvalid;
 
-		// TODO:check with the database for everything.
-
+		//check with the database for everything.
+		db.ValidateRoom(roomID);
 		return ReservationCodes.RoomFoundSuccessfully;
 	}
 
