@@ -702,7 +702,7 @@ public class DB_API {
 					INNER JOIN planet_info on SUBSTRING('%s' from 5 for 4)=planet_info.simple_id
 					INNER JOIN solar_system_info  on SUBSTRING('%s' from 1 for 4)=solar_system_info.simple_id
 					INNER JOIN hotel_info  on SUBSTRING('%s' from 9 for 4)=hotel_info.simple_id;
-					""",RoomID
+					""",RoomID,RoomID,RoomID
 				);
 		ArrayList<HashMap<String,String>> results= extractQuery(query, fields);
 
