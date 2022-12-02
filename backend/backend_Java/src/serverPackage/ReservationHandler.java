@@ -295,6 +295,7 @@ public class ReservationHandler {
 
 		// RESERVE
 		ReservationCodes rc = db.checkRoomAvailability(roomID, startTime, finishTime);
+		System.out.println(rc);
 		if (!rc.equals(ReservationCodes.RoomAvailable))
 			return rc;
 		rc = db.Reserve(clientUsername, roomID, startTime, finishTime);
@@ -567,8 +568,8 @@ public class ReservationHandler {
 			return ReservationCodes.RoomIDInvalid;
 
 		//check with the database for everything.
-		db.ValidateRoom(roomID);
-		return ReservationCodes.RoomFoundSuccessfully;
+		ReservationCodes rc = db.ValidateRoom(roomID);
+		return rc;
 	}
 
 }

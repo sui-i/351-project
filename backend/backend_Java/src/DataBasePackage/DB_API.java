@@ -646,11 +646,12 @@ public class DB_API {
 			TimeStamp Book_Out = new TimeStamp(BookOut);
 			//Note here we are inserting two seperate records in room_reservation_history and users_reservation_history
 			query = String.format("INSERT INTO room_reservation_history (reservation_id,room_id,booked_in,booked_until,cancelled) values (%s,'%s','%s','%s',false) ; ",newId,RoomID,Book_In.toString(),Book_Out.toString());
+			System.out.println(query);
 			if(! insertQuery(query)) return ReservationCodes.RoomNotReserved;
 			//MEOW: TO DO : 
 
 			query = String.format("INSERT INTO users_reservation_history (username,room_id,reservation_id,reservation_date,check_in,check_out,cancelled) values ('%s','%s',%s,NOW(),%s,'%s',null) ; ",username,RoomID,newId,Book_In.toString(),Book_Out.toString());
-
+			System.out.println(query);
 			if(! insertQuery(query)) return ReservationCodes.RoomNotReserved;
 			return ReservationCodes.RoomStatusChangedSuccessfully;
 
