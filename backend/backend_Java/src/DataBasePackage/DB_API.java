@@ -51,7 +51,7 @@ public class DB_API {
 	private static HashMap<String,String> TableNames;
 	private boolean created=false;
 	private static final String JDBC_DRIVER ="org.postgresql.Driver";
-    private static final String DB_URL = "jdbc:postgresql://localhost/Hostellar";
+    private static final String DB_URL = "jdbc:postgresql://localhost/hostellar";
     private static final String USER = "postgres";
     private static final String PASS ="password";
     private static HashMap<String,DB_UserInformation> users;
@@ -403,7 +403,8 @@ public class DB_API {
 				else {
 					//TO-DO: Implement the codes
 					password= md5.getMd5(password);
-					String query = String.format("Insert INTO %s (username,password,email,date_of_creation,last_login,userType,verification_code) VALUES('%s','%s','%s',NOW(),NOW(),%s,%s) ;",TableNames.get("Credentials"),username,password,email,UserTypeCodes.NonVerifiedUser.ID,VerificationCode);  
+					String query = String.format("Insert INTO %s (username,password,email,date_of_creation,last_login,userType,verification_code) VALUES('%s','%s','%s',NOW(),NOW(),%s,'%s') ;",TableNames.get("Credentials"),username,password,email,UserTypeCodes.NonVerifiedUser.ID,VerificationCode);  
+					
 					String query2= String.format("INSERT INTO users_info (username,first_name,last_name) VALUES ('%s','%s','%s');",username,FirstName,LastName);
 					
 					
@@ -481,16 +482,16 @@ public class DB_API {
 		try {
 			UserTypeCodes registered=checkMembershipUserName(username);
 			if(registered.ID !=2) {
-				System.out.println(String.format("[Server]: Verfication of %s's failed",username));
+				//System.out.println(String.format("[Server]: Verfication of %s's failed",username));
 				return false;
 			}
-			String query= String.format("UPDATE user_credentials SET usertype= %s WHERE username='%s'; ", 1,username);
+			String query= String.format("UPDATE users_credentials SET usertype= %s WHERE username='%s'; ", 1,username);
 			if(insertQuery(query)) {
-				System.out.println(String.format("[Server]: Verfication of %s's was successful",username));
+				//System.out.println(String.format("[Server]: Verfication of %s's was successful",username));
 				return true;
 			}
 			
-			System.out.println(String.format("[Server]: Verfication of %s's failed",username));
+			//System.out.println(String.format("[Server]: Verfication of %s's failed",username));
 			return false;
 					
 		}

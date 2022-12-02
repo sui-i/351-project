@@ -1,13 +1,15 @@
 package serverPackage;
 
 import java.util.Date;
+
 import java.util.HashMap;
 import java.util.Random;
 
 import DataBasePackage.DB_API;
 import DataBasePackage.DB_UserInformation;
-import emailVerificationServer.EmailAPI;
+import emailVerificationServer.EmailPythonCaller;
 import requestsrepliescodes.IdentificationCodes;
+import requestsrepliescodes.MailCodes;
 import requestsrepliescodes.ReservationCodes;
 import requestsrepliescodes.UserTypeCodes;
 
@@ -113,6 +115,8 @@ public class ReservationHandler {
 			return IdentificationCodes.UsernameAlreadyExists;
 
 		UserTypeCodes idcByEmail = db.checkMembershipUserName(username);
+		if (idcByEmail.equals(UserTypeCodes.InternalError))
+			return IdentificationCodes.InternalError;
 		if (idcByEmail.equals(UserTypeCodes.VerifiedUser) || idcByUsername.equals(UserTypeCodes.Admin))
 			return IdentificationCodes.EmailAlreadyExists;
 
@@ -121,9 +125,8 @@ public class ReservationHandler {
 		String verificationCode = "";
 		for (int i = 0; i < 6; i++)
 			verificationCode += (char) rand.nextInt((int) 'A', (int) 'Z');
-		// TODO: switch it to MailCodes
-		boolean mailCode = EmailAPI.send("Verify your email!", "Your verification code is: " + verificationCode, email);
-		if (!mailCode)
+		MailCodes mailCode = EmailPythonCaller.send("Verify your email!", "Your verification code is: " + verificationCode, email);
+		if (!mailCode.equals(MailCodes.EmailSentSuccessfully))
 			return IdentificationCodes.EmailSendingError;
 
 		// then add the new user.
@@ -264,9 +267,9 @@ public class ReservationHandler {
 		if (!userInfo.getUserType().equals(UserTypeCodes.NonVerifiedUser))
 			return IdentificationCodes.UserAlreadyVerified;
 
-		boolean mailCode = EmailAPI.send("Verify your email!",
+		MailCodes mailCode = EmailPythonCaller.send("Verify your email!",
 				"Your verification code is: " + userInfo.getVerificationCode(), userInfo.getEmail());
-		if (!mailCode)
+		if (!mailCode.equals(MailCodes.EmailSentSuccessfully))
 			return IdentificationCodes.EmailSendingError;
 
 		return IdentificationCodes.VerificationCodeResentSuccessfully;
@@ -295,7 +298,8 @@ public class ReservationHandler {
 		if (!rc.equals(ReservationCodes.RoomStatusChangedSuccessfully))
 			return rc;
 		//send email
-		EmailAPI.send("New Invoice!", String.format("Thank you for reserving a Room %s with a Hostellar affliated hotel.\n Your total is %s$.", roomID, 800), clientEmail);
+		EmailPythonCaller.send("New Invoice!", String.format("Thank you for reserving a Room %s with a Hostellar affliated hotel.\n Your total is %s$.", roomID, 800), clientEmail);
+		
 		return ReservationCodes.RoomStatusChangedSuccessfully;
 	}
 
@@ -314,6 +318,9 @@ public class ReservationHandler {
 		ReservationCodes roomCode = validateRoomID(roomID);
 		if (roomCode != ReservationCodes.RoomFoundSuccessfully)
 			return roomCode;
+		// send email
+		EmailPythonCaller.send("Room reservation cancelled!", String.format("Your reservation of room %s with a Hostellar affliated hotel has been cancelled.", roomID), clientEmail);
+		
 		// unReserve
 		return db.CancelReservation(clientUsername, roomID, startTime);
 	}
