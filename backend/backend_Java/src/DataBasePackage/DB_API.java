@@ -368,7 +368,7 @@ public class DB_API {
 		}
 		
         catch(Exception e) {
-        	System.out.println(e.getStackTrace());
+        	e.printStackTrace();
         	return IdentificationCodes.InternalError;
         }
         
@@ -421,7 +421,7 @@ public class DB_API {
 		}
 		
         catch(Exception e) {
-        	System.out.println(e.getStackTrace());
+        	e.printStackTrace();
         	return IdentificationCodes.InternalError;
         }
         
@@ -604,7 +604,7 @@ public class DB_API {
 		}
 		
         catch(Exception e) {
-        	System.out.println(e.getStackTrace());
+			e.printStackTrace();
         	return ReservationCodes.InternalError;
         }
 }
@@ -662,7 +662,7 @@ public class DB_API {
 		}
 		
         catch(Exception e) {
-        	System.out.println(e.getStackTrace());
+        	e.printStackTrace();
         	return ReservationCodes.InternalError;
         }
 }
