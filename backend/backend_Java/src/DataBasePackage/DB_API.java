@@ -574,6 +574,8 @@ public class DB_API {
 		assert conn !=null : "No connection mate";
 		try {
 			ReservationCodes status= ValidateRoom(RoomID);
+			print(status.toString());
+			print("Daddy");
 			if(!(status.equals(ReservationCodes.RoomFoundSuccessfully))) return status;
 			if(!ValidateSynthax.checkTime(BookIn) || !ValidateSynthax.checkTime(BookOut)) return ReservationCodes.InvalidDateFormat;
 
@@ -698,7 +700,7 @@ public class DB_API {
 		//String query = String.format("Select * from %s where room_id = '%s' ;",TableNames.get("Rooms"),RoomID);
 		String query= String.format("SELECT room_info.* , planet_info.simple_name as planet_name, solar_system_info.simple_name as solar_system_name ,hotel_info.simple_name as hotel_name from room_info INNER JOIN planet_info on SUBSTRING('%s' from 5 for 4)=planet_info.simple_id INNER JOIN solar_system_info  on SUBSTRING('%s' from 1 for 4)=solar_system_info.simple_id INNER JOIN hotel_info  on SUBSTRING('%s' from 9 for 4)=hotel_info.simple_id WHERE room_id='%s';",RoomID,RoomID,RoomID,RoomID);
 		ArrayList<HashMap<String,String>> results= extractQuery(query, fields);
-
+		print(results.toString());
 		
 		if(results.size()==0){
 			return ReservationCodes.RoomIDInvalid;
