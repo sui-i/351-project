@@ -114,7 +114,7 @@ public class ReservationHandler {
 		if (idcByUsername.equals(UserTypeCodes.VerifiedUser) || idcByUsername.equals(UserTypeCodes.Admin))
 			return IdentificationCodes.UsernameAlreadyExists;
 
-		UserTypeCodes idcByEmail = db.checkMembershipUserName(username);
+		UserTypeCodes idcByEmail = db.checkMembershipEmail(email);
 		if (idcByEmail.equals(UserTypeCodes.InternalError))
 			return IdentificationCodes.InternalError;
 		if (idcByEmail.equals(UserTypeCodes.VerifiedUser) || idcByUsername.equals(UserTypeCodes.Admin))
