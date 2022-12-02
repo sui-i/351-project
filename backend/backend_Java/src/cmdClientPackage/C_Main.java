@@ -40,7 +40,9 @@ public class C_Main {
 	}
 	
 	public void startApp() {
-		System.out.println(web.AttemptRegister("Ahmade","12345678","yatovew117@ceoshub.com","Hashem","Khoror"));
+		System.out.println(web.AttemptDeleteAccount("Ahmade"));
+		if (true) return;
+		System.out.println(web.AttemptRegister("Ahmadef","12345678","yatovew117@ceoshub.com","Hashem","Khoror"));
 		if (1+1==2)return;
 		System.out.println("Welcome to Hosteler commandLine reservation applet.");
 		List<Character> options = Arrays.asList(new Character[] {'L','R','V','B','U','S','D','M','G','Q'});
