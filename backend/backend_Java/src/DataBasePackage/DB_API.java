@@ -687,8 +687,8 @@ public class DB_API {
 		assert conn !=null : "No connection mate";
 		HashMap<String,ReservationCodes> Errors = new HashMap<>();
 		
-		String s="room_type|num_of_beds|floor|price_per_night|planet_name|solar_system_name|hotel_name";
-		String [] fields=  s.split("|");
+		String s="room_type,num_of_beds,floor,price_per_night,planet_name,solar_system_name,hotel_name";
+		String [] fields=  s.split(",");
 		//String [] fields=  new String [] {"num_of_beds","floor","price_per_night","booked_until","solar_system","planet","hotel","room_type"};
 		ReservationCodes [] errors = new ReservationCodes [] {ReservationCodes.IndentityError,ReservationCodes.IndentityError,ReservationCodes.IndentityError,ReservationCodes.IndentityError,ReservationCodes.PlanetNotFound,ReservationCodes.SolarSystemNotFound,
 		ReservationCodes.HotelNotFound};
@@ -885,8 +885,8 @@ public class DB_API {
 		);
 		//String query1 = String.format("Select * from user_reservation_history where username='%s';", username);
 		//String query2 = String.format("Select * from user_reservation_history where username='%s';", username);
-		String fields="room_id|reservation_date|check_in|check_out|cancelled|solar_system_name|planet_name|hotel_name";
-		String [] fields1= fields.split("|");
+		String fields="room_id,reservation_date,check_in,check_out,cancelled,solar_system_name,planet_name,hotel_name";
+		String [] fields1= fields.split(",");
 		//String [] fields1=  new String [] {"room_id","reservation_date","check_in","check_out","cancelled"};
 		//String [] fields2=  new String [] {"num_of_beds","floor","price_per_night","booked_until","solar_system","planet","hotel","room_type"};
 		ArrayList<HashMap<String,String>> results= extractQuery(query1,fields1);
