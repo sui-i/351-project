@@ -575,7 +575,7 @@ public class DB_API {
 		try {
 			ReservationCodes status= ValidateRoom(RoomID);
 			print(status.toString());
-			print("Daddy");
+			
 			if(!(status.equals(ReservationCodes.RoomFoundSuccessfully))) return status;
 			if(!ValidateSynthax.checkTime(BookIn) || !ValidateSynthax.checkTime(BookOut)) return ReservationCodes.InvalidDateFormat;
 
@@ -612,6 +612,34 @@ public class DB_API {
         	return ReservationCodes.InternalError;
         }
 }
+	/**
+	 *
+	 * Query : "SELECT room_info.room_id from room_info INNER JOIN room_reservation_history ON room_reservation_history.room_id=room_info.room_id WHERE (booked_in <= '%s')  and  (booked_until >= '%s') AND cancelled = false ;"
+	 * @param BookIn 
+	 * @param BookOut
+	 * @return  <ul> 
+	 * 				<li> {@code ReservationCodes.RoomAvailable} if available</li>
+	 * 				<li> 1 if the times aren't available </li>
+	 * 				<li> 2 if some other error occurs </li>
+	 * 			</ul>
+	 */
+	public ArrayList<String> GetAvailableRooms(String BookIn,String BookOut){
+		try{
+			TimeStamp usersDate= new TimeStamp(BookIn);
+			TimeStamp booked_until= new TimeStamp(BookOut);
+			String query1= String.format("SELECT room_info.room_id from room_info INNER JOIN room_reservation_history ON room_reservation_history.room_id=room_info.room_id WHERE (booked_in <= '%s')  and  (booked_until >= '%s') AND cancelled = false ; ",booked_until.toString(),usersDate.toString());
+			ArrayList<HashMap<String,String>> rooms= extractQuery(query1, new String [] {"room_id"});
+			ArrayList<String> results=new ArrayList<>();
+			for(int i=0; i<results.size();i++){
+				if(rooms.get(i).get("room_id")!=null) results.add(rooms.get(i).get("room_id"));
+			}
+			return results;
+		}
+		catch(Exception e){
+			e.printStackTrace();
+			return null;
+		}
+			}
 
 	/**
 	 * Query : "Select booked_until,Available from %s where RoomId = '%s' order by booked_until desc ;
